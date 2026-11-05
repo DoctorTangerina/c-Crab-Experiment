@@ -1,0 +1,2094 @@
+target_no,instance_id,repo,path,comment_type,family,borderline,reviewed,note,comment_text
+2,Avaiga__taipy-1042@a76a34b,Avaiga/taipy,tests/core/test_taipy.py,style,C,,,,"@user1:
+Usually, the name and the tags are specific to a scenario instance. They are not passed when building a scenario configuration, but they are provided as parameters during the scenario creation.
+
+You can have an example in my previous comment.
+
+
+@author:
+All right, I see. Thank you for clarifying this. I will change it."
+4,Lightning-AI__pytorch-lightning-4654@89b962d,Lightning-AI/pytorch-lightning,pytorch_lightning/trainer/connectors/callback_connector.py,functional,A,,,,"@user1:
+```suggestion
+        if os.getenv('COLAB_GPU') and refresh_rate < 20:
+```
+I suggest using this since this is what we use at other places.
+
+@author:
+Does this work for Colab CPU and TPU runtimes too?
+
+@user1:
+Yes. Its actually a string. On other runtimes its value is '0'."
+10,PrefectHQ__prefect-14313@d428713,PrefectHQ/prefect,docs/integrations/prefect-docker/index.mdx,documentation,C,,,,"@user1:
+I think this link is no longer accurate
+
+@user2:
+Good catch, I missed one. 😅"
+11,PrefectHQ__prefect-14313@d428713,PrefectHQ/prefect,docs/3.0rc/deploy/index.mdx,documentation,C,,,,"@user1:
+```suggestion
+```
+
+@user1:
+tags and search->boost are left over metadata from mkdocs that we should remove."
+13,PrefectHQ__prefect-18444@1ffae47,PrefectHQ/prefect,tests/_internal/test_websockets.py,functional,B,,,,"@user1:
+wondering if this was intentionally deferred since we already import settings top level? i saw claude do this the other day and i don't think we're suggesting that in CLAUDE.md anywhere but i can double check
+
+@author:
+I totally wrote this Claude didn't write this... good catch, updated ;)"
+14,ansible__ansible-20646@f695114,ansible/ansible,lib/ansible/modules/cloud/amazon/rds.py,functional,A,,,,"@user1:
+I think this should instead be `is not None`, since there are optional parameters that are neither true or false, such as `iops`, `size`, and `license_model`."
+15,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,functional,B,,,,"@user1:
+boto3_conn handles this too :)"
+16,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,functional,A,,,,"@user1:
+I assume this changes the results that this module returns? I also note that the module is in preview mode and that might be acceptable.
+
+@author:
+Good catch! No reason for me to be changing this, fixed it."
+17,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,functional,B,,,,"@user1:
+boto_conn now handles missing regions, no need to do it here."
+18,ansible__ansible-33909@d516d5b,ansible/ansible,lib/ansible/modules/network/iosxr/iosxr_interface.py,documentation,A,yes,,,"@user1:
+You can replace this with `type: bool`
+
+@author:
+sure"
+20,ansible__ansible-36996@4b45ffc,ansible/ansible,lib/ansible/modules/cloud/misc/terraform.py,functional,A,,,,"@user1:
+I think this should be behind a conditional so that it only runs if `force_init` is true, since the TF docs state:
+
+>  Though subsequent runs may give errors, this command will never delete your existing configuration or state.
+> -- https://www.terraform.io/docs/commands/init.html#usage
+
+So while I think it is safe to run, it may cause the module to error out when the user doesn't care to make sure plugins are `init`ed. 
+
+@author:
+Yeah, nice remark. I'll fix it."
+27,ansible__ansible-44951@91cfd5c,ansible/ansible,lib/ansible/modules/cloud/ovirt/ovirt_cluster.py,style,A,,,,"@user1:
+There can't be spaces in cluster name."
+29,ansible__ansible-51415@fb988f5,ansible/ansible,lib/ansible/modules/network/meraki/meraki_admin.py,style,C,,,,"@user1:
+This tag/access isn't defined in the description for tags. Can you add that information like you did for the json dict for networks?
+
+@author:
+I've updated this so please take a look and let me know if what I have is more obvious."
+31,ansible__ansible-54268@403b068,ansible/ansible,lib/ansible/module_utils/redfish_utils.py,functional,B,,,,"@user1:
+Is it possible to not use `""/redfish/v1""` here but instead pass it from the module like we do with most other methods?
+
+@user2:
+Good catch on the `""/redfish/v1""`. I agree."
+32,ansible__ansible-55379@060b0e9,ansible/ansible,lib/ansible/modules/cloud/ovirt/ovirt_template.py,functional,B,yes,,,"@user1:
+It doesn't make sense in case of template as there is no run-once, so plaese remove it."
+34,ansible__ansible-56679@5e79e31,ansible/ansible,lib/ansible/modules/system/hostname.py,style,B,,,,"@user1:
+Could you do something like `choices=STRATS.keys()` here to avoid duplicating the list?"
+38,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,B,yes,,,"@user1:
+No need to check the handle value, just base it off the LogonUser return value."
+39,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,A,,,,"@user1:
+You shouldn't set this to `$false` as it could overwrite code above that set it to `$true`. Just rely on an implicit value of no changes and only set to `$true` if a change occurred."
+40,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,structural,A,,,,"@user1:
+We also don't want to test the credentials if `update_password` is `on_create` and we didn't create a new user. Right now this will always check and update the password for both `on_create` and `when_changed` effectively making them the same thing. We could always make this more efficient by not testing the credentials when `update_password` is `always` as we will always update it regardless of this result.
+
+@author:
+No it won't $new_user is only true if the user was newly created https://github.com/ansible/ansible/pull/58383/files#diff-a814da53b65fce105cb5fb909b79b267R201 therefore it won't be touched.
+
+The outer if-statement checks:
+```
+($password) ∧ (($new_user ∧ $update_password == ""on_create"") ∨ ($update_password ∈ {'always', 'when_chantged'}))
+```
+
+The inner if-statement:
+```
+¬($new_user)
+```
+
+So Test-Credential is executed when:
+```
+($password) ∧ (($new_user ∧ $update_password == ""on_create"") ∨ ($update_password ∈ {'always', 'when_chantged'})) ∧ ¬($new_user)
+```
+
+And for the case where `$password = 'something' ∧ update_password == 'on_create' ∧ $new_user == $true` (we just created the user) it will results in:
+
+1. `$password` => $true
+2. `(($new_user ∧ $update_password == ""on_create"")` => $true
+3. ¬($new_user) => $false
+
+=> So it will not be executed.
+
+And for the case where `$password = 'something' ∧ update_password == 'on_create' ∧ $new_user == $false` (we the user already existed) it will results in:
+
+1. `$password` => $true
+2. `($new_user ∧ $update_password == ""on_create"")` => $false
+3. `($update_password ∈ {'always', 'when_chantged'})` => $false
+
+=> So it will not be executed either.
+
+Maybe this if statement is too complicated, I'll consider rewriting it.
+
+@user1:
+Ahh yes I see it now sorry, we should still avoid testing the credentials when the credentials is `always` as we will be changing it anyway.
+
+It did seem a bit confusing when I was reading through it originally so if you can simplify it then by all means go ahead.
+
+@author:
+Sometimes you can't see the forest for the trees...
+It's now way easier."
+45,ansible__ansible-59946@fbe8544,ansible/ansible,lib/ansible/utils/display.py,functional,A,,,,"@user1:
+shouldn't we keep the previous check also (make it an `and`) to avoid `None` values instead of list or list of empty items?
+
+@author:
+Probably
+
+@author:
+Done."
+46,ansible__ansible-60622@19d2ad7,ansible/ansible,lib/ansible/modules/cloud/docker/docker_image_info.py,functional,C,,,,"@user1:
+O() doesn't exist right? Typo?
+https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_documenting.html#linking-within-module-documentation
+
+@author:
+Typo indeed! Should have been `C(...)`. Thanks for spotting!"
+48,ansible__ansible-62373@30950ec,ansible/ansible,lib/ansible/plugins/action/__init__.py,style,B,,,,"@user1:
+Instead of setting these all to their defaults from `modify_module`, just use `become_kwargs = {}` to start, it will achieve the same goal without duplicating defaults that could lead to issues later."
+49,ansible__ansible-71136@621cec5,ansible/ansible,lib/ansible/executor/task_executor.py,functional,A,,,,"@user1:
+no, combine vars with inventory_hostname variables is specifically what we want to avoid, this does not only bring the `-k` defined password but any that where set in inventory for the inventory_hostname, then applying possibly wrong password (among other settings) to the delegated_to host.  What we do need to do is pull the play_context passwords  (in the end they should really be applied to the task, but that is future fix) and let delegated_to host override if set.
+
+@user1:
+need to x2 check, but `  self._play_context.update_vars(cvars)` shoudl do the trick here
+
+@user1:
+currently other plugins use play_context directly as a fallback ` conn_password = self.get_option('password') or self._play_context.password`
+
+@user1:
+after thinking for a bit, bets place should be to add passwords to the `set_options` calls in  task_executor, both for connection and become by merging into 'task_keys' before passing it in (at lowest priority) which will allow settings/vars to keep the right precedence and insure its always present
+
+
+
+@user1:
+https://github.com/ansible/ansible/blob/devel/lib/ansible/executor/task_executor.py#L903
+
+@user1:
+actually .. it seems we do attempt to do that .. could it be we have a bug in that code?
+
+@user1:
+ah ... winrm uses `remote_password` not `password` .. why it is not getting picked up.
+
+@user1:
+not sure how we want to fix it, add 'remote_password' as another task field or update the winrm plugin?
+
+@user2:
+may I ask please why WinRM uses remote_password and not password ?
+
+@author:
+@user2 they are just keyword names for the config options which they never really were used for anything special before. I mostly followed the same standard for `remote_user` and `remote_addr` but after this change it does have a meaning. I've added the alias for `password` and fixed the code to actually use the aliases when setting the options for keywords.
+
+@user2:
+@author thanks for explanation, should we expect this fix to be pushed in next Ansible release 2.9.12 ? or shall I do the same fix manually on my installed version 2.9.11 ?
+
+@author:
+I'll be creating a backport for this so the next 2.9 release will include it. Unfortunately it is too late for 2.10.0 so it will be in the 2.10.1 release later on.
+
+@user2:
+yes I saw them, what about 2.11 ?"
+51,apache__airflow-16732@8ec4f26,apache/airflow,tests/dags/test_chain_xcomargs.py,functional,C,,,,"@user1:
+This shouldn't be a new file, but some extra cases with asserts here https://github.com/apache/airflow/blob/fa811057a6ae0fc6c5e4bff1e18971c262a42a4c/tests/models/test_baseoperator.py#L381-L401
+
+@author:
+Added similar cases for `XComArgs`."
+52,apache__airflow-26766@cf0c9a6,apache/airflow,airflow/providers/cncf/kubernetes/utils/xcom_sidecar.py,functional,B,,,,"@user1:
+stuff in the k8s provider should not refer to core settings.  we're trying to keep these separate.  core should only be referred to for k8s executor.  if you want to be able to modify the xcom container, should do so via airflow connection instead... or... possibly.... through an operator param... but i think airflow connection is better.  look in KPO how you can reference attrs on the hook through `self.hook`.  this can get you access to params defined in the connection.
+
+@author:
+I will get moving on the changes.
+
+@author:
+@user1 I moved the configuration to the connection."
+54,apache__airflow-8749@161c96c,apache/airflow,airflow/providers/amazon/aws/operators/step_function_get_execution_output.py,functional,B,,,,"@user1:
+This is not needed because you are pushing it to xcom via `return execution_output` automatically. And you can access this value via xcom key `return_value` of this ti.
+
+@author:
+removed"
+56,certbot__certbot-7270@65f464e,certbot/certbot,certbot/tests/util_test.py,functional,B,,,,"@user1:
+This should be deleted.
+
+@author:
+Done."
+57,certbot__certbot-9076@01f570d,certbot/certbot,tools/finish_release.py,functional,A,,,,"@user1:
+Have you not had a chance to test this yourself yet? This script crashes for me on this line because `version` is no longer defined. To fix that, maybe we could make a simple function called something like `fetch_version_number` that contains the code to grab the version number from Azure Pipelines?"
+64,conan-io__conan-16942@e62c6eb,conan-io/conan,conans/client/migrations.py,style,B,,,,"@user1:
+Conan will not provide a default plugin, so a migration will not be necessary"
+65,conan-io__conan-16942@e62c6eb,conan-io/conan,conans/client/rest/remote_credentials.py,functional,B,yes,,,"@user1:
+We don't need an empty default plugin, better consider the non-existence of the file as user didn't provide one and do nothing."
+69,cvat-ai__cvat-4062@ff04d8f,cvat-ai/cvat,cvat/apps/dataset_manager/formats/transformations.py,functional,B,,,,"@user1:
+I suspect, opencv may be a bit faster, did you try to check it?
+
+@author:
+I'll investigate this point
+
+@author:
+Yes, OpenCV about 2.5 times faster, I updated the code."
+71,dask__dask-7974@88a13f7,dask/dask,dask/base.py,documentation,C,,,,"@user1:
+**THIS** function does indeed take as many graphs as you like, the original docstring was correct. It's only for the `self.visualize` that the graph in question is already implied and there is no way to show more.
+
+@author:
+Oh! Didn't know that :heavy_check_mark:"
+73,dask__dask-7974@88a13f7,dask/dask,dask/base.py,functional,C,,,,"@user1:
+This parameter is, however, wrong. `*args` is the set of dask graphs to show, one or more of them."
+74,dask__dask-7974@88a13f7,dask/dask,dask/highlevelgraph.py,functional,C,yes,,,"@user1:
+Doesn't the extension you get depend on the `format` argument?
+
+@author:
+It also depends on `filename`.
+
+https://github.com/dask/dask/blob/88a13f77f374a11425961c074f4e579f3befe721/dask/dot.py#L282-L283
+
+but, `format` would overwrite the format in the `filename`.
+`x.dask.visualize(filename=""thishouldbesvg.svg"", format=""png"")`
+would `thishouldbesvg.svg.png`!
+
+@user1:
+I don't know what the code produces (you can test), but the wording here implies that when you give a filename without any extension at all, "".svg"" is appended - which I suspect is not necessarily true.
+
+@author:
+Oh, you are indeed right!
+
+@author:
+```py
+import dask.array as da
+
+x = da.ones((10, 10), chunks=(5, 5))
+x = x + 100
+x = x * 100
+
+x.dask.visualize(filename=""isthissvg"")
+```
+produces `isthissvg.png`
+
+@author:
+Wow, I found some tiny flaws in the filename/format system.
+I will create an issue on it once I confirm them.
+
+@author:
+For now, I have just changed 
+`'.svg' will be used by default.`
+to 
+`'.png' will be used by default.`
+which is true.
+
+_I will make this doc even better in another PR which fixes the filename/format situation for HLGs._
+
+Is this fine for now?
+
+
+@user1:
+>  '.png' will be used by default.
+
+Is it true regardless of the `format` argument?
+
+> I will make this doc even better in another PR
+
+yes, that's fine.
+
+@author:
+> Is it true regardless of the format argument?
+
+yes! 
+
+@author:
+EDIT: format would overwrite the filename (if the filename has an extension attached or not)
+
+```py
+x.dask.visualize(filename=""whatextension.png"", format='pdf') # whatextension.png.pdf
+x.dask.visualize(filename=""whatextension"", format=None) # whatextension.png
+```"
+75,dask__dask-7974@88a13f7,dask/dask,dask/base.py,functional,C,,,,"@user1:
+If we're being thorough, then `cmap` should be a separate kwargs in this list with a better description than given here; or just remove it, since we don't say anywhere what kind of object cmap can be (and it is probably not tested).
+
+@author:
+Right!"
+83,deepset-ai__haystack-1413@fc3b61a,deepset-ai/haystack,test/test_pipeline.py,documentation,C,,,,"@user1:
+Twice the same assert
+
+@author:
+Oops."
+84,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/sql.py,documentation,B,,,,"@user2:
+Also this part can probably be aligned with the equivalent for `delete_documents()`. Please sync with @user1"
+85,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/elasticsearch.py,functional,B,,,,"@user2:
+@user1 Just worked on enabling the deletion of documents by ids. The signature there looks different as she decided to go for a separate `ids` param in addition to `filters`. I have no strong opinion about either of the two designs but we should make it consistent. Can the two of you please discuss and decide which signature we want to use?
+
+@user2:
+https://github.com/deepset-ai/haystack/pull/1606"
+86,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/elasticsearch.py,style,B,,,,"@user1:
+I know that the id field in elasticsearch has the `_` prefix but we usually abstract this away from the user (for example when writing new docs by passing a dict the field is just `id`. Let's also make it here consistent across all doc stores"
+92,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,haystack/nodes/file_converter/parsr.py,style,A,,,,"@user1:
+should this be `if extract_headlines`?
+
+@author:
+Good catch"
+94,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,haystack/nodes/file_converter/parsr.py,structural,B,,,,"@user1:
+nit: if you use `sys.maxsize` instead of 1000, your intent is more obvious (for example, at first I was wondering if 1000 was somehow special in this context)"
+95,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,test/nodes/test_file_converter.py,documentation,C,,,,"@user1:
+should we assert the number of docs is exactly 2 before getting here? The second item in `expected_headlines` wouldn't be tested if some day `docs` contained only one item."
+96,deepset-ai__haystack-3546@a260299,deepset-ai/haystack,haystack/nodes/retriever/multimodal/retriever.py,functional,A,,,,"@user1:
+Would this stop MultiModal retriever from using all the document stores?
+
+@user2:
+My understanding is that any document store still works because the default implementation is just to run `query_by_embedding` and only `OpenSearchDocumentStore` and `ElasticsearchDocumentStore` have a special implementation. Our tests use the MultiModalRetriever only with `InMemoryDocumentStore` if I am not mistaken. So we should double check that manually before merging. @author You could try to run the tests involving MultiModalRetriever in test_retriever.py with ElasticsearchDocumentStore, maybe?
+
+@author:
+@user3-risch @user1 Ok I ran all multimodal tests of `test_retriever.py` locally using `OpenSearchDocumentStore` and added another one that uses `retrieve_batch`. All tests were fine. I added the `retrieve_batch` test using `InMemoryDocumentStore` as all the others.
+I know that `#type: ignore` is not really nice here, so I resolved the `query_embs` one by allowing for multi-dimensional `np.ndarray`s. 
+For the other one I'll open another PR to resolve this. It would be just too big for this one I guess."
+99,deepset-ai__haystack-5284@60a39ef,deepset-ai/haystack,haystack/nodes/prompt/invocation_layer/hugging_face.py,functional,C,yes,,,"@user1:
+```suggestion
+            raise RuntimeError(f""The task of {model} could not be checked because of the following error: {e}"") from e
+```
+
+I feel it can be slightly improved. (Read [this](https://www.pythontutorial.net/python-oop/python-raise-from/))
+
+@author:
+Thanks, I didn't know about this feature."
+101,deepset-ai__haystack-8457@2dd3777,deepset-ai/haystack,haystack/components/converters/docx.py,functional,A,,,,"@user1:
+Those two keys are always going to be present - we can remove this check.
+
+@user1:
+Whoops, this  `table_format` key won't be present in existing serialized pipelines - we should still check for that. Sorry about the confusion."
+103,deepset-ai__haystack-92@accd8b1,deepset-ai/haystack,haystack/database/elasticsearch.py,style,B,,,,"@user1:
+Can we make this fct private?
+Can we rename it? Since it applies filters on the docs and e.g. in the finder just returns the questions. That doesnt really fit the name.
+
+@user2:
+Wouldn't make it private as we call it from retriever.eval().
+As the functionality is overlapping with ""get_all_documents()"", we could a) extend this one and get rid of the new implementation or b) rename the new one to ""get_all_documents_in_index()"
+110,frappe__frappe-13065@dfc23eb,frappe/frappe,frappe/api.py,functional,A,,,,"@user1:
+this would convert in all these cases
+
+![image](https://user-images.githubusercontent.com/28212972/119487423-fb9b9480-bd76-11eb-9b62-dda6068bd695.png)
+
+
+This would be applicable to all parameters regardless of what was expected
+
+One idea that I have is that can we keep the util and apply it to a parameter if we are expecting a boolean value at specific endpoint ?
+
+@author:
+Given the scope of its usage at this point, this becomes a problem when you'd have a field named `y`,`n`, `true`, `false` and `order_by` that field, or have the same values for a `document name` that `parent` parameter would accept out of all those that Frappe REST allows.
+
+OTOH, since only debug and as_dict can have boolean values, might as well just convert them 😄 . Nice catch"
+111,getmoto__moto-7406@26efd90,getmoto/moto,moto/route53domains/models.py,functional,A,,,,"@user1:
+Moto still supports Python 3.8, which doesn't support the |-operand. So they should all be converted:
+`Optional[int] = None`
+
+@author:
+Fair enough, although I really like the new `|` operator"
+112,getsentry__sentry-71711@d1652c4,getsentry/sentry,src/sentry/api/endpoints/organization_pinned_searches.py,style,A,,,,"@user1:
+`organization`
+
+@user2:
+Let's make sure there is a test in place which would catch this, if there isn't already
+
+@author:
+🤦 
+Thanks for catching this! Fixing now"
+113,getsentry__sentry-71711@d1652c4,getsentry/sentry,src/sentry/api/endpoints/organization_pinned_searches.py,style,A,,,,"@user1:
+I think the position should be part of the select criteria, since the unique is `org, user, position`"
+116,getsentry__sentry-71942@a4f03f3,getsentry/sentry,src/sentry/issues/endpoints/organization_group_search_views.py,style,A,,,,"@user1:
+Not that big of a deal, but we usually return a 404 for this kind of thing. 405 is specific to the method, we just want to behave like the endpoint doesn't exist."
+120,gradio-app__gradio-3275@067f582,gradio-app/gradio,guides/05_tabular-data-science-and-plots/creating-a-dashboard-from-supabase-data.md,functional,C,,,,"@user1:
+maybe add a link to supabase.com? 
+
+typo:
+> data from Supabase plot it in
+
+data from Supabase *and plot it in"
+121,gradio-app__gradio-3275@067f582,gradio-app/gradio,guides/05_tabular-data-science-and-plots/creating-a-dashboard-from-supabase-data.md,functional,C,,,,"@user1:
+make the link clickable 
+`[https://app.supabase.com/](https://app.supabase.com/)`"
+125,home-assistant__core-110255@a9d173a,home-assistant/core,homeassistant/components/bmw_connected_drive/__init__.py,structural,A,,,,"@user1:
+Please instead update the device entries and remove the config entry id from them. If there are no other config entries remaining the device entry will be removed automatically. That's safer than removing the device entry directly as it's (theoretically) possible for multiple config entries (from any integration) to be connected to the same device entry.
+
+Example:
+https://github.com/home-assistant/core/blob/7dc9ad63bd0503cc3298f99ae415a2718cb7f40d/homeassistant/components/tradfri/__init__.py#L191-L193
+
+@author:
+Thanks - copied from the wrong integration :)"
+128,hpcaitech__ColossalAI-4080@dc82ade,hpcaitech/ColossalAI,applications/Chat/coati/trainer/base.py,documentation,B,,,,"@user1:
+Why pass data loader in `__init__()`? This is usually passed in `fit()`.
+
+@author:
+This is fixed in 211dfb5 and 69ab71b."
+130,hpcaitech__ColossalAI-6059@802df11,hpcaitech/ColossalAI,colossalai/quantization/fp8.py,functional,A,,,,"@user1:
+use try-catch block to get better compatibility
+
+@author:
+Fixed"
+131,hpcaitech__ColossalAI-6059@802df11,hpcaitech/ColossalAI,colossalai/zero/low_level/bookkeeping/tensor_bucket.py,structural,B,,,,"@user1:
+and keep this unchanged
+
+@author:
+Previous PR [low-level-fp8](https://github.com/hpcaitech/ColossalAI/pull/5961/files#r1758289979)  changed it from ""dist.all_gather"" to ""dist.all_gather_into_tensor"". I just changed it back
+
+@user1:
+all_gather_into_tensor has better performance
+
+@author:
+Fixed"
+134,huggingface__accelerate-255@12e4b18,huggingface/accelerate,src/accelerate/accelerator.py,functional,B,,,,"@user1:
+Same ehre + one for each process."
+142,huggingface__datasets-586@034c1c0,huggingface/datasets,datasets/text/text.py,functional,A,,,,"@user1:
+Let's merge the PR on multi-threaded `text` and add it in the new script before?
+
+@user2:
+Be careful by putting all these checks in `assert`s - that's not what they should be used for. ValueErrors or filenotfound errors might be better. the issue with using asserts everywhere is that users will miss out on these error messages when they run their scripts in optimized mode, which turns off asserts (which are basically debug statements). This is true for the whole code base - using asserts to check arguments is not always what you'd want from a usability perspective.
+
+I'd change it to:
+
+```python
+if not self.config.data_files:
+    raise ValueError(f""At least one data file must be specified, but got data_files={self.config.data_files}"")
+```
+
+@author:
+Yes indeed I'll change that"
+143,huggingface__diffusers-4015@c63a53a,huggingface/diffusers,src/diffusers/pipelines/stable_diffusion_xl/pipeline_stable_diffusion_xl_img2img.py,functional,B,,,,"@user1:
+```suggestion
+        denoising_end: Optional[float] = None,
+```
+
+Same as: https://github.com/huggingface/diffusers/pull/4015/files#r1257982804 => can we switch to % here maybe? 
+
+@author:
+so if you use percentages the accuracy of the calculation and converting to integer means you might misalign timesteps, which results in artifacting
+
+@user2:
+Fair point! 
+
+@author:
+i have an idea i will implement a helper method to return a pair of values from two inputs.
+
+@user1:
+Hmm can you explain how you might accidentally misalign? 
+
+@user1:
+Actually I think this can't really happen if we always round, e.g.:
+
+```py
+max_inference_steps = int(round(denoising_end * num_inference_steps))
+first_inference_steps = int(round(denoising_start * num_inference_Steps))
+```
+
+`denoising_end` should always be equal to `1 - denoising_start` and in this case we will always have:
+
+```py
+num_inference_steps = max_inference_steps + first_inference_steps
+```
+
+no? 
+
+@author:
+it happens when you have precise values for `strength` that result in remainders in the `int()` casting that become discarded. i have tested it:
+![1689000316 7576849ca8f41e6b56b1ff29f093680e55fbc6](https://github.com/huggingface/diffusers/assets/59658056/727c7404-8103-4b3c-866a-91af6d57791a)
+
+In this test, `num_inference_steps` is set to `27` and `strength` is set to `0.73` - the calculation says that the model should run for about `19.71` steps, but since we can't run a fractional step, this would be truncated by `int()` to `19`, but the value for `begin_inference_step` is `7.27` which truncates to `7`.
+
+This results in a misalignment of one step, which is, apparently, enough to disrupt the output altogether.
+
+We can use round(), but instead, I have opted for what I've considered a more robust approach.
+
+Furthermore, there are some prompts/seeds/subject material where these artifacts prove useful in making the output more variable and creative. Having the option to set those and override our best judgement seems like one of the things that makes Diffusers great, and I wanted to retain that.
+
+
+
+
+@user3:
++1 on @user1 suggestion on using a percentage 
+
+It seems to me we will just have to set  `denoising_end = denoising_start`, and default it to be `(1- strength)`? 
+
+then,
+`final_inference_steps = int(denoising_end * num_inference_steps)`
+`begin_inference_steps = int(denoising_start * num_inference_steps)`
+
+so in the example `num_inference_step = 27`, `strength= 0.73`,  we will have `final_inference_steps = begin_inference_steps = 7`, i.e  run `7` steps in base model and `20` in refiner - is this what's intended? 
+
+
+@author:
+ive tested this, and while it seems like it should work, it has really broken the results for me, overall. i am digging into it."
+144,huggingface__diffusers-792@90385bb,huggingface/diffusers,src/diffusers/pipelines/stable_diffusion/safety_checker.py,functional,B,,,,"@user1:
+I don't think we need an `if` statement here as `.float()` should always work and be correct (e.g. we can't do `fp16` on CPU either and doing `numpy()` will move it to `fp32` anyways
+
+@user2:
+@user1 why would `numpy()` move the arrays to `fp32`? I thought that numpy arrays support `fp16`?
+I believe we should use `.half()` instead which should work on CPU also?"
+146,iterative__dvc-2596@37847e7,iterative/dvc,scripts/completion/dvc.bash,functional,A,,,,"@user1:
+You need to replace hyphen in `COMP_WORDS[1]` here too, otherwise you'll get an error on `import-url` and `get-url`, because it would evaluate to `_dvc_import-url_...`, which is invalid."
+147,iterative__dvc-2596@37847e7,iterative/dvc,scripts/completion/dvc.bash,style,B,,,,"@user1:
+Not quite sure how bash is handling namespacing for completion scripts, so a bit worried about it colliding with something and so wouldn't place this function like that, but would just define it inside of `_dvc` function as a nested function. That way there is no chance of it colliding with anything."
+148,jina-ai__serve-1256@2f495e3,jina-ai/serve,jina/clients/python/grpc.py,style,B,,,,"@user1:
+this `:d` seems odd
+
+@author:
+It's a formatting code, like the 's' and 'f'. But yeah, it doesn't add anything. I can remove them"
+152,keephq__keep-100@6a8be21,keephq/keep,keep/parser/tests_for_parser/test_parser.py,style,B,,,,"@user1:
+parser = Parser()"
+153,keephq__keep-1984@e524fe8,keephq/keep,keep/api/routes/topology.py,functional,A,yes,,,"@user1:
+Can we use more specified exceptions here?"
+155,keephq__keep-3054@2d23bf3,keephq/keep,tests/e2e_tests/docker-compose-e2e-postgres.yml,documentation,A,yes,,,"@user1:
+This Posthog key too"
+156,keephq__keep-3054@2d23bf3,keephq/keep,tests/e2e_tests/docker-compose-e2e-mysql.yml,functional,A,,,,"@user1:
+Please remove POSTHOG keys from here and set POSTHOG_DISABLED=true"
+158,keephq__keep-4568@aaa03de,keephq/keep,keep/api/models/alert.py,structural,B,,,,"@user1:
+Let's maybe remove these limit/offset parameters from batch enrichment request and hardcode limit:1000 offset:0
+in the place where it's used now. I think no need to make limit and offset being part of public api especially because it's gonna be change in future.
+
+@author:
+Deleted at https://github.com/keephq/keep/pull/4568/commits/524d00c72d1ec0b5f985577dbb7f21a67a0dc34c."
+165,marimo-team__marimo-4080@8a73f89,marimo-team/marimo,marimo/_runtime/runtime.py,functional,A,,,,"@user1:
+Should this be adding module names, not package names?
+
+@author:
+The module names can be lossy, so I need to add package names. We convert it right below though 
+
+@user1:
+just double checking — any issues with the code below? Will adding package names to `missing_modules` make `module_to_package` unhappy?
+
+<img width=""610"" alt=""image"" src=""https://github.com/user-attachments/assets/7399f4ee-6da9-482b-8759-b76f0f028a6e"" />
+
+Like should this be
+
+```python
+missing_packages: list[str] = []
+missing_modules: set[str] = set()
+for e in module_not_found_errors:
+    if isinstance(e, ManyModulesNotFoundError):
+        missing_packages.extend([p for p in e.package_names if not self.package_manager.attempted_to_install(p)
+```
+
+
+@author:
+ah i see now, cleaning it up"
+166,matplotlib__matplotlib-17892@cb25841,matplotlib/matplotlib,lib/matplotlib/cbook/__init__.py,style,B,,,,"@user1:
+can you make this a keyword only argument?
+
+@author:
+It's done. Thanks for the suggestion!"
+167,matplotlib__matplotlib-30199@b5dfb32,matplotlib/matplotlib,lib/matplotlib/pyplot.py,functional,C,,,,"@user1:
+This isn't autogenerated.
+
+@author:
+Oops, forgot that one — fixed!"
+170,microsoft__autogen-2225@9cf65ed,microsoft/autogen,autogen/agentchat/contrib/capabilities/transforms.py,functional,A,,,,"@user1:
+To align with `_cache_get` I think this line should be:
+`key = f""{json.dumps(content)}_{self._min_tokens}""`"
+171,microsoft__autogen-4044@e5bddfc,microsoft/autogen,dotnet/Directory.Build.props,structural,B,,,,"@user1:
+Maybe try simply removing the S.T.J package reference in `Directory.Build.props` instead? We probably don't need that global reference after updating M.E.A.I version"
+172,microsoft__autogen-5843@e07fb7a,microsoft/autogen,python/packages/autogen-agentchat/src/autogen_agentchat/teams/_group_chat/_swarm_group_chat.py,functional,B,,,,"@user1:
+Potentially a breaking change, but it's small enough that I think it is likely okay. Probably should have been this way from the start anyway
+
+@author:
+Yeah... It should have been this way. I am planning to make it clear in the release note that we require keyword arguments for these classes. 
+
+@author:
+I reverted this ... let's wait until a good time."
+174,mlflow__mlflow-1658@3f53b0b,mlflow/mlflow,mlflow/store/local_artifact_repo.py,functional,A,,,,"@author:
+The spark UDF test (`pytest tests/pyfunc/test_spark.py::test_spark_udf --large`) was failing due to leaked mlruns directory from another test run (we should fix that separately), see [this travis log](https://travis-ci.org/mlflow/mlflow/jobs/562924587). The failure revealed that we currently have a bug/edge case in how we handle downloading artifacts from empty directories (in ArtifactRepository.download_artifacts, we assume that an empty result from list_artifacts implies that an artifact path is a file, but it could actually be an empty directory, e.g. the `mlruns` directory in the above failure). I changed this code to get the test to pass on the PR, but this is probably not the right solution (will think about this more tomorrow)
+
+@user1:
+I don't understand why do you want to add the list_dir to the result. Can you elaborate on what caused the error and how does this fixes it? From looking at it briefly I don't think the list_dir should be returned. If anything, I don't understand why list artifacts pointing to a file does not return the file itself. 
+
+@author:
+Yeah agreed, adding `list_dir` is just a hack to get the tests to pass against the file-based artifact repo, because it allows us to distinguish between listing an empty directory & a file.
+
+Agree that it'd make sense for list_artifacts pointing a file to return the file itself (similar to how `ls` behaves), but that's a broader change that requires modifications across the different artifact repository implementations, so I just worked around this for now by removing the problematic empty `mlruns` directory in the `projects` tests that create it."
+178,modin-project__modin-4215@69f9652,modin-project/modin,modin/experimental/core/execution/native/implementations/omnisci_on_native/test/test_dataframe.py,functional,C,,,,"@user1:
+```suggestion
+        ""d"": pandas.to_datetime(
+            [
+                ""2018-10-26 12:00"",
+                ""2018-10-26 13:00:15"",
+                ""2020-10-26 04:00:15"",
+                ""2020-10-26"",
+            ]
+        ),
+```
+the ""d"" column has only 2 elements when others have 4. This makes the test fail silently at the DataFrames construction stage: [this piece of code](https://github.com/modin-project/modin/blob/0f5a47177025b069e74de9d8caff17e1e6b24fec/modin/experimental/core/execution/native/implementations/omnisci_on_native/test/utils.py#L261-L278) tries to build modin and pandas dataframes from the given data and considers that the test passes if they both raise an error (always happen if the data is incorrect).
+
+I think we have to add a parameter or smth else in a separate PR to explicitly turn this behavior on, so no implicit silent errors occur. 
+
+@author:
+Yeah, my bad..."
+179,netbox-community__netbox-10171@249b8b0,netbox-community/netbox,netbox/extras/tables/tables.py,style,A,,,,"@user1:
+Here we want to override the column's default accessor (the instance's `object_repr` attribute) with `changed_object`, to ensure that it gets picked up by the table for prefetching.
+
+```suggestion
+        accessor=tables.A('changed_object'),
+```"
+180,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/netbox/filtersets.py,functional,A,,,,"@user1:
+I'm pretty sure this was there for sanity-checking. Was is raising an exception? If so, it probably warrants looking into the underlying cause.
+
+@author:
+I will be honest, I don't remember removing this at all.
+
+@author:
+Restored this in the latest commit"
+181,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/forms/models.py,documentation,A,,,,"@user1:
+Let's not do this, as it's likely to lead to strange issues. It's fine to leave the `asn` field in the form since the help text explains that it's being deprecated.
+
+@author:
+Done, pulled this out"
+185,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/ipam/graphql/scalars.py,style,B,,,,"@user1:
+Are you planning to do anything with this? I know we talked about possibly using dotted notation. If not, should we just use BigInt directly?
+
+@author:
+Not yet, I can swap to BigInt for now"
+186,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/ipam/forms/bulk_import.py,functional,B,,,,"@user1:
+This should be inferred from the model; no need to specify it on the form."
+187,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/forms/bulk_edit.py,functional,A,,,,"@user1:
+If we're keeping the `asn` field on Site for now, this field should stay.
+
+@author:
+Done"
+189,networkx__networkx-4134@3b27fe2,networkx/networkx,.circleci/config.yml,documentation,B,,,,"@user1:
+This isn't needed.  There is already a ``.nojekyll`` in the directory containing ``latest``."
+190,networkx__networkx-4602@b2da108,networkx/networkx,networkx/algorithms/centrality/betweenness.py,functional,A,,,,"@user1:
+Unfortunately, nodes are not sortable in general.Using `sorted` should be fine in tests where we know what the nodes are, but in the package code itself we should use `list`.
+
+@author:
+Yup this was an oversight on my part - should be fixed in 2e2a63e."
+191,networkx__networkx-5305@072b960,networkx/networkx,networkx/algorithms/distance_measures.py,functional,A,,,,"@user1:
+API question: do we want the default to be ""weight""? This seems like it might silently change some user code as ""weight"" is a very common edge attribute name, so any existing code that calls e.g. `nx.eccentricity(G)` may get a different result than previous versions of networkx if the edges of `G` have a ""weight"" attribute!
+
+I think the correct thing to do would be to match the default value for `weight=` in `shortest_path_lengths`, which is `weight=None`.
+
+@author:
+> I think the correct thing to do would be to match the default value for weight= in shortest_path_lengths, which is weight=None.
+
+I agree, and this is how I would do it normally, but here I'm following the pattern of [shortest_paths/weighted](https://github.com/networkx/networkx/blob/main/networkx/algorithms/shortest_paths/weighted.py), which has default `weight=""weight""`.
+
+This seems like an API inconsistency - if you and @user2 agree that `weight=None` is preferable, I will update here and maybe we should open a separate issue for refactoring in this direction elsewhere (e.g. in [shortest_paths/weighted](https://github.com/networkx/networkx/blob/main/networkx/algorithms/shortest_paths/weighted.py)). Thoughts?
+
+@user2:
+Yes -- it should default to `weight=None`.  
+
+The `weighted.py` module does use `weight=""weight""`, but we shouldn't use the `weighted.py` functions unless a `weight` argument is provided. That's what `shortest_path_lengths` does for us (which is in the `generic.py` module). It chooses whether to call the weighted functions, or stick with the unweighted functions with the default choice being unweighted (unless a weight value is provided).
+
+@author:
+> I think the correct thing to do would be to match the default value for weight= in shortest_path_lengths, which is weight=None.
+
+@user1 The default value for weight in `shortest_path_lengths` is None, but this sets all weights to 1, which is not what we're looking for. 
+
+> That's what shortest_path_lengths does for us (which is in the generic.py module). It chooses whether to call the weighted functions, or stick with the unweighted functions with the default choice being unweighted (unless a weight value is provided).
+
+@user2 I'm not sure I agree. We are trying to distinguish three cases:
+1. Weights are via a provided weight function
+2. Weights are via edge attributes ( weight=""weight"")
+3. Weights are all 1 (""unweighted"" case)
+
+When weight=""weight"", we're not defaulting to the unweighted case, we're using the edge attributes as weights. If we pass weight=None, we are telling `shortest_path_length` to set weights to 1, not use the edge attributes.
+
+Constructively, three paths forward come to mind:
+1. Leave  weight=""weight"" as the default in all `distance_measures`. Consider refactoring `distance_measures` and `generic` at a later time.
+2. In `_extrema_bounding`, do something like:
+```
+if not weight:
+      dist = nx.shortest_path_length(G=G, source=current, weight=""weight"")
+else:
+      dist = nx.shortest_path_length(G=G, source=current, weight=weight)
+```
+3. refactor `generic` as part of this PR.
+
+My view is refactoring `generic` is out of scope, and option 2 seems clunky, but I am happy to do it if you think that best. Do you see a preferable alternative?
+
+
+@user2:
+We want the unweighted values when the user does not provide the `weight` argument to the function.
+I think all the code is just fine except for the default value of weight, which should be None just as it is for `shortest_path_length`.  Then for each use case the right thing happens:
+
+1) Weight=function: The user specifies a weight function, so `weight` is not None and `shortest_path_length` uses the weight provided weight function -- all is good.
+2) Weights=edge attribute name.  For example, weight=""weight"" or weight=""distance"" or weight=""cost"" or any other attribute name.  Again, weight is not None, so `shortest_path_length` uses the edge attribute specified to find the weights.
+3) Unweighted case:  This is the old/existing case. The user doesn't specify any `weight` and so `weight=None` is passed into `shortest_path_length` which calls the unweighted path length function.
+
+
+
+@user1:
+@author consider the following.
+
+Let's say a user has the following code:
+
+```python
+>>> import networkx as nx
+>>> G = nx.Graph([(0, 1, {""weight"": 10})])
+>>> nx.diameter(G)
+```
+
+In all previous versions of networkx, this would give `1`. However, if we were to make `weight=""weight""` the default, then this would give `10` instead; i.e. we'd be silently changing the results of existing user code without warning. This is something that we must avoid, otherwise we'd potentially be introducing bugs (and hard-to-track-down ones, at that) all over existing user code!
+
+I certainly understand the logic of wanting a weighted result by default if the graph is weighted. Even without backwards-compatibility constraints, choosing an explicit default for an edge attribute doesn't mesh well with the generality of the library. Consider another example: let's say someone has a graph where the nodes represent towns and the edges represent roads between them (as I gather, this is a pretty common example in geospatial applications). The edges of this graph might have multiple attributes, say one called `""distance""` that represents the physical distance between nodes along a given edge, and another called `""weight""` which represents the number of travelers / hour that travel along that edge. In this case, if a user is calling one of the `distance_measures` functions on the graph, chances are they actually want the result to be weighted by the `""distance""` edge attr, but we'd be giving them a different (and harder to understand for this example) value *by default*. In this case too, I'd argue it's much better to have an unweighted default and force the user to be intentional about which weight they want.
+
+Anyways, just some high-level pontification. The real blocker for me with going with `weight=""weight""` as the default is the backward-incompatibility concern!
+
+@author:
+@user2  @user1  Thank you both for being patient and explaining your reasoning here; I now understand what you mean.
+
+I thought you wanted to make `weight=None` do what `weight=""weight""` does, and drop `weight=""weight""` as an option altogether. My mistake!"
+192,networkx__networkx-5305@072b960,networkx/networkx,networkx/algorithms/tests/test_distance_measures.py,functional,C,,,,"@user1:
+I don't think this assertion is a good idea... the pytest.approx call on the next line actually tests the behavior we care about.
+```suggestion
+```
+
+@user2:
+OK... that's my mistake.  I was thinking we should check that we understand what is happening by testing that round-off occurs. But I agree that this is not the answer we care about. 
+
+Should we make all the comparisons use the `pytest.approx` idiom? or only the ones where round-off messes up the comparison?
+
+@user1:
+> Should we make all the comparisons use the pytest.approx idiom? or only the ones where round-off messes up the comparison?
+
+It's probably safest to use `pytest.approx` everywhere for testing ""equality"" with floating point values, but it's also not super critical. I doubt it will cause failures except *maybe* on systems that use 32-bit floats. 
+
+@user2:
+Would it be useful to know (and test for) cases where round-off makes a difference. In these examples, 2 have round-off and the rest don't. Do we care if that changes? probably not. :}"
+195,networkx__networkx-7159@7e65b7d,networkx/networkx,networkx/readwrite/tests/test_gml.py,functional,C,,,,"@user1:
+I'm not too sure what is even being tested here?
+
+``` python
+>>> gml = ""graph [edge [ source wow target wow ] node [ id wow label lol ]]""
+>>> nx.parse_gml(gml)._adj
+{'lol': {'lol': {}}}
+>>>  gml = ""graph [edge [ source wow target wow ] node [ id wow label 䈀 ]]""
+>>> nx.parse_gml(gml)._adj
+...
+...
+NetworkXError: cannot tokenize 䈀 ]] at (1, 59)
+```
+
+Why can't a unicode character just be tokenised like a string? The GML parser doesn't seem right here?
+
+This was added in https://github.com/networkx/networkx/pull/3603/
+
+@author:
+> Why can't a unicode character just be tokenised like a string? The GML parser doesn't seem right here?
+
+I don't know - maybe gml only supports a limited unicode character range (or ascii only)?
+
+FWIW there's a slightly more informative chained exception with the following:
+
+```python
+# Taken directly from the updated test:
+>>> gml = ""graph [edge [ source u'u\\4200' target u'u\\4200' ] node [ id u'u\\4200' label b ] ]""
+Traceback (most recent call last)
+   ...
+NetworkXError: cannot tokenize 'u\4200' target u'u\4200' ] node [ id u'u\4200' label b ] ] at (1, 23)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last)
+   ...
+NetworkXError: expected an int, float, string, '[' or string convertible ASCII value for node id or label, found 'u' at (1, 22)
+```
+
+@user2:
+The link on our docs (which is a webarchive link) has a link to [a technical report pdf](https://web.archive.org/web/20190303094704/http://www.fim.uni-passau.de/fileadmin/files/lehrstuhl/brandenburg/projekte/gml/gml-technical-report.pdf) whcih on page two says:
+
+> Further reglementations are a maximum line length and a maximum key size of 254 characters (this is necessary since some operating systems and editors do not handle longer lines), and the use of 7-bit ASCII characters only. Any other characters are coded in the ISO 8859-1 character set, and have the form &name;. Especially, the characters "" and & within strings must be coded this way to avoid ambiguity. The ISO 8859-1 ist also used by HTML, which is the most common format for distributing data on the world wide web.
+
+So if we want unicode, I think the preferred option is to store it in ASCII form by converting it to [ISO 8859-1](https://en.wikipedia.org/wiki/ISO/IEC_8859-1) which is a pretty restricted set of characters compared to unicode.  If we want to store unicode more generally, we can break the GML minimal standard by writing and reading some other thing. Our [current parser](https://github.com/networkx/networkx/blob/1c2fa4b9372df1a1428444d89fe6a72359e1a2cb/networkx/readwrite/gml.py#L312) doesn't seem to handle unicode explicitly.  
+
+So then... what is this test doing?  I think it is trying to test that we are using a string with a unicode character **not** represented properly.
+
+I propose that we make this:  `  ...  '\u4200'` as that is IIC a standard python way to represent the unicode character with code 4200. Does this make any sense? I am way out of my wheelhouse here. :}
+
+@user1:
+> I propose that we make this:   ...  '\u4200' as that is IIC a standard python way to represent the unicode character with code 4200. Does this make any sense? I am way out of my wheelhouse here. :}
+
+Yes I think that's sounds good for now. I guess the first priority here is to fix the syntaxwarning.
+
+@author:
+> I propose that we make this:   ...  '\u4200' as that is IIC a standard python way to represent the unicode character with code 4200. Does this make any sense? I am way out of my wheelhouse here. :}
+
+The test is an `assert_parse_error` test, i.e. checking that the nx gml parser *fails* to read the line correctly... Funnily enough all three proposals (`u\4200`, `u\\4200` and `\u4200`) pass the test :upside_down_face: . So there likely is a deeper issue with the gml parser tokenization - but for the purposes of fixing the syntax warning, I switched to `\u4200` in e5e528c
+
+@user2:
+The GML technical doc explicitly says it does NOT support unicode (must be converted to html style 8859-1 chars like &amp).  So I think we want to put in valid unicode and check that it doesn't work.
+
+Do we need the `u` in front of the single quotes?  I think we should probs remove them too (?? python2 historical cruft??).
+
+@author:
+>  So I think we want to put in valid unicode and check that it doesn't work.
+
+Sounds good - as of e5e528c the `\u4200` values are valid unicode characters!
+
+> Do we need the u in front of the single quotes? I think we should probs remove them too (?? python2 historical cruft??).
+
+Nope, those are no longer necessary either - removed in 62887bd"
+196,numba__numba-4282@a062e23,numba/numba,numba/utils.py,functional,C,,,,"@user1:
+Better to include the original message, which will contain "" '.0' is not a valid parameter name"". 
+
+Also,  it is weird that python2 is generating that a arg with `.0` as the name, and that `funcsigs` can't handle it.
+
+@author:
+> Better to include the original message, which will contain "" '.0' is not a valid parameter name"".
+
+Good idea
+
+> Also, it is weird that python2 is generating that a arg with `.0` as the name, and that `funcsigs` can't handle it.
+
+Yes, this was weird. That you have seen the `.0` confirms it is not just me. Looking at the byte code disassembly, it's definitely in there!"
+198,numpy__numpy-12123@1c2abd3,numpy/numpy,numpy/lib/type_check.py,structural,C,,,,"@user1:
+I think we are headed toward using the version deprecated rather than the version in which we intend to remove it. The latter may change, the first is fixed and helps folks downstream know how to set up version dependent workarounds.
+
+@author:
+Thanks for fixing"
+199,numpy__numpy-14924@6a7e3f1,numpy/numpy,numpy/random/_generator.pyx,functional,A,,,,"@user1:
+It looks like you want `acc` to ""accumulate"" the products of 1 minus the beta random variates, but you can't use `val_data[i+j]` for that, because it includes the product of `acc` and the random beta (not just the random beta).  You can make this work if you save the random beta variate in its own variable.  The body of the `while` loop then looks like this:
+
+                    acc = 1.
+                    for j in range(k - 1):
+                        v = random_beta(&self._bitgen,
+                                        alpha_data[j], alpha_csum_data[j + 1])
+                        val_data[i + j] = acc * v
+                        acc *= (1. - v)
+                    val_data[i + j + 1] = acc
+                    i = i + k
+
+where `v` is `cdef`'d to be type `double` at the beginning of the function.
+
+@author:
+Thanks for the hint. I have pushed the suggested changes. This should restore the correct distribution.
+
+@user1:
+Thanks, the update looks good.
+
+I'm currently running a bunch of tests to see if anything breaks. :)"
+200,numpy__numpy-15425@e603b5f,numpy/numpy,numpy/tests/test_public_api.py,style,C,,,,"@user1:
+What is this for?
+
+@author:
+This is to verify that explicitly calling numpy.testing is not adding a second copy of 'testing' to the result of dir.
+
+@user1:
+But this is started in a separate process, so can have no effect on the rest of the test.
+
+@user2:
+At this point in the test we probably already did anything bad (e.g. testing is definitely imported), wouldn't it be enough to just test that `len(dir(np)) == len(set(dir(np)))`, with a comment of why?
+
+@author:
+@user3-wieser @user2 I have modified the test to assert len(dir(np)) == len(set(dir(np)))
+
+@user2:
+Thanks, seems fair enough to me. If you are still enthusiastic: We try to keep the lines below 80 characters long (so the comment is a bit too long). Might as well rebase/squash the commits (but we can also do both of that).
+
+@author:
+@user2  Thanks for the review. I have modified the comments to be inline with the standards."
+203,numpy__numpy-22997@8c57716,numpy/numpy,numpy/__init__.cython-30.pxd,functional,A,,,,"@user1:
+Should this one (and probably a handful of other void functions) be `except *`? I assume this doesn't swallow errors.
+
+@author:
+Arg, I didn't scan the `void` ones carefully, I guess.  This isn't designed to error, but clearly can...  (one of those bad functions).  (the xincref/decref family is also weird, I think they tend to clear, but probably not always... and they shouldn't be used anway, especially in cython)"
+205,optuna__optuna-1087@4177569,optuna/optuna,optuna/integration/chainermn.py,functional,A,,,,"@user1:
+It seems like the keyword argument of `log` is ignored.
+
+Isn't it better to pass `log` to `self.delegate.suggest_float`?
+
+@author:
+Thank you!
+I will fix it."
+207,optuna__optuna-972@1f4813a,optuna/optuna,optuna/pruners/hyperband.py,functional,C,,,,"@user1:
+The pruner is never activated because this objective function does not have `trial.report` or `trial.should_prune`. How about using the same objective function as the other pruners (e.g., https://github.com/optuna/optuna/blob/v1.2.0/optuna/pruners/median.py#L14-L44)."
+210,pandas-dev__pandas-42186@62d46c4,pandas-dev/pandas,.pre-commit-config.yaml,functional,A,,,,"@user1:
+`pxi.in` isn't recognised as `cython` by [identify](https://github.com/pre-commit/identify), does the following work?
+
+```suggestion
+        files: (\.pyx|\.pxi.in)$
+```
+
+@author:
+I tried that, but it shows the following message, don't know if it worked or not as it showed the same message when I ran unwanted patterns with the cython check their. While, it gave error for .rst files when ran with ci-check on PR.
+
+<img width=""1030"" alt=""Screenshot 2021-08-02 at 8 51 19 PM"" src=""https://user-images.githubusercontent.com/46242526/127885070-14358a8b-6d6f-452b-99a6-3bbac71bdd41.png"">
+
+
+
+@author:
+Should I make a commit anyway?
+
+@user1:
+ah, you should run `pre-commit run cython-casting --all-files`, else it'll only run against files you've staged
+
+@author:
+Thank you!! I ran that and found that my hook is not working for the previous test.pyx or test.pix.in example, it works when I move the logic to unwanted hooks but it doesn't work with the new hook
+
+@author:
+Ok with the quotes it works now"
+212,pandas-dev__pandas-42635@59d4145,pandas-dev/pandas,pandas/tests/tools/test_to_datetime.py,functional,C,,,,"@user1:
+Can you parameterize this over `cache = True | False`?
+
+@author:
+Updated"
+213,pandas-dev__pandas-43930@fef88a7,pandas-dev/pandas,pandas/core/indexes/base.py,functional,B,,,,"@user1:
+This type information update is strictly speaking not correct I think, since this attribute will never be Nullable/ExtensionEngine? (those are only dynamically returned from `_engine`)
+
+So if you don't change that here, the type `cast` in `_engine` definition below might not be needed (untested)"
+215,pandas-dev__pandas-50366@1e7613f,pandas-dev/pandas,pandas/_libs/tslib.pyx,functional,A,yes,,,"@user1:
+ending this with ""search"" seems weird (and i dont see it in any test cases)
+
+@author:
+It's true that it wasn't tested, but it's been like this since pandas 0.24:
+```python
+In [1]: import pandas
+
+In [2]: pandas.__version__
+Out[2]: '0.24.0'
+
+In [3]: pandas.to_datetime(['2020-01-f00'], format='%Y-%d-%m', exact=False)
+---------------------------------------------------------------------------
+
+ValueError: time data '2020-01-f00' does not match format '%Y-%d-%m' (search)
+```
+
+Maybe we can just remove it - people typically know whether they've passed `exact`, and it doesn't really add much
+
+Especially as it was never there for (more common) ISO formats:
+```python
+In [4]: pandas.to_datetime(['2020-01-f00'], format='%Y-%m-%d', exact=False)
+---------------------------------------------------------------------------
+ValueError: time data 2020-01-f00 doesn't match format specified
+```
+
+Let's just unify them to
+```python
+time data '2020-01-f00' does not match format '%Y-%d-%m'
+```"
+216,pandas-dev__pandas-55938@b36d8d1,pandas-dev/pandas,asv_bench/benchmarks/indexing.py,functional,A,,,,"@user1:
+Why is this assignment here? It's overriding the prior `self.df`"
+221,pydantic__pydantic-11468@92c01bd,pydantic/pydantic,docs/migration.md,style,C,,,,"@user1:
+```suggestion
+    * `allow_population_by_field_name` → `populate_by_name` (or `validate_by_name` starting in v2.11)
+```"
+225,pyg-team__pytorch_geometric-4635@498dbbf,pyg-team/pytorch_geometric,torch_geometric/data/hetero_data.py,style,B,,,,"@user1:
+maybe you could use the `is_node_attr` and `is_edge_attr` to simplify this loop quite a bit?"
+227,python-poetry__poetry-4985@b350568,python-poetry/poetry,src/poetry/utils/env.py,style,B,,,,"@user1:
+I wonder if we should keep the original format here for better readability. What do you think? (same for the lines 730 and 805, 859)
+
+This can be achieved by `#fmt: off/on` (https://stackoverflow.com/a/58584557/9750706)
+
+@author:
+In this case, because the exact same string is repeated 4 times in this class, I'd suggest defining this as a string constant in the class (next to `ENVS_FILE`) called something like `VERSION_SCRIPT`.
+
+Then we won't have to wrap it, and won't have to fiddle with black formatting.
+
+_(did this in the most recent commit, let me know what you think)_
+
+@user1:
+Good idea  :+1: I saw there is already a `GET_PYTHON_VERSION` at the top of the file. I think we can use this one.
+
+@author:
+Even better! Adjusted the last commit to use the existing constant.
+
+...or now that I think about it; maybe there is a reason to use a 'one-liner' version here, because it looks like command line arguments? Tests still pass though.
+
+EDIT: I tested some things in a Notebook and I don't think the multi-line version will work, but maybe I am mistaken. We could just add this constant below the `GET_PYTHON_VERSION` constant as a `GET_PYTHON_VERSION_ONELINER` and use that instead. Avoid the trouble :) _(adjusted the commit to this idea)_"
+230,python-telegram-bot__python-telegram-bot-3514@d5c0a5c,python-telegram-bot/python-telegram-bot,telegram/_utils/markup.py,functional,A,,,,"@user1:
+At this point we haven't yet established that the rows are sequences as well. `check_keyboard_type([1])` would raise an exception with this addition IISC …"
+231,python-telegram-bot__python-telegram-bot-4168@96ca73d,python-telegram-bot/python-telegram-bot,telegram/_update.py,functional,A,,,,"@user1:
+I strongly suggest using `message.sender_chat` also in these cases. Not including a field called `sender_chat` in this property doesn't make much sense to me :D"
+233,python__cpython-104029@f78e70e,python/cpython,Lib/test/test_dis.py,style,C,,,,"@user1:
+This is quite a big block of code that will have to be updated when any of the generated code changes. Would it be possible to instead test only for the `CALL_INTRINSIC_2         1 (INTRINSIC_PREP_RERAISE_STAR)` line, so we don't have to hardcode so much bytecode?"
+234,python__cpython-104029@f78e70e,python/cpython,Tools/build/generate_opcode_h.py,style,C,,,,"@user1:
+Let's move all this to a variable `intrinsic_footer` like we do for the header."
+237,python__mypy-14517@78b0f55,python/mypy,mypy/partially_defined.py,functional,B,,,,"@user1:
+I wonder if this might degrade performance, since builtins have over 200 definitions, and it looks like we are iterating over all of them for every module. Can you measure the time spent in this loop when performing a self check, for example? 
+
+@author:
+I have found a way to deal with this that doesn't involve calling `record_definition` every time! So performance should be unchanged."
+238,python__mypy-15353@65efb01,python/mypy,mypy/typeops.py,functional,A,,,,"@user1:
+Hmm, mutating fdef here seems a little suspicious to me. Why do we need this? (My weak mental model for when it's safe to mutate these kind of things is to try and keep it to semantic analysis, like you do in prepare method signature)
+
+@author:
+Ah, good catch, thanks! I'm actually not entirely sure why I added this -- perhaps this was before I made sure the semantic analyzer set the is_static property. At any rate, I've verified that is_static is set correctly for methods named `__new__` by the time we get in typeops, meaning that it is not necessary to modify the attribute here. I've removed it.
+
+@user1:
+Thanks! Github is having some problems, so your commit hasn't shown up. The workaround I found is to make an empty commit, push it, then reset to delete the commit, then force push
+
+@author:
+I actually had some issues with my local git client suddenly deciding to use the wrong SSH key -- fixed that now, but I see that the commit still isn't visible. Will make an empty commit and push again, thanks for the tip!"
+242,python__mypy-6781@3a824fb,python/mypy,mypy/moduleinfo.py,style,A,,,,"@user1:
+This is the PyPI distribution name, but the actual package name is different, and the package name is required in this file. In this case the package name is `dateutil`. Unfortunately, some manual tweaking seems to be required to get the package name to import."
+243,python__mypy-6781@3a824fb,python/mypy,mypy/moduleinfo.py,documentation,A,,,,"@user1:
+This is another PyPI distribution name that isn't a real Python package name. There are some other examples below."
+244,python__mypy-6803@8e6a9b8,python/mypy,mypy/checker.py,structural,B,,,,"@user1:
+This `if` is redundant. If the list is empty, the loop body will simply not run.
+
+@author:
+Good I refactored it but I didn't improve this part. Thank you."
+245,python__mypy-6803@8e6a9b8,python/mypy,mypy/checker.py,functional,B,,,,"@user1:
+You might need to add an explicit type comment `List[str]` here, otherwise self-check may fail."
+247,python__mypy-9629@13dc4d2,python/mypy,mypy/checkexpr.py,functional,A,,,,"@user1:
+Unfortunately the `Any` type here may result in false negatives, since it's used for type inference:
+
+```py
+def f(**kwargs: int) -> None: pass
+
+f(**{'x': 'y'})  # No error here after this change
+```
+
+More generally, it would be great if we can avoid inferring `Any` types in fully annotated code.
+
+Random idea: Use `Mapping[str, <nothing>]` as the context, potentially only if the kwargs expression is an empty dictionary expression (check for it here). This would certainly be a hack, but at least it's a pretty localized hack.
+
+@author:
+I see... Another idea can be to relax the check here to allow the case where `typ` is `dict[<nothing>, <nothing>]`. At first I didn't like this solution as I thought it was less elegant, but if trying to change the inferred type will result in a hacky code like you said, maybe this one is better?
+https://github.com/python/mypy/blob/985a20d87eb3a516ff4457041a77026b4c6bd784/mypy/checkexpr.py#L3933-L3949"
+248,pytorch__vision-8316@92ec2fb,pytorch/vision,torchvision/transforms/v2/functional/_augment.py,documentation,B,,,,"@user1:
+this is properly torchscript-compatible already (see my main comment above), so we can remove this todo
+
+```suggestion
+```"
+249,pytorch__vision-8316@92ec2fb,pytorch/vision,torchvision/transforms/v2/functional/_augment.py,functional,B,,,,"@user1:
+For consistency with the other kernels we should expose a `jpeg_video` kernel that calls into `jpeg_image()`."
+250,qutebrowser__qutebrowser-3590@872cff2,qutebrowser/qutebrowser,qutebrowser/mainwindow/tabbedbrowser.py,documentation,A,yes,,,"@user1:
+Why check for both? `if tab is not None:` should be enough.
+
+@author:
+Well, maybe I should just do ""if tab:"" since this page says it *can* be 0 as well:
+
+http://doc.qt.io/qt-5/qtabwidget.html#currentWidget
+
+
+@user1:
+That's sure an interesting documentation :laughing: 
+
+> The tab dialog does its best to make sure that this value is never 0 (but if you try hard enough, it can be).
+
+However, it's a pointer - and a nullpointer in C++ means `None` in Python."
+252,qutebrowser__qutebrowser-7003@3656345,qutebrowser/qutebrowser,tests/end2end/features/test_downloads_bdd.py,functional,C,,,,"@user1:
+Move it to `tests/end2end/features/conftest.py` instead.
+
+@author:
+Done :+1:"
+253,ray-project__ray-49918@04cf1ee,ray-project/ray,python/ray/tests/test_actor_failures.py,functional,B,,,,"@user1:
+is this intended to be deleted or uncommented?
+
+@author:
+fixed"
+256,run-llama__llama_index-13413@63620ed,run-llama/llama_index,llama-index-packs/llama-index-packs-rag-fusion-query-pipeline/llama_index/packs/rag_fusion_query_pipeline/base.py,documentation,B,,,,"@user1:
+should we even be using service context? We can pass the embed model to the index, and the llm to the query engine
+
+```
+vector_index = VectorStoreIndex(nodes, embed_model=embed_model)
+self.query_engines.append(vector_index.as_query_engine(llm=self.llm))
+```
+
+@author:
+Indeed, `service_context` is marked as deprecated."
+258,scikit-learn__scikit-learn-29401@819e167,scikit-learn/scikit-learn,sklearn/compose/_column_transformer.py,functional,C,yes,,,"@user1:
+Actually it is not necessarily using the global configuration, you could imagine something like this:
+
+```py
+estimator.set_output(transform='pandas')
+estimator.set_output(transform=None)
+```
+
+The global configuration is `transform='default'` but the estimator is using `transform='pandas'`
+
+More a meta comment: I get the fact that it may not be very clear from the docstring what `transform=None` does but I don't think there is an easy way to improve the situation in the docstring. Full disclosure: I am not sure about the use case for `transform=None` actually :thinking:.
+
+@author:
+Oh, I was thinking that we cannot actively set `transform=None`, because this is what the docstring says: `transform : {""default"", ""pandas"", ""polars""}, default=None`. 
+
+Also, I have just discovered, there is
+```
+    supported_outputs = ADAPTERS_MANAGER.supported_outputs
+    if dense_config not in supported_outputs:
+        raise ValueError(
+            f""output config must be in {sorted(supported_outputs)}, got {dense_config}""
+        )
+```
+to prevent us from setting `transform=None`.
+
+It can only stay `None` if it is untouched, and then the global configuration is used within the `_get_output_config()` function.
+
+I'm happy to revert this if it's wrong, but I will keep my suggestions for now to facilitate discussion.
+
+@user1:
+> transform : {""default"", ""pandas"", ""polars""}, default=None
+
+I guess the docstring is slightly misleading then. It seems like you can use `transform=None`:
+
+```py
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(as_frame=True, return_X_y=True)
+
+scaler = StandardScaler()
+scaler.set_output(transform=""pandas"")
+scaler.set_output(transform=None)
+
+scaler.fit(X)
+# this outputs a pandas DataFrame so transform=None did not change transform=""pandas""
+X_scaled = scaler.transform(X)
+```
+
+
+@user2:
+`None` is used as a sentinel. In the future, f `set_output` supported `predict`, then the default `transform=None` will leave transform configuration alone:
+
+```python
+scaler.set_output(predict=""pandas"") 
+```
+
+
+@author:
+Your example got me really confused @user1 , because I had tried a similar experiment with `FunctionTransformer`, that had led me to think that we cannot pass `transform=None`:
+
+```python
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import FunctionTransformer
+
+#set_config(transform_output=""pandas"")  # same as using set_output before transform=None 
+X, y = load_iris(as_frame=True, return_X_y=True)
+
+functrans = FunctionTransformer()
+functrans.set_output(transform=""pandas"")
+functrans.set_output(transform=None)
+
+functrans.fit(X)
+# this raises a ValueError:
+functrans.transform(X)
+```
+
+`ValueError: output config must be in ['default', 'pandas', 'polars'], got None`
+
+It seems that `FunctionTransformer().set_output()` and `_SetOutputMixin.set_output() `(from `StandardScaler` ) are handeling this differently. The latter has an early [`if transform is None: return self`](https://github.com/scikit-learn/scikit-learn/blob/64ab789905077ba8990522688c11177442e5e91f/sklearn/utils/_set_output.py#L411), while the `FunctionTransformer` can pass [self._sklearn_output_config = {transform: None}](https://github.com/scikit-learn/scikit-learn/blob/64ab789905077ba8990522688c11177442e5e91f/sklearn/preprocessing/_function_transformer.py#L415C17-L415C61) to `_get_output_config()`, which would then raise the above error message.
+
+I am not sure what to make of this, though...
+Is this wanted/expected or should we allign this?
+
+I think I should revert the documentation change, since `transform=None` is sometimes possible to pass and then the previous setting is used, not necessarily the global configuration.
+
+@user1:
+OK well, I think we should fix the bug first and leave the docstring modification for another PR when we understand a bit more the `.set_output` thing.
+
+
+
+@author:
+Yes, I agree. I will revert the documentation changes then."
+259,scikit-learn__scikit-learn-29442@3a19575,scikit-learn/scikit-learn,sklearn/linear_model/_coordinate_descent.py,structural,C,,,,"@user1:
+```suggestion
+    sample_weight : ndarray of shape (n_samples,), default=None
+```"
+260,scipy__scipy-20393@c92a476,scipy/scipy,scipy/special/_add_newdocs.py,functional,A,,,,"@user1:
+```suggestion
+    r""""""
+```
+
+These need to be raw strings. It looks like it’s causing a test failure."
+261,scrapy__scrapy-2456@c7bb2fa,scrapy/scrapy,tests/test_feedexport.py,style,C,,,,"@user1:
+Could you please write this test without .strip(), so that we're explicit about newlines before and after items?
+
+@author:
+Sure :+1:"
+262,skypilot-org__skypilot-1144@36893af,skypilot-org/skypilot,sky/backends/wheel_utils.py,functional,C,,,,"@user1:
+add: `glob pattern {wheel_name}` for easier debugging?
+
+@author:
+Good point. Added. Thanks!"
+266,skypilot-org__skypilot-1427@b01cb79,skypilot-org/skypilot,sky/authentication.py,functional,B,,,,"@user1:
+nit: `private_key_path is None` can't seem to happen.
+
+@author:
+Good catch! Fixed. Thanks!"
+272,skypilot-org__skypilot-3017@1f526ee,skypilot-org/skypilot,llm/mixtral/serve.yaml,functional,A,,,,"@user1:
+What is this file for? Will this have any side-effects?
+
+@user1:
+Also is it a common issue for other workloads? Should we add it in `azure-ray.yml.j2` instead?
+
+@author:
+This is a good point! This file is wrongly configured on Azure with multiple GPUs, causing the issue with the distributed workload using nccl. We should include this in the `azure-ray.yml.j2`.
+
+@author:
+Fixed. PTAL."
+273,skypilot-org__skypilot-4067@ff528a5,skypilot-org/skypilot,examples/dag/diamond.yml,style,B,yes,,,"@user1:
+I realized this would change the direction of the edge, e.g. for `dependencies` we need to specify its predecessor but not its successor, which is inconsistent with our python api (`>>`). Could we use sth like `downstream` and change the direction here?
+
+@author:
+Quick questions:
+1. Should we swap the parameter order in `add_dependency`?
+2. Are you suggesting replacing 'dependencies' to 'downstream' in the YAML header?
+
+Note: Wouldn't using `__lshift__` instead be more intuitive? Like `task1 << task2` means `task1` is dependent on `task2`.
+
+@user1:
+answer to both questions is yes. We could discuss more on naming, though I think we should fix the direction. The reason to use `>>` is from airflow's UX design, and using UX that is counterwise with the main player in the domain might not be the best choice ;)
+
+@author:
+Thanks for the feedback. I've already renamed all relevant parts to use the downstream/edge style consistently."
+277,skypilot-org__skypilot-5435@50d9632,skypilot-org/skypilot,tests/smoke_tests/smoke_tests_utils.py,style,B,,,,"@user1:
+We have a similar function at `/sky/skypilot_config.py:overlay_skypilot_config`, since `Dict[str, Any]` can be trivially converted to `config_utils.Config` you may be able to use that function instead of defining a function here."
+278,skypilot-org__skypilot-569@1c4deb7,skypilot-org/skypilot,sky/setup_files/setup.py,style,C,,,,"@user1:
+not 1.15, but 10.15"
+279,skypilot-org__skypilot-614@ac824f0,skypilot-org/skypilot,sky/clouds/gcp.py,style,A,,,,"@user1:
+is this `ubuntu 20.04`?
+
+@author:
+Ah my bad. Just updated to the correct image name."
+280,skypilot-org__skypilot-727@4fca3da,skypilot-org/skypilot,docs/source/getting-started/quickstart.rst,functional,C,,,,"@user1:
+This will not allocate GPU for the training. Can we change this to 
+```
+sky exec mycluster python train_cpu.py
+sky exec mycluster --gpus=V100:1 python train_gpu.py
+```?
+
+@author:
+Done, good catch!"
+282,sqlfluff__sqlfluff-2121@d0d52a4,sqlfluff/sqlfluff,src/sqlfluff/dialects/dialect_redshift.py,structural,A,,,,"@user1:
+This is wrong, please remove. Provided description of DatatypeIdentifierSegment in earlier comment."
+283,sqlfluff__sqlfluff-2121@d0d52a4,sqlfluff/sqlfluff,src/sqlfluff/dialects/dialect_postgres_keywords.py~,structural,B,,,,"@user1:
+This looks like a backup copy of dialect_postgres_keywords, please remove. General note: you need to be more conscious of what you're committing in these PRs
+
+@author:
+Same idea. Sorry for that."
+286,sqlfluff__sqlfluff-494@554c74a,sqlfluff/sqlfluff,src/sqlfluff/rules/std.py,functional,B,,,,"@user1:
+Generally best to avoid while True unless absolutely necessary, it's easier to read and safer to put the logic around when to loop into the while condition instead of `True`
+
+@author:
+Good catch. Bad habit die hard."
+287,sqlfluff__sqlfluff-541@c5a16c3,sqlfluff/sqlfluff,src/sqlfluff/core/templaters/base.py,style,A,,,,"@user1:
+What is `full_templated` in this context? Do you mean `templated_str` instead?"
+288,sqlfluff__sqlfluff-865@9e69af8,sqlfluff/sqlfluff,test/fixtures/parser/ansi/update.yml,style,A,,,,"@user1:
+Nested table_reference? This doesn't look quite right 🤔"
+289,sympy__sympy-11818@ab1bcd5,sympy/sympy,sympy/sets/fancysets.py,functional,A,,,,"@user1:
+The method could probably check this first and coerce other into a ComplexRegion before asking `if other.is_ComplexRegion`.
+
+@author:
+I don't think converting other to ComplexRegion is necessary, since under the `if other.is_ComplexRegion:` we are only using `other.sets` which just returns set passed in constructor, and this way we don't incur overhead of ComplexRegion's constructor.
+
+If you think this makes logic of what's happening clearer, I'll change it.
+
+@user1:
+>  this makes logic of what's happening clearer
+
+Yes, that is what I think. We should avoid having to use any knowledge of the internal representation of ComplexRegion. Hence also the conversion should be carried out by ComplexRegion despite of some overhead. That could be done by overloading `ComplexRegion.__new__` to accept a subset of Reals, or, maybe preferably, by a new method `ComplexRegion.from_real`."
+290,sympy__sympy-15346@99fe375,sympy/sympy,sympy/simplify/tests/test_trigsimp.py,structural,C,,,,"@user1:
+This could be `trigsimp(r1) == cos(S(1)/50)`. `simplify` is an expensive operation that tries many different methods, most of which only apply in specific cases, while we are expressly testing `trigsimp`. (This could also be in release notes: change order of TR10i and TRmorrie in trigsimp.)"
+295,sympy__sympy-18605@a356458,sympy/sympy,sympy/tensor/indexed.py,functional,B,,,,"@user1:
+Since `range is S.Infinity` is a normal bool rather than a fuzzy bool it isn't necessary to use `fuzzy_not` for that so this could be
+```
+if range is not S.Infinity and fuzzy_not(range.is_integer):
+```"
+296,sympy__sympy-18630@9ca7e3a,sympy/sympy,sympy/functions/special/hyper.py,functional,A,,,,"@user1:
+```suggestion
+            terms.append(((Rf1/Rf2) * (arg**i)) / factorial(i))
+```"
+298,sympy__sympy-19254@8adfdbe,sympy/sympy,sympy/polys/factortools.py,functional,A,,,,"@user1:
+`binomial` is not defined.
+
+@author:
+You are right, checking the log now i see: ""ImportError: cannot import name 'binomial' from partially initialized module 'sympy' (most likely due to a circular import)""
+What is the correct way of importing the binomial function?
+
+@user2:
+If you want to resolve the circular import issue, you should import inside the function block itself."
+300,sympy__sympy-19913@d466e06,sympy/sympy,sympy/printing/tests/test_pycode.py,functional,C,,,,"@user1:
+```suggestion
+    assert p.doprint(loggamma(x)) == 'mpmath.loggamma(x)'
+```"
+303,sympy__sympy-22369@6eb7e6a,sympy/sympy,sympy/geometry/util.py,style,A,,,,"@user1:
+I recommend against changing `find` in this way. One might have the equation `2*y + 1` which is another way of saying `y = 1/2`."
+304,sympy__sympy-22426@05cec82,sympy/sympy,bin/coverage_doctest.py,functional,B,,,,"@user1:
+""indirect"" is spelled wrong in these variable names."
+305,sympy__sympy-24666@7d194c7,sympy/sympy,sympy/functions/elementary/tests/test_piecewise.py,structural,B,,,,"@user1:
+Why do you have to use `Tuple` instead of tuple? And is it intended to use `0.5` instead of `S.Half`?
+
+@author:
+Not a specific idea, but Tuple would be better I thought.
+
+@author:
+should I replace it ?
+
+@user1:
+It is better to use python iterables because `Tuple` is quite redundant.
+
+@user1:
+And also I suggest to use `S.Half` instead of floats."
+307,sympy__sympy-26515@2c01ca9,sympy/sympy,sympy/polys/sqfreetools.py,functional,C,,,,"@user1:
+""multivariate"" --> ""univariate""
+
+@author:
+Fixed."
+308,sympy__sympy-27352@b3187d6,sympy/sympy,sympy/polys/matrices/domainmatrix.py,functional,B,,,,"@user1:
+If the code is the same in both branches then the if check is not needed.
+
+@author:
+Okay, I will update that."
+313,tobymao__sqlglot-2096@1794bf3,tobymao/sqlglot,sqlglot/expressions.py,functional,B,,,,"@user1:
+just do raise i think
+
+@user1:
+actually it's not necessary, it happens on line 3574
+
+@author:
+we can also do `raise` yeah, mostly wanted to follow the same style as in 3574"
+314,tobymao__sqlglot-2096@1794bf3,tobymao/sqlglot,sqlglot/expressions.py,functional,B,,,,"@user1:
+possible to do without the try catch? it doesn't just return null?
+
+@author:
+I tried without the try-catch first but it doesn't always return `None`, due to this check in `_parse`:
+
+https://github.com/tobymao/sqlglot/blob/6fa1581ae0bdf7e0073a7b9a355e72241e5e6959/sqlglot/parser.py#L967-L968
+
+Tbh, I'm not sure if the `is None` check below is needed - if the parsing fails, it seems like it'll always raise instead of hitting that block."
+315,tobymao__sqlglot-5284@3f57fcd,tobymao/sqlglot,sqlglot/dialects/databricks.py,functional,A,,,,"@user1:
+```suggestion
+            exp.GroupConcat: groupconcat_sql,
+```
+
+@author:
+right"
+318,voxel51__fiftyone-4236@2af48de,voxel51/fiftyone,fiftyone/__init__.py,functional,B,,,,"@user1:
+@author can you explain why the docs build is causing us problems here? Would love to avoid needing `_FIFTYONE_FORCE_DB_CONNECT_ON_IMPORT` if at all possible
+
+@author:
+Yeah I really hate it also 😫😫
+
+Basically it is a mongoengine problem.
+
+Autodoc tries to go in and touch every member and inherited member of each class. Which includes a field on the mongoengine document called ""objects"" which has a getter that requires the db connection 🤬
+
+So it goes in, the connection has not been made, the ""objects"" getter fails, and then doc build fails.
+
+I tried to play with autodoc settings including to ignore inherited members or specifically skip ""objects"", but didn't come up with anything that worked.
+
+I'll try to think of other solutions, but brainstorming welcome
+
+@user1:
+I see. One way to clean up a bit would be to only call `migrate_database_if_necessary()` inside `establish_db_conn()`.
+
+To limit the number of places that `_FIFTYONE_FORCE_DB_CONNECT_ON_IMPORT` needs to exist.
+
+@user1:
+you tried added `exclude-members` [to the conf](https://github.com/voxel51/fiftyone/blob/85339fcecf03978435fed6fd94565d1c63f58dd6/docs/source/conf.py#L73
+)? 
+
+
+```py
+autodoc_default_options = {
+    ...
+    ""exclude-members"": ""objects""
+}
+```
+
+
+@author:
+Ok perhaps I do not understand sphinx directives like I thought I did, but adding to `conf.py` works where directly to the automodule directive did not.
+I thought I had tried that too but oh well glad it works!"
+320,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/client/restful/restful_client.py,functional,A,,,,"@user1:
+`if api_key is not None and self._cluster_authed`"
+322,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,B,,,,"@user1:
+Why need this bool variable? Just use `self.is_legal_api_key(token)` is fine."
+323,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,B,,,,"@user1:
+Does this logic be duplicated with the code below.
+The below code can detect the situation that having duplicate api-keys of a user."
+326,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,style,B,,,,"@user1:
+Rename the variable to `all_api_keys`"
+327,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/deploy/cmdline.py,functional,A,,,,"@user1:
+Should this be `if api_key is None` ?
+Same as all other places."
+328,xorbitsai__inference-2079@5ae18b2,xorbitsai/inference,xinference/model/llm/vllm/core.py,style,A,,,,"@user1:
+`transformers` is an optional dependency, so we may need to put the import into function."
+332,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/funnel_event_query.py,style,A,,,,"@user1:
+⚠️
+```suggestion
+    def get_query(self, entities=None, entity_name=""events"") -> Tuple[str, Dict[str, Any]]:
+```"
+333,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/base.py,functional,A,,,,"@user1:
+Because of Python specifics, function arg default values should never be mutable objects. Such a default value is reused across function calls (weird, I know), so if one call of `_get_inner_event_query` mutated `entities` (e.g. did `entities.push(foo)`), `entities` would be `[foo]` for the next call of `_get_inner_event_query`.
+This is not a problem with objects that are immutable in Python, like strings, numbers, booleans, or `None`.
+```suggestion
+    def _get_inner_event_query(self, entities=None, entity_name=""events"") -> str:
+```
+
+@author:
+oh yes, I did consider this, since I treat entities as read-only, but yeah, making it explicit like this makes more sense! Thanks :)"
+334,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/funnel_event_query.py,style,A,,,,"@user1:
+⚠️
+```suggestion
+    def _get_entity_query(self, entities=None, entity_name=""events"") -> Tuple[str, Dict[str, Any]]:
+```"
+337,saleor__saleor-5085@f8ed729,saleor/saleor,.pre-commit-config.yaml,functional,A,,,,"@user1:
+```suggestion
+         language_version: python3.8
+```"
+341,zulip__zulip-22583@37ae377,zulip/zulip,static/styles/app_components.css,functional,A,,,,"@user1:
+I think a 2px `margin-left` here would fix the overflow issue; test-deploying that but you might want to play with it."
+343,PostHog__posthog-10293@7041fd3,PostHog/posthog,posthog/models/team/team.py,style,A,,,,"@user1:
+Let's make it a `TextField`. Somebody might want to put three 60-character-long columns here, and boom, we're out of space."
+345,ManimCommunity__manim-509@1cbc24f,ManimCommunity/manim,manim/mobject/value_tracker.py,functional,A,,,,"@user1:
+I like this approach, but it creates a new instance of `ValueTracker` instead of mutating the existing one. This has two problems:
+- references to the old object won't see the change
+- it's inefficient to create a new object
+
+It might be better to instead use the `increment_value` method, and then return `self`. 
+
+@author:
+Thanks for the review! That is exactly what I was trying to figure out (not creating a new `ValueTracker`). Fixed in the next commit."
+346,OpenMined__PySyft-4522@776c2e8,OpenMined/PySyft,syft/frameworks/torch/mpc/falcon/falcon_helper.py,structural,B,,,,"@user1:
+MAYBE: Please remove the prints :D"
+349,ManimCommunity__manim-1140@ed7dc3d,ManimCommunity/manim,manim/grpc/impl/frame_server_impl.py,functional,B,yes,,,"@user1:
+Is this change, in particular the removal of `stub`, actually safe to make?
+
+@author:
+Stub is unused and is a function var. Also the test pass, so I have to believe so.
+
+@user1:
+I don't think that we have any tests for the WebGL renderer."
+351,home-assistant__core-142977@fa60db7,home-assistant/core,homeassistant/helpers/script.py,functional,B,yes,,,"@user1:
+If `enabled` is an attribute of a `Script`, it should ideally be checked there, probably in `Script.async_run`.
+
+@user1:
+Although the intention is to never use it for top-level script anyway, so if that is documented, then I guess moving the check simply to `_async_run_script` should also be OK.
+
+@author:
+@user1 fair warning this is my first PR in core so please feel free to hand hold a bit if you want... or shout at me for doing it wrong :) I am happy either way.
+
+when moving the check up to to `_async_run_script ` do you mean something like this?
+![image](https://github.com/user-attachments/assets/f8e704cc-eb94-4aa1-955e-f0643bc40e71)
+
+
+@user1:
+Yes, but:
+- do not move the docstring
+- check for just `script.enabled`, do not check for `parallel`
+- adjust the log by removing parallel
+
+@author:
+@user1 right, gotcha, so its more generic, like this?
+![image](https://github.com/user-attachments/assets/12e79249-ceda-4a74-a9a4-a76e9d3a3650)
+
+
+@user1:
+Yes
+
+@author:
+@user1 cool, I have updated. thanks for bearing with me. you also hinted that it should be documented that its intended only for use when running a non-top-level script. I am not sure exactly where that would go...
+
+@user1:
+You can put it in the docstring of the `__init__` method of `Script`.
+
+@author:
+@user1 forgive me being the n00b here but could you give me a hint on this one. 
+do you mean adding comment here?
+![image](https://github.com/user-attachments/assets/2634672d-851a-488a-8e47-e351cf23612d)
+or do you mean adding to this?
+![image](https://github.com/user-attachments/assets/900b8ed9-a1e1-4342-949f-0535eb30d5e9)
+or something else entirely?
+
+I am currently swinging wildly between feeling like an idiot and glad to be learning
+
+@user1:
+Add it here https://github.com/home-assistant/core/blob/195b1e85ccd7c55efcb8fffe6615d1be98aa1712/homeassistant/helpers/script.py#L1451 leaving one empty line of space.
+
+@author:
+@user1 like this?
+![image](https://github.com/user-attachments/assets/89f5a80f-b2b7-4576-9b6e-a078c8fc252e)
+
+
+
+@user1:
+It should look like this: https://github.com/home-assistant/core/blob/dev/homeassistant/core.py#L163-L166
+
+@author:
+@user1 okay that should be that sorted now"
+352,dbt-labs__dbt-core-7276@acfae95,dbt-labs/dbt-core,core/dbt/contracts/publication.py,style,B,,,,"@user1:
+What about - `public_node_dependencies`?
+
+@author:
+Done"
+353,saleor__saleor-5611@a2d5871,saleor/saleor,saleor/warehouse/migrations/0003_warehouse_slug.py,style,B,,,,"@user1:
+`default_slug_value` never changes so it doesn't have to be passed as an argument; it could be a constant at the module level."
+354,PostHog__posthog-7569@db32271,PostHog/posthog,ee/clickhouse/views/cohort.py,functional,B,,,,"@user1:
+Why do we need to call it this way? I'd expect `team=team` arg to filter instead.
+
+The expected behavior is that passing team arg should automatically simplify - callsites don't need to worry beyond this and should not be calling simplify themselves.
+
+@author:
+Hmm was wondering what the pattern here should be. Filter auto simplifies but all the other ones don't so I just did a manual call for uniformity
+
+@author:
+@user1 should I add simplification logic in all the filters? Or was there a reason not to
+
+@user1:
+Please pass `team=team` to all filters and _don't_ call simplify outside of tests. This will do the right thing.
+
+@author:
+ah nvm i see where it's simplifying. done!"
+356,dbt-labs__dbt-core-8743@fb6f32f,dbt-labs/dbt-core,core/dbt/contracts/graph/unparsed.py,functional,B,,,,"@user1:
+What is the utility of this as a classmethod given it is passed an instance of itself? Perhaps a regular method would be more straightforward. Also, types on this signature would be great!
+
+@author:
+Oh, right. I originally created it as an override of the 'validate' class method, but that didn't work because it had to have a different signature."
+357,pwndbg__pwndbg-2075@3d3a319,pwndbg/pwndbg,.github/workflows/lint.yml,functional,A,,,,"@user1:
+This should be ""error"", which matches the behavior before this change."
+359,geldata__gel-6352@24b4f19,geldata/gel,edb/server/args.py,functional,B,,,,"@user1:
+This is a bit misleading, as we're not sending any ""Salted Challenges"" as in SCRAM. Should we have a new `ServerAuthMethod.Password` enum?
+
+@author:
+Yeah, let me test if the config patches that would be necessary to backport it to 4.x work.
+(Since it's actually an object in the config system)
+
+@author:
+Yeah I think this should work
+
+@author:
+... maybe. I'm getting some really weird errors testing the new auth extension after in an place upgrade... We'll see.
+
+@author:
+Ok got it"
+360,PostHog__posthog-8874@960dad4,PostHog/posthog,ee/clickhouse/queries/trends/clickhouse_trends.py,functional,B,,,,"@user1:
+Constructing this twice might not be ideal. What if each thread was also responsible for also serializing the data? This might avoid the parsing-related duplication that's occurring here and in`_run_query`
+
+@author:
+Connecting to the database doesn't work in threads, hence doing this outside.
+
+@user2:
+Ideally, we just pull the parse function needed directly. Otherwise, there's a lot of unnecessary logic being done to build the query
+
+@author:
+How about this? Cleaner than repeating all of the logic
+
+@user2:
+oh yep, nice"
+361,geldata__gel-5130@2e5341f,geldata/gel,edb/edgeql/compiler/stmt.py,functional,A,,,,"@user1:
+I'd do this in `clauses` itself, for two reasons:
+ * A new context is already getting made there, so it'll be a bit faster
+ * But more importantly, we want this to be true for where clauses on updates and deletes also
+
+@user1:
+And I think limit/offset should get checked too
+
+@author:
+I think that DMLs in limits and offsets are fine as the limit and offset clauses will only get executed once."
+362,geldata__gel-5130@2e5341f,geldata/gel,edb/edgeql/compiler/context.py,functional,C,yes,,,"@user1:
+Maybe make this an `Optional[str]` so we can say ""UPDATE may not be done in a FILTER clause"" or whatever"
+366,RasaHQ__rasa-5341@d8b1c24,RasaHQ/rasa,rasa/nlu/components.py,functional,C,,,,"@user1:
+```suggestion
+                ""To make use of lookup tables, add a 'DIETClassifier' or a 'CRFEntityExtractor' with ""
+```
+We are not featurizing lookup tables in `DIETClassifier`. We only do that in `CRFEntityExtractor`.
+
+@user2:
+Got it, will fix. How are they used in DIET then?
+
+@user1:
+`RegexFeaturizer` adds them as sparse features. `DIETClassifier` simply uses the sparse features."
+367,dbt-labs__dbt-core-7186@c6b5b12,dbt-labs/dbt-core,core/dbt/contracts/graph/model_config.py,functional,B,,,,"@user1:
+This should go in [`SeedConfig`](https://github.com/dbt-labs/dbt-core/blob/main/core/dbt/contracts/graph/model_config.py#L500), now defined separately, rather than `NodeConfig`"
+368,All-Hands-AI__OpenHands-8343@9d4e2af,All-Hands-AI/OpenHands,openhands/core/logger.py,functional,B,yes,,,"@user1:
+It won't hurt us to change this default because we override anyway but why is it changing here?
+
+@author:
+The agent said that `test_logging.py` was failing, but I'll try reverting it.
+
+@user1:
+Yeah probably because it changed the tests"
+369,All-Hands-AI__OpenHands-8343@9d4e2af,All-Hands-AI/OpenHands,openhands/llm/llm.py,functional,A,,,,"@user1:
+Not a behavior change but looks like this was broken before, missing a comma."
+371,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,functional,A,,,,"@user1:
+Why/OK to comment this out?
+
+This line assigns `config[""head_node""][""IamInstanceProfile""]` while the loop below assigns the `node_config` dict for `ray.head.default`, which is slightly different?
+
+@author:
+The effect should be similar according to the code below. TL;DR ray looks for the instance profile in the `node_config` first and then goes to the `head_node`, which treats them equivalently. We use the `node_config` since it is general for both head and workers when we don't need to distinguish head or worker.
+
+https://github.com/skypilot-org/skypilot/blob/fa02be38ac8d885bee2c76817b959abf40366d49/sky/skylet/providers/aws/config.py#L191-L203"
+372,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,functional,B,,,,"@user1:
+Is it possible to keep one `config.py`, while allowing `bootstrap_aws()` to take an argument like `use_skypilot_iam_role_head_and_workers=True`? This is to ease reviewing and code maintenance.
+
+@user2:
+yes, I have the same comment, we should use a feature flag. otherwise version control/compatibility in the future would be horrible.
+
+once there is huge enough difference between us/Ray autoscaler, then we should write something to migrate old setting to new settings
+
+@author:
+The main reason that I added a different config file is that I think using a flag will involve more modifications in our forked node_providers. 
+Previously, the workflow I used for updating our fork with the upper stream was to download the upper stream files we are currently based on (for example, ray v2.0.1) and do a `diff` between the two files, and adopt the changes to the new version of the file. Adding a feature flag will generate more diff between the files, and make the process harder. Do you have a better workflow to complete this process?
+Also, using a flag will be quite messy, as we have to modify multiple global variables, making the code hard to read.
+
+Now, `config.py` is deprecated and only used for backward compatibility. If we want to update the file from the upstream, we can do something similar to `config_v2.py` (no need to change `config.py`).
+
+> otherwise version control/compatibility in the future would be horrible.
+
+@user2 Could you explain how that will cause the problem and how could keep it in the same file help?
+
+@author:
+I can try to add the flag to the original `config.py` file and let you guys compare the two methods if you guys think that will be easier to see the difference and decide which one to use. : )
+
+@author:
+Thank you for your suggestions @user2 @user1! I just tried to merge the new changes to the original `config.py` and it looks ok without much modifications.
+
+Tested:
+1. on master branch `sky launch -c old echo hi`
+2. check the IAM role of that instance to be `ray-autoscaler-v1` 
+3. switch to the current branch `sky launch -c old echo hi`, the job ID is 2 means it reuses the original cluster (also checked the console that there is only 1 cluster named old)"
+373,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,functional,A,,,,"@user1:
+`profile` is undefined on this line. Seems duplicated by L368 to L371.
+
+@author:
+Fixed. Thanks!"
+375,saleor__saleor-4617@9c2907b,saleor/saleor,saleor/graphql/account/mutations/base.py,style,B,,,,"@user1:
+It would be nice to extract this validation to a function, as we will want to validate the URL against `ALLOWED_STOREFRONT_HOSTS` in a few places. Not sure where we could put the function but maybe somewhere in `saleor/core`?"
+377,ansible__ansible-65021@f63c26e,ansible/ansible,test/integration/targets/elb_application_lb/tasks/test_modifying_alb_listeners.yml,style,B,,,,"@user1:
+Could you please remove the debug statements from this patch?
+
+@author:
+Thanks for pointing those debug statements out in a kind way. I thought i had removed them."
+378,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,functional,B,,,,"@user1:
+Is this used anywhere?"
+379,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,functional,A,,,,"@user1:
+`logger` has not been defined."
+381,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,functional,B,,,,"@user1:
+We probably don't need this setting. Adding/removing this function to/from the authentication pipeline should be enough to enable or disable the functionality."
+382,ManimCommunity__manim-482@f2fd3e3,ManimCommunity/manim,tests/test_geometry.py,style,C,,,,"@user1:
+Unfortunatly there is already a test_geometry file, which is for graphical unit tests of geometrey module. Could you please rename this file into something like ""test_unit_geometry.py'"" ? 
+
+@author:
+Done"
+383,home-assistant__core-146453@71eab0c,home-assistant/core,homeassistant/components/hassio/__init__.py,functional,A,,,,"@user1:
+Installation type isn't always Supervised here, right?
+
+@author:
+It is, because we check beforehand if we use HAOS or supervised using the same check the system health has, and the upper if statement checks if this is not HAOS, thus it's supervised
+
+@user1:
+Which upper check?
+
+@author:
+system_info.py
+```py
+        if info.get(""hassos"") is not None:
+            info_object[""installation_type""] = ""Home Assistant OS""
+        else:
+            info_object[""installation_type""] = ""Home Assistant Supervised""
+```
+
+This file
+```py
+is_haos = info.get(""hassos"") is not None
+```
+```py
+if not is_haos or deprecated_architecture:
+    ir.async_create_issue(
+        hass,
+        ""homeassistant"",
+        issue_id,
+        breaks_in_ha_version=""2025.12.0"",
+        learn_more_url=DEPRECATION_URL,
+        is_fixable=False,
+        severity=IssueSeverity.WARNING,
+        translation_key=issue_id,
+        translation_placeholders={
+            ""installation_type"": ""Supervised"",
+```
+
+@user1:
+There's an `or` operator after `is_haos` in the check in your last reference.
+
+@author:
+sharp...."
+387,netbox-community__netbox-17674@1507840,netbox-community/netbox,netbox/ipam/filtersets.py,style,B,,,,"@user1:
+Is this function name right? `test_`?
+
+
+@author:
+Yeah sorry, I neglected to commit my last set of changes before pushing."
+388,netbox-community__netbox-14047@0ec158d,netbox-community/netbox,netbox/virtualization/forms/filtersets.py,functional,A,,,,"@user1:
+There is no `manufacturer_id` filter for virtual machines, so this form field would have no effect beyond constraining the choices for the platform field below, which could be very confusing to the user. The scope of FR #12741 deals only with the VM & device edit forms; we shouldn't be making any changes to the list filters as part of this work anyway."
+389,langflow-ai__langflow-918@c710c1c,langflow-ai/langflow,src/backend/langflow/services/database/models/user/crud.py,functional,C,,,,"@user1:
+Maybe `Optional[User]` would be better in this case?
+
+I think the point of this is mainly that a user might not be found in a function that uses this other function.
+
+@author:
+Done"
+390,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/azure/linux.yml,functional,B,,,,"@user1:
+if I'm not wrong, the environment is created in the next file, and it doesn't exist here, so it can't be activated (and it's not needed)"
+391,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.cmd,structural,B,,,,"@user1:
+you don't need the `-n pandas-dev`, the name of the environment is already defined in the yaml file"
+392,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.sh,functional,A,,,,"@user1:
+This one can't be removed, as the rest of the next step is to remove pandas from the environment, so it needs to be active"
+393,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.sh,structural,B,,,,"@user1:
+same about `-n pandas-dev` not needed"
+397,RasaHQ__rasa-7797@3d69847,RasaHQ/rasa,.github/workflows/continous-integration.yml,functional,B,,,,"@user1:
+Why do we need it? I see that the `Test Documentation` runs always, thus we should have this `if` here 
+
+@author:
+You mean we don't need the `if` in line 62? I agree. This is a copy-and-paste error. I didn't mean to include line 62. I will delete it."
+399,scikit-learn__scikit-learn-23548@cc5e175,scikit-learn/scikit-learn,sklearn/metrics/tests/test_ranking.py,functional,C,,,,"@user1:
+This test would only test the first line, since it will fail right away and the other lines would not run.
+
+I suggest using a `pytest.mark.parametrize` to parametrize over the different inputs.
+
+@author:
+Thanks for the catch! I used `pytest.mark.parametrize` to test different 1d array input combinations.
+The test should raise ValueError if one of the input is 1d array."
+400,pytorch__vision-2988@7ea166d,pytorch/vision,test/test_image.py,functional,A,,,,"@author:
+My current implementation does not convert palette images to grayscale. This is not a bug/limitation but a feature™. This is because palette images already have only 1 channel. So when a user specifies `channels=1` there is no need do an additional conversion to grayscale.
+
+@user1:
+Hum, I'm wondering if the semantics for `channels=1` shouldn't be to always convert to grayscale, irrespective if it's `palette` or not.
+What bugs me a bit about the current semantics is that the user is not guaranteed to have images in the correct colorspace with `channels=1`, so an image with the pallete can potentially look like an almost all-black image for the purpose of training a model.
+
+Thoughts?
+
+@author:
+I agree that this complicates the semantics. On the other hand, it does not have a real effect on the situation once it becomes a tensor. 
+
+At any case, I do not mind changing this but it would probably involve a double conversion first to RGB and then to Grayscale because jpeglib does not support a Palette to Grayscale conversion. Thoughts?
+
+@user1:
+There is a semantics change in converting it or not to grayscale for the following reason:
+some datasets store semantic maps as a palette image, with labels / colors going from 0 to 20 or so. If we were expecting to see the image in `L` format, we would see it with different colors.
+
+Here is one example:
+```python
+i = Image.open('/datasets01/VOC2007/011719/SegmentationClass/005130.png')
+print(i.mode)
+# > 'P'
+
+# color values used as labels for semantic segmentation
+np.unique(np.array(i))
+# > array([  0,   3, 255], dtype=uint8)
+
+# but if we convert them to grayscale for visualization
+# values are different
+np.unique(np.array(i.convert('L')))
+# > array([  0, 113, 220], dtype=uint8)
+```
+
+> double conversion first to RGB and then to Grayscale
+
+That's fine with me
+
+@author:
+done"
+402,pandas-dev__pandas-35974@d0a8a68,pandas-dev/pandas,pandas/io/excel/_xlrd.py,functional,B,,,,"@user1:
+Do we need to append the empty list here? Would be preferable to just continue
+
+@author:
+I removed `should_skip_row` entirely, I think the benefit from the original PR came from not reading all the rows into memory, rather than from optimising skipping rows"
+407,pandas-dev__pandas-28802@33c889c,pandas-dev/pandas,pandas/tests/reshape/test_cut.py,functional,C,,,,"@user1:
+Can you add `list` as a `box` since this should also work for something like `[True, True, False]`?"
+410,pandas-dev__pandas-23480@ab05b87,pandas-dev/pandas,pandas/tests/test_multilevel.py,functional,C,,,,"@user1:
+move in pandas/tests/series where reindex tests are"
+413,pytorch__vision-4457@231054c,pytorch/vision,torchvision/transforms/autoaugment.py,functional,C,,,,"@user1:
+```suggestion
+    If img is PIL Image, it is expected to be in mode ""RGB"".
+```
+
+@author:
+Hi @user1 ,
+
+The below snippet still works when I pass a pillow image with the mode is `'L'`. This definition of ""work"" here is that it does not raise the above issue. I've also checked some of the results and see that they are all good. If then, does it come from the tensor transformation side?
+
+```python
+from PIL import Image
+from pathlib import Path
+import torch
+import torchvision
+from torchvision import transforms
+
+image_path = 'n02100877_4699.jpg'
+raw_image = Image.open(image_path).convert('L')  # try with 'L', 'RGB
+print(image.size, image.mode) 
+tf = transforms.AutoAugment(transforms.autoaugment.AutoAugmentPolicy.CIFAR10)
+for seed in range(0, 2000):
+    torch.manual_seed(seed)
+    image = tf(raw_image)
+    image.save(out_dir / f""{seed}.png"", 'png')
+```
+
+@author:
+Here is the already setup colab notebook that you could manually check yourself: https://colab.research.google.com/drive/1WtlOAASAGJA927oeFECN2YSFAhlMJ6j2?usp=sharing
+
+@user1:
+Hmm, thanks for investigating. It seems that PIL supports the colour operators even when the image is grayscale. 
+
+I think we have a few options:
+1. Update the documentation for Tensors only since PIL supports `L`
+2. Update the documentation for both to avoid confusing people
+3. Update the implementations of colour transforms of TorchVision that don't support Grayscale images to align them with PIL.
+
+I think option 3 is worth exploring but it will take longer and needs to happen carefully. So I would be in favour of doing 1 or 2 in this PR and follow up on 3 on a separate one. I don't have strong opinion over how we go, so let me know what you prefer.
+
+@author:
+Yeah, I think that this PR is just for updating the documentation only to keep it relates to the original issue. Furthermore, since we have already declared some policies such as ImageNet, CIFAR10 that their input is not a grayscale image. Thus, changing to support grayscale images would have some conflicts with the policy definitions as well that we might have further discussion in another thread.
+
+In conclusion, in this PR, I would change the document so that this transformation only supports RGB for now."
+416,scikit-learn__scikit-learn-9802@5c7da54,scikit-learn/scikit-learn,sklearn/linear_model/stochastic_gradient.py,functional,B,,,,"@user1:
+I don't think we want this as a constructor parameter. It should be a parameter to `_validate_params`
+
+@author:
+Thanks. I'll modify the code."
+421,apache__airflow-32366@52228da,apache/airflow,Dockerfile,functional,B,,,,"@user1:
+Looks great. Yeah. Lets' remove it then and see if `pip` can resolve them on their own. If there are problems with ""eager upgrade"" and pip not finding the right resolution automatically, the right way to handle it will be to add ""pydantic>=2"" to `EAGER_UPGRADE_ADDITIONAL_REQUIREMENTS` (currently empty so it should be commented that likely we should remove it in the future when the resolution is improved) in both Dockerfile and Dockerfile.ci. This is the way how we ""help"" `pip` by additionally limiting the `eager upgrade`.
+
+@author:
+It would resolve it to 1.18 because (a dependency of) Moto pins it to `pydantic~=1.18` (I tried it locally before settling on this hack)"
+423,scipy__scipy-13893@4fcbd8b,scipy/scipy,scipy/optimize/tests/test_linprog.py,functional,C,,,,"@user1:
+Set `atol` instead of adding 1.
+
+@author:
+Yep, that worked!  Removed `+1` and added `atol=1e-12`"
+431,hummingbot__hummingbot-4889@d8a242a,hummingbot/hummingbot,test/hummingbot/connector/exchange/mexc/test_mexc_api_order_book_data_source.py,functional,C,,,,"@user1:
+`asyncio.sleep` should not be patched directly as this could affect other portions of the code also using this function (other than the one intended to be patched). To avoid this, the object that calls `asyncio.sleep` can have a member function called `_sleep` that it then calls `asyncio.sleep`. Then, the mock will be on the member `_sleep` function.
+
+This goes for any other tests patching `asyncio.sleep` directly."
+432,hummingbot__hummingbot-4889@d8a242a,hummingbot/hummingbot,test/hummingbot/connector/exchange/mexc/test_mexc_exchange.py,functional,C,,,,"@user1:
+This directly adds `0.3` seconds to the test suite, and we are actively trying to identify those tests that use this strategy in our codebase and refactor them. The way to avoid waiting for a fixed amount of time is to instead await `self.resume_test_event`, which will be set by the `side_effect` defined above."
+440,matplotlib__matplotlib-26151@c6a1bf5,matplotlib/matplotlib,lib/matplotlib/_mathtext.py,style,A,,,,"@user1:
+This falls into the category of lurking problems that _probably_ won't be a real problem but _could_ be...
+
+string comparison of version numbers is likely to fail. 
+
+Unfortunately the version we are gaurding against doesn't have a tuple version (with integers) to compare to. (Current pyparsing _does_)
+
+we are saved a bit by this having minor/patch version of 0, but would still fail if pyparsing got to version `10.0.0` as we would want that to be greater than 3.0.0, but string comparison would fail. Now _probably_ by the time that happens (_if_ it happens) we will no longer support versions less than 3... but if pyparsing decided to switch to date versions of `2023.7.0` or something, we would be in the same boat a whole lot sooner (and possibly without warning).
+
+```suggestion
+if tuple(int(x) for x in pyparsing_version.split(""."")) < (3, 0, 0):
+```
+
+may work in a bit more robust manner
+
+Or we can just use `nestedExpr` for now and handle switching to the new name later (as at least oneOf is already using the deprecated version, so that change can be separated from this PR."
+441,goauthentik__authentik-13602@50ea3f3,goauthentik/authentik,authentik/events/migrations/0009_remove_notificationtransport_webhook_mapping_and_more.py,style,A,,,,"@user1:
+Is this intended? It should be a rename I think
+
+@author:
+Good catch, didn't notice that it didn't rename the field 
+
+@user1:
+When running makemigrations it should ask whether the field was renamed. If it doesn't, something is fishy
+
+@author:
+It didn't, probably because I added related_name and that was enough to throw it off"
+444,scikit-learn__scikit-learn-15277@594e3a6,scikit-learn/scikit-learn,azure-pipelines.yml,style,B,,,,"@user1:
+You have two lint commands here... Should these be together in a single script to make it easy to change both circle and Azure runs?
+
+@author:
+I would be okay with combining them. What do you think of naming the combined script ""linting.sh""?
+
+@user2:
+> I would be okay with combining them. What do you think of naming the combined script ""linting.sh""?
+
+sounds good to me."
+448,pandas-dev__pandas-35284@644bdf7,pandas-dev/pandas,pandas/io/formats/latex.py,style,B,,,,"@user1:
+Duplicated lines?
+
+@author:
+Right thanks !"
+450,pandas-dev__pandas-16744@b8a6007,pandas-dev/pandas,pandas/tests/series/test_datetime_values.py,functional,C,,,,"@user1:
+This test will always pass, since
+
+- if there's no exception originally, everything is fine
+- If there is an exception, the `assert 'data type ""datetime"" not understood'` is True, so no AssertionError is raised
+
+It's best to assign `result = ` that operation, construct an expected series `expected = pd.Series(pd.to_datetime(['2011-12-26', '2011-12-27', '2011-12-28'])` and then compare them with `tm.assert_series_equal(result, expected)`
+
+@author:
+You are right. My bad!
+
+Please check now."
+453,pandas-dev__pandas-23886@d6a2d5b,pandas-dev/pandas,pandas/io/formats/style.py,structural,C,,,,"@user1:
+I'd remove the quotes here too."
+456,freqtrade__freqtrade-5846@da4344d,freqtrade/freqtrade,requirements.txt,functional,B,,,,"@user1:
+I think the `types` dependency should go into `requirements-dev.txt` ... it's not necessary on an installation that ain't running `mypy`."
+457,frappe__frappe-16877@e78a251,frappe/frappe,frappe/database/query.py,functional,A,,,,"@user1:
+Started getting attribute error without this 🤔 
+
+```suggestion
+	return Field(key).isnotnull() if value.lower() == ""set"" else Field(key).isnull()
+```
+
+#
+Ref:
+
+```python
+In [6]: frappe.db.get_values(""DocType"", {""name"": (""is"", ""set"")})
+-------------------------------------------------------------------
+AttributeError                    Traceback (most recent call last)
+~/Desktop/dev/killt/apps/frappe/frappe/commands/utils.py in <module>
+----> 1 frappe.db.get_values(""DocType"", {""name"": (""is"", ""set"")})
+
+~/Desktop/dev/killt/apps/frappe/frappe/database/database.py in get_values(self, doctype, filters, fieldname, ignore, as_dict, debug, order_by, update, cache, for_update, run, pluck, distinct, limit)
+    509                                         if order_by:
+    510                                                 order_by = ""modified"" if order_by == ""KEEP_DEFAULT_ORDERING"" else order_by
+--> 511 					out = self._get_values_from_table(
+    512                                                 fields=fields,
+    513                                                 filters=filters,
+
+~/Desktop/dev/killt/apps/frappe/frappe/database/database.py in _get_values_from_table(self, fields, filters, doctype, as_dict, debug, order_by, update, for_update, run, pluck, distinct, limit)
+    718                                         field_objects.append(field)
+    719
+--> 720 		query = self.query.get_sql(
+    721                         table=doctype,
+    722                         filters=filters,
+
+~/Desktop/dev/killt/apps/frappe/frappe/database/query.py in get_sql(self, table, fields, filters, **kwargs)
+    302                 **kwargs,
+    303 	):
+--> 304                 criterion = self.build_conditions(table, filters, **kwargs)
+    305                 if isinstance(fields, (list, tuple)):
+    306                         query = criterion.select(*kwargs.get(""field_objects"", fields))
+
+~/Desktop/dev/killt/apps/frappe/frappe/database/query.py in build_conditions(self, table, filters, **kwargs)
+    291
+    292                 else:
+--> 293                         criterion = self.dict_query(filters=filters, table=table, **kwargs)
+    294
+    295                 return criterion
+
+~/Desktop/dev/killt/apps/frappe/frappe/database/query.py in dict_query(self, table, filters, **kwargs)
+    255                                 if isinstance(value[1], (list, tuple)) or value[0] in list(OPERATOR_MAP.keys())[-4:]:
+    256                                         _operator = OPERATOR_MAP[value[0]]
+--> 257                                         conditions = conditions.where(_operator(key, value[1]))
+    258                                 else:
+    259                                         _operator = OPERATOR_MAP[value[0]]
+
+~/Desktop/dev/killt/apps/frappe/frappe/database/query.py in func_is(key, value)
+     10 def func_is(key: Union[str, Field], value: str):
+     11         ""Wrapper for IS""
+---> 12         return key.isnotnull() if value.lower() == ""set"" else key.isnull()
+     13
+     14 def like(key: str, value: str) -> frappe.qb:
+
+AttributeError: 'str' object has no attribute 'isnotnull'
+```
+
+
+@author:
+need to instantiate field objects for str inputs, took field objects only into account fixed [3296898](https://github.com/frappe/frappe/pull/16877/commits/3296898b4864d977cfb9b4bbdb5a68ca64cbb4c5)"
+458,matplotlib__matplotlib-27172@9f80d55,matplotlib/matplotlib,lib/matplotlib/axes/_axes.py,functional,C,yes,,,"@user1:
+I think this isn't (and was not) correct. We draw an empty legend. Please fix this along the way.
+
+@author:
+Happy to, but a bit confused.  When I run the following, no legend appears on the image:
+
+```python
+plt.plot([1, 2, 3])
+ax.lengend()
+```
+
+Is this a backend-bependent behavior?  Or by ""draw"" do you mean the legend object is created and some drawing code runs on it, even if there's no visible legend?
+
+@user2:
+There is actually a tiny gray box in the upper right hand corner when you do that
+<img width=""201"" alt=""NoLegend"" src=""https://github.com/matplotlib/matplotlib/assets/1562854/5791fdbf-57c4-4d4d-91e4-e0f104c32f77"">
+
+
+@user1:
+Correct, the legend is empty and thus shrinks to the small box. You will also notice that `ax.legend()` will return a `Legend` object.
+
+@author:
+Ahh, I totally missed that, haha.  Thanks!"
+463,goauthentik__authentik-12630@7fed46f,goauthentik/authentik,authentik/stages/authenticator_email/models.py,functional,B,,,,"@user1:
+We usually allow text inputs for those. An example of a declaration: https://github.com/goauthentik/authentik/blob/main/authentik/tenants/models.py#L66. Usage: https://github.com/goauthentik/authentik/blob/39d8b413577be7c0136bb9074f4f86d7861dfffc/authentik/events/models.py#L64
+
+@author:
+In the email stage, we use this:
+https://github.com/goauthentik/authentik/blob/39d8b413577be7c0136bb9074f4f86d7861dfffc/authentik/stages/email/models.py#L77-L79
+
+Is there a use case where the token is valid in days, years, or seconds? 
+
+@user2:
+There usually isn't a use case where the token is valid for that long, however for consistency we should use the same format everywhere (and refactor the email stage to use the same format)"
+467,scikit-learn__scikit-learn-12822@c451532,scikit-learn/scikit-learn,sklearn/feature_extraction/text.py,documentation,C,,,,"@user1:
+Putting these here would suggest that `CountVectorizer` is an `__init__` parameter to the class, which it isn't. That's why travis is failing.
+
+These information you have here are useful (IMO), but I guess the idea here is to also explain what these classes do by better explaining the parameters already listed in the docstring. For instance, the `norm` parameter was mentioned as badly documented in the issue. As an example, you can have a look at the parameter descriptions of [`LogisticRegression`](https://scikit-learn.org/dev/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression), I hope it helps.
+
+@author:
+@user1 
+I updated some descriptions.  Is this better?"
+468,pandas-dev__pandas-34933@de64663,pandas-dev/pandas,pandas/core/frame.py,functional,C,,,,"@user1:
+include the type for ignore_index.
+
+@author:
+Got it, done."
+469,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+I don't think `original` is used? In that case, it's not needed to return it
+
+@author:
+I have addressed this review comment"
+470,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+I think `retbins` arg is not used anymore in this function?
+
+@user1:
+And the same for `name`
+
+@author:
+I have addressed this review comment"
+471,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+this check is not needed, as you defined `name = None` above
+
+@author:
+I have addressed this review comment"
+472,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+The `try ... except ...` below should not be necessary anymore, since `x` is already an array (asarray is used in `_preprocess_for_cut`)
+
+@author:
+@user1 you are referring to the try except in the pd.cut method, specifically these lines
+
+        try:  # for array-like
+            sz = x.size
+        except AttributeError:
+            x = np.asarray(x)
+            sz = x.size
+
+Is that correct?
+
+@user1:
+yes (I couldn't comment on those lines) 
+Normally it should already be assured before that you have an array here
+
+@author:
+@user1 thanks, that is what i thought!
+
+@author:
+I have addressed this review comment"
+473,pytorch__vision-2596@8859151,pytorch/vision,packaging/pkg_helpers.bash,structural,B,,,,"@user1:
+It is a bit weird that you pinned the version of `ffmpeg` in the following line but not in this one.
+
+@author:
+I think we can remove the version pinning safely"
+475,pandas-dev__pandas-23141@1c22791,pandas-dev/pandas,pandas/tests/indexes/multi/test_constructor.py,functional,C,,,,"@user1:
+Let's the check the error message via `pandas.util.testing.assert_raises_regex`."
+476,ccxt__ccxt-14582@83f50a7,ccxt/ccxt,js/base/Exchange.js,functional,A,,,,"@user1:
+!== null is not transpilable 
+
+@author:
+fixed it"
+477,ccxt__ccxt-14830@1d1701f,ccxt/ccxt,js/poloniex.js,functional,A,,,,"@user1:
+@author in this case you've also inverted the conditional, no?
+
+@author:
+oh, I think you're right!"
+478,ccxt__ccxt-16729@284cdce,ccxt/ccxt,js/huobi.js,functional,A,,,,"@user1:
+@author something is off here 
+```
+ p huobi balance
+Python v3.10.9
+CCXT v2.7.33
+{}
+huobi requires to release all resources with an explicit call to the .close() coroutine. If you are using the exchange instance with async coroutines, add `await exchange.close()` to your code into a place when you're done with the exchange and don't need the exchange instance anymore (at the end of your async coroutine).
+```
+
+
+@author:
+ah, forgot to place spot. please recheck now.
+all I wanted to mean is that, if someone uses `fetchBalance ({marginMode: 'isolated/cross'})` I mean that user is requesting spot margin balance (isolated/cross), without the need to place `margin:true` in params. is not that a correct expectation?
+
+@user1:
+>  fetchBalance ({marginMode: 'isolated/cross'}) I mean that user is requesting spot margin balance 
+@author yes I think that is correct unless we have the ambiguity between isolated/cross on the swap wallet as well"
+481,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages.js,functional,B,,,,"@user1:
+`needs_resorting` would be a nicer variable name, but also probably we should just sort unconditionally; it's a really low value optimization, since there should never be a lot of these and they likely don't change often."
+482,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages.js,functional,C,,,,"@user1:
+success has a typo."
+483,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages_overlay_ui.js,functional,B,,,,"@user1:
+This can be a follow-up, but we should definitely call it `data-scheduled-message-id`, to avoid confusion -- they are not message IDs."

@@ -1,0 +1,2351 @@
+target_no,instance_id,repo,path,comment_type,family,borderline,reviewed,note,comment_text
+1,Avaiga__taipy-1042@a76a34b,Avaiga/taipy,tests/core/scenario/test_scenario_manager.py,functional,C,,,,"@user1:
+A few remarks: 
+1. I believe it would be interesting to test what happens when some scenarios have the same value
+2. I believe the following way of configuring and creating scenarios is more representative.
+- 2 scenario configs.
+- 1 scenario from the first config
+- 2 scenarios from the second config but attached to two different cycles.
+
+```
+    scenario_1_cfg = Config.configure_scenario(id=""scenario_1"", frequency=Frequency.DAILY)
+    scenario_2_cfg = Config.configure_scenario(id=""scenario_2"", frequency=Frequency.DAILY)
+
+    scenario_1 = _ScenarioManager._create(scenario_1_cfg, name=""B_scenario"")
+    scenario_2 = _ScenarioManager._create(scenario_2_cfg, name=""A_scenario"", creation_date=datetime.datetime.now() + datetime.timedelta(days=2))
+    scenario_3 = _ScenarioManager._create(scenario_2_cfg, name=""C_scenario"")
+
+    scB = _ScenarioManager._set_primary(scenario_1)
+    scB.tags = [""banana"", ""kiwi""]
+    scA = _ScenarioManager._set_primary(scenario_2)
+    scB.tags = [""apple"", ""banana""]
+    scC = _ScenarioManager._set_primary(scenario_3)
+    scB.tags = [""banana"", ""kiwi""]
+
+    primary_scenarios_sorted_by_name = [scenario_2, scenario_1, scenario_3]
+    assert primary_scenarios_sorted_by_name == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key=""name"")
+
+    primary_scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3]
+    assert primary_scenarios_sorted_by_id == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key=""id"")
+
+    primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_3, scenario_2]
+    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._get_primary_scenarios(
+        sorted=True, sort_key=""creation_date""
+    )
+
+    primary_scenarios_sorted_by_tag = [scenario_2, scenario_1, scenario_3]
+    assert primary_scenarios_sorted_by_tag == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key=""tags"")
+```
+
+What do you think?
+
+@author:
+Thank you for showing how configuring and creating scenarios is done in a more representative way. Indeed, it would be interesting to look at what happens when two scenarios have the same value. I will have a look at this!
+
+@author:
+Hello @user1, 
+
+Currently, I am busy implementing your recommended changes. However, I have some issues with using the representative way of configuring and creating scenarios, as now my primary scenarios seems to contain dates as well as scenarios when I print it. Hence, I think it would be nice if you can check whether I am doing it correctly. 
+Here is what I currently have for the test function:
+```suggestion
+    def test_get_primary_scenarios_sorted():
+    scenario_1_cfg = Config.configure_scenario(id=""scenario_1"", frequency=Frequency.DAILY)
+    scenario_2_cfg = Config.configure_scenario(id=""scenario_2"", frequency=Frequency.DAILY)
+
+    scenario_1 = _ScenarioManager._create(scenario_1_cfg, name=""B_scenario"")
+    scenario_2 = _ScenarioManager._create(scenario_2_cfg, name=""A_scenario"")
+    scenario_3 = _ScenarioManager._create(scenario_2_cfg, name=""C_scenario"")
+
+    _ScenarioManager._set_primary(scenario_1)
+    scenario_1.tags = [""banana"", ""kiwi""]
+    _ScenarioManager._set_primary(scenario_2)
+    scenario_2.tags = [""apple"", ""banana""]
+    _ScenarioManager._set_primary(scenario_3)
+    scenario_3.tags = [""banana"", ""kiwi""]
+
+    print(""all scenarios: "", _ScenarioManager._get_all)
+    primary_scenarios = _ScenarioManager._get_primary_scenarios()
+    print(""primary scenarios: "", primary_scenarios)
+
+    primary_scenarios_sorted_by_name = [scenario_2, scenario_1, scenario_3]
+    print(_ScenarioManager._sort_scenarios(primary_scenarios, sort_key=""name""))
+    assert primary_scenarios_sorted_by_name == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key=""name"")
+
+    primary_scenarios_sorted_by_id_version1 = [scenario_1, scenario_2, scenario_3]
+    primary_scenarios_sorted_by_id_version2 = [scenario_1, scenario_3, scenario_2]
+    result_sort_primary_scenarios_by_id = _ScenarioManager._sort_scenarios(primary_scenarios, sort_key=""id"")
+    print(""result of sort primary scenarios by id: "")
+    print(result_sort_primary_scenarios_by_id)
+    assert (primary_scenarios_sorted_by_id_version1 == result_sort_primary_scenarios_by_id or 
+            primary_scenarios_sorted_by_id_version2 == result_sort_primary_scenarios_by_id)
+
+    primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_3, scenario_2]
+    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(primary_scenarios, 
+                                                                                         sort_key=""creation_date"")
+
+    primary_scenarios_sorted_by_tags_version1 = [scenario_2, scenario_1, scenario_3]
+    primary_scenarios_sorted_by_tags_version2 = [scenario_2, scenario_3, scenario_1]
+    result_sort_primary_scenarios_by_tags = _ScenarioManager._sort_scenarios(primary_scenarios, sort_key=""tags"")
+    print(""result of sort primary scenarios by tags: "")
+    print(result_sort_primary_scenarios_by_tags)
+    assert (primary_scenarios_sorted_by_tags_version1 == result_sort_primary_scenarios_by_tags or 
+            primary_scenarios_sorted_by_tags_version2 == result_sort_primary_scenarios_by_tags)
+
+    primary_scenarios_sorted_by_name_descending_order = [scenario_3, scenario_1, scenario_2]
+    assert primary_scenarios_sorted_by_name_descending_order == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=True, sort_key=""name""
+    )
+```
+
+I figured out that my implementation of the sort mechanism is not predictable when handling two scenarios with the same value, for instance the same name. So, if scenario A and B have the same name, the returned sorted list might either be [A, B] or [B, A]. However, I think this is fine. What do you think. I appreciate your help!
+
+
+@user1:
+1. Two scenarios from the same cycle cannot be primary simultaneously. In your example, your 3 scenarios are from the same cycle. So when you promote `scenario_3` as primary, the two others are demoted as not primary anymore.
+
+    To make them all 3 primary, they must belong to different cycles. You can pass different days as `creation_date` when creating the scenarios. Something like that:
+
+    ``` python
+    scenario_1 = _ScenarioManager._create(scenario_1_cfg, name=""B_scenario"")
+    scenario_2 = _ScenarioManager._create(scenario_2_cfg, name=""A_scenario"", creation_date=datetime.datetime.now() + datetime.timedelta(days=2))
+    scenario_3 = _ScenarioManager._create(scenario_2_cfg, name=""C_scenario"", creation_date=datetime.datetime.now() + datetime.timedelta(days=4))
+    ```
+
+2. About the unpredictability: We can use a second criterion in case of an equal value. The `id` is guaranteed unique, so we can use it as the second criterion to make it predictable. It is made of the config_id concatenated with a random unique id.
+    
+    Something like the following should do the job:
+
+    ``` python
+    if sorted:
+        if sort_key in [""name"", ""creation_date"", ""tags""]:
+            scenarios.sort(key=lambda x: (getattr(x, sort_key), x.id)
+        elif sort_key == ""id"":
+            scenarios.sort(key=lambda x: x.id
+        else:
+            scenarios.sort(key=lambda x: (x.name, x.id)
+    ```
+    In the test, we need to determine at runtime whether scenario_2.id or scenario_3.id is 'smaller'.
+    
+I Hope this can help. Please tell me if it does make sense to you."
+3,Avaiga__taipy-833@24559da,Avaiga/taipy,tests/core/data/test_write_single_sheet_excel_data_node.py,functional,C,,,,"@author:
+This test implements the same logic as what we do in other tests, except it does not use the Taipy code.
+It just simply reads an Excel file using `openpyxl.reader.excel.load_workbook`, closes it using `Workbook.close` and trees to delete the file.
+
+The deletion raises an error."
+5,Lightning-AI__pytorch-lightning-7351@7b3f48d,Lightning-AI/pytorch-lightning,pytorch_lightning/trainer/connectors/logger_connector/logger_connector.py,functional,B,,,,"@user1:
+```suggestion
+    def log_evaluation_step_metrics(self) -> None:
+```"
+6,Lightning-AI__pytorch-lightning-866@5a0ccf4,Lightning-AI/pytorch-lightning,pytorch_lightning/trainer/training_io.py,functional,A,,,,"@author:
+Is this known?
+
+@user1:
+the `abs` looks suspicious...
+
+@author:
+The check should be `!=0` if the global step matched for odd vs even number of training steps, so if that's worked out then we shouldn't need it. Unless it's intended, in which case I think just ``(self.global_step + 1) % self.num_training_batches`` is sufficient since global step matches num_training_batches in the even case. 
+
+Thinking about it, I should probably just remove the abs, it is fine without. 
+
+@author:
+I've removed the `abs` and made sure it handled accumulated batches properly. Can you think of anything else that might change the global step? 
+
+Currently the only test that throws this warning now is ``test_restore_models/test_dp_resume`` since this changes the percentage of train data used when resuming in a new trainer. Not much we can about that."
+7,OpenMined__PySyft-5385@0af54a4,OpenMined/PySyft,src/syft/lib/__init__.py,functional,A,,,,"@user1:
+We shouldn't convert to string, we need to check all the arguments (even if nested) are strings.
+
+In other words:
+
+```
+if isintance(args[0], str):
+   ...
+elif is_iterable(args[0]):
+   # iterate through this and check if the components are strings and load them
+else:
+   # error
+
+@author:
+Done."
+8,OpenMined__PySyft-5385@0af54a4,OpenMined/PySyft,src/syft/lib/__init__.py,functional,A,,,,"@user1:
+Q: Why is the need to convert to string?
+
+@author:
+To ensure only string objects get passed.
+
+Now checking using `isinstance` before calling `_load_lib`, to better handle error reporting."
+9,OpenMined__PySyft-5452@2b1416a,OpenMined/PySyft,proto/lib/python/range.proto,functional,B,,,,"@user1:
+I think this has been introduced in Slices, but it's not necessary at all. You can validate if a field is Set with the `HasField` method. Could you address this and make the change in slices as well? 
+
+@author:
+Sure, will do."
+12,PrefectHQ__prefect-14392@aac04aa,PrefectHQ/prefect,scripts/surface_high_engagement_issues.py,functional,A,,,,"@user1:
+maybe we can we `assert` or `raise` here in case we don't have `data` in the response?
+
+@author:
+ended up removing this due to refactor"
+19,ansible__ansible-36494@c514aeb,ansible/ansible,lib/ansible/modules/network/nxos/nxos_vrf.py,style,B,,,,"@user1:
+Probably not related to this diff but what is the use of this if command when command is already declared so it seems like a  if True type of check.
+
+@author:
+Good point. I will remove this check."
+21,ansible__ansible-39963@85a7d65,ansible/ansible,lib/ansible/modules/cloud/azure/azure_rm_loadbalancer_facts.py,functional,A,,,,"@user1:
+How about I just want to list all LB in this subscription? It can accept None value"
+22,ansible__ansible-41849@08ea4e9,ansible/ansible,test/integration/targets/ecs_cluster/playbooks/roles/ecs_cluster/tasks/main.yml,documentation,C,,,,"@user1:
+Should be able to access this from `register`ing the results of the previous task
+
+@author:
+I registered the output from iam_role task and reran the tests. The tests passed."
+23,ansible__ansible-42145@12c0d66,ansible/ansible,lib/ansible/modules/network/meraki/meraki_config_template.py,functional,B,,,,"@user1:
+Again, the else here is unneeded and unwanted."
+24,ansible__ansible-42145@12c0d66,ansible/ansible,lib/ansible/modules/network/meraki/meraki_config_template.py,functional,B,,,,"@user1:
+Again, the else here is unneeded and unwanted."
+25,ansible__ansible-42145@12c0d66,ansible/ansible,lib/ansible/modules/network/meraki/meraki_config_template.py,functional,B,,,,"@user1:
+Again, the else here is unneeded and unwanted."
+26,ansible__ansible-42456@b29e00e,ansible/ansible,lib/ansible/plugins/lookup/consul_kv.py,functional,A,,,,"@user1:
+you describe scheme but give no way to set it?
+
+@author:
+What do you mean by that? It can be set via the scheme param (line 131) or will be parsed from ANSIBLE_CONSUL_URL if one uses the environment variables
+
+@author:
+@user1 Can you please elaborate what the change request would be here? I still don't get it
+
+@user1:
+you have an option 'scheme' .. but the user has no way to set/change the option .. not via env var ini config .. anything
+
+@author:
+@user1 Ok, maybe i am overly tired or otherwise dense, but won't it be set via the kwargs?
+
+For example ```lookup('consul_kv', 'my/key', host='10.10.10.10', port='2000', scheme='https')```
+
+In line 131 i parse the kwargs for scheme
+In line 125 i parse the ANSIBLE_CONSUL_URL From the environment. Both results will be used in the consul-library call (line 126 and 134).
+
+Sorry in advance if i am mistaken and just don't see my failure here
+
+
+@user1:
+forgot that part, still it seems that rest of options can be set in other ways also, why force user to always set in kwargs
+
+@author:
+@user1 Because i didn't want to introduce backwards-compatibility breaking changes.
+host and port were to be set via kwargs prior to my PR, so i thought it would be best to just stick to the scheme here.
+If i removed it fom the kwargs and introduced explicit args for that, all usages of the lookup plugin would have to be rewritten wouldn't it?
+
+@author:
+@user1 i gave it a thought. In which way would you imagine that variable to be set in an other way than via the kwargs?
+
+@user1:
+env var or ini entry, just like you do for host
+
+@author:
+@user1 But it will already be parsed from ANSIBLE_CONSUL_URL. Shall i omit this parsed results **if** ANSIBLE_CONSUL_SCHEME (just an example name) is set **or always** and rely on ANSIBLE_CONSUL_SCHEME is set?"
+28,ansible__ansible-49873@10ef1a3,ansible/ansible,lib/ansible/modules/network/onyx/onyx_bgp.py,functional,A,,,,"@user1:
+version_added: 2.8
+
+@user1:
+needs to be added in the purge attributes"
+30,ansible__ansible-51415@fb988f5,ansible/ansible,lib/ansible/modules/network/meraki/meraki_admin.py,functional,C,,,,"@user1:
+It wasn't clear to me what this new id and access referred to until I looked at the new examples. How about a line in the description that says something like ""This list is a json dict with two parameters, C(id) and C(access).""  Also glancing at the code, it seems access can only be set to three choices. Would be worth adding that to this description as well.
+
+@user2:
+No, we have a construct for this already. Please use `suboptions`, check any of the modules using, like: *lib/ansible/modules/network/aci/mso_site.py*"
+33,ansible__ansible-56567@ce2e515,ansible/ansible,changelogs/fragments/56567-Fix-win_iis_website-id assignment-for-first-new-site.yml,functional,C,,,,"@user1:
+Unless you quote the entire line, `#` will comment out the rest of the line, this will result in the following data structure:
+
+```
+{
+    ""bugfixes"": [
+        ""win_iis_website - \""Fixed ""
+    ]
+}
+```
+
+I would include the full URL to the issue/pr in the changelog fragment."
+35,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,style,B,,,,"@user1:
+I don't see a reason why we need to expose both the provider and type right now. Maybe if we make this a generic module util but for now it just complicates matters."
+36,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,B,,,,"@user1:
+Really isn't a need to provide these contants, if we are always using a network logon and the default provider just pass those values as is an just add a comment."
+37,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,A,,,,"@user1:
+You should call this straight after `LogonUser`. If you don't you run the risk of any of the preceding calls overwriting the value and then you getting the wrong error code. Right now this should always be returning `0` as the `CloseHandle` will be succeeding."
+41,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.py,documentation,C,,,,"@user1:
+Looks like there is a mistake in the docs, are you able to change it to something like `C(always) will always update the password`."
+42,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,structural,B,,,,"@user1:
+What's the CI check, we use `$Domain` down below so I assume it's not for an unused variable.
+
+@author:
+This is the check: https://app.shippable.com/github/ansible/ansible/runs/130742/1/tests
+
+@user1:
+That doesn't make sense, you are using `$Domain` later on, will have to look into PSScriptAnalyzer to try and figure out what's happening there.
+
+@author:
+Ok, I'm going to remove this workaround."
+43,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,B,,,,"@user1:
+Handling the SecureString -> Ptr is really unecessary considering the original source is a string. It will be a lot less complicated if you just pass the password as a string and not a pointer.
+
+@author:
+This is the recommended implementation microsoft in there examples like here: https://docs.microsoft.com/de-de/dotnet/api/system.runtime.interopservices.marshal.securestringtoglobalallocunicode?view=netframework-4.8
+
+The password will spread around memory without being cleaned up. And I don't know if even the garbage collector will pick up copies to/in unmanaged code... Right now I've my doubts that this would be secure, I don't want to accidentally leak secrets just because security was inconvenient. Can you assure me that using a string here is as secure as my current approach?
+
+@user1:
+It is the recommended implementation if the input value is a secure string, in this case the input value is a string (passing in as a string from the controller). You are manually converting to a secure string then doing the whole copying to unmanaged memory then clearing it out there later. If the original value was a SecureString and we never dealt with just a String I would agree with you here but ultimately that is not the case.
+
+> The password will spread around memory without being cleaned up
+
+If you let the PInvoke marshaler deal with this you don't have to worry about it at all. Having the function definition be a string will make the .NET CLR automatically convert a string to unmanaged memory and pass in a pointer itself. This is also guaranteed by the CLR to be released once the function is returned. You are just skipping that step and doing it all yourself manually.
+
+> Right now I've my doubts that this would be secure, I don't want to accidentally leak secrets just because security was inconvenient
+
+Right now the password is already in memory as plaintext due to the input value from the controller just being a json string that is converted. There's nothing you can do about this as Ansible has no way of copying a secure string without it being a string originally.
+
+> Can you assure me that using a string here is as secure as my current approach?
+
+The marshaler does this all for you and guarantees the memory is cleared once the function has returned. Even if something goes horribly wrong the process will exit and also clear out the data in memory.
+
+In the end you are trying to make something secure that is not already secure. This can't be done with how it works right now. If you can't trust the machine you are connecting to with Ansible then how can you trust it when you've promoted it as a domain controller.
+
+I admire what you are trying to achieve and it's great to see but really it isn't doing anything in the bigger picture and it's just making this module even harder to maintain.
+
+@author:
+> The marshaler does this all for you and guarantees the memory is cleared once the function has returned. Even if something goes horribly wrong the process will exit and also clear out the data in memory.
+
+I did not know that, that makes it way less important to care about.
+
+> There's nothing you can do about this as Ansible has no way of copying a secure string without it being a string originally.
+
+Until now, but there is another Ticket to address this issue (Ok the other issue is about non pipelining connectors writing the file with the secrets to disk, but it's basically the same problem).
+
+> In the end you are trying to make something secure that is not already secure.
+
+I just did not want to contribute to the problem, and because I did not know about the ""automated cleanup"" it looked a bit more important to think about ;-)
+
+> If you can't trust the machine you are connecting to with Ansible then how can you trust it when you've promoted it as a domain controller.
+
+It's not about trusting the machine now, but more of trusting the machine in the future, bootstrapping the environment before handing over to the customer, but you're right, it does not quite fit in here.
+
+> and it's just making this module even harder to maintain.
+
+I still disagree on that one, I consider both solutions equally difficult to maintain and both have there unique pitfalls and weaknesses. But anyway, I'm switching this for a string, as you're right, it is less important than I thought it was."
+44,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,B,,,,"@user1:
+Why this one, sounds like a problem if you are not passing in a null ptr to LogonUser which shouldn't happen as we set that?
+
+@author:
+Right, that should no longer be there. It was left in from debugging."
+47,ansible__ansible-61603@5bf662a,ansible/ansible,lib/ansible/modules/crypto/luks_device.py,functional,A,,,,"@user1:
+```suggestion
+        result = self._run_command([self._blkid_bin, '--uuid', uuid])
+```
+According to `man blkid` on my system, it is `--uuid` and not `--uid`."
+50,apache__airflow-14836@e9f6cb4,apache/airflow,.pre-commit-config.yaml,functional,B,,,,"@user1:
+I believe using system hook and script is not needed (but I am not sure if it works with yarn)
+
+pre-commit has a built-in `language: node` and it understand package.json. Not sure about yarn.lock though . But if we can make it works - it will even automatically rebuild the node environment for you and allow to run yarn commands. 
+
+You can some examples here: 
+
+https://github.com/Exocortex/pre-commit/blob/master/.pre-commit-hooks.yaml
+
+Also I think you should select the files that the lint should run on - .js files basically. Pre-commit has the nice feature that it only runs the checks on files that are changed in your commit but also splits the checks to N parallell checks - as many as many processors you have. So for sure you need ""files:"" field to tell pre-commit which files it should run on and your command (either script or yarn command) should take those files as parameters. 
+
+
+For example when you only change a.js, b.js, c.js but not d.js  and you have 2 CPUs precommit should run two commands in parallel:
+
+```
+yarn lint a.js b.js
+yarn lint c.js
+```
+
+@author:
+Good call. Updated. I also made `lint` and `test` separate hooks."
+53,apache__airflow-51237@6dd1634,apache/airflow,dev/breeze/src/airflow_breeze/prepare_providers/provider_documentation.py,functional,B,,,,"@user1:
+As discussed on slack - adding the need for GH token here is likely not a good idea for the interactive command. We can query local git repo without extra interaction with GH because RM already has all the commits locally - and we have all data in ""Changes"" (notably commit hash).
+
+```
+class Change(NamedTuple):
+    full_hash: str
+    short_hash: str
+    date: str
+    message: str
+    message_without_backticks: str
+    pr: int | None
+```
+
+Either by pygit api or even easier by `git command`:
+
+```
+git diff 4dfc907f6bdc86a4c9bb941f61accebdc5333b13..4dfc907f6bdc86a4c9bb941f61accebdc5333b13^ --name-only 
+providers/fab/tests/conftest.py
+providers/fab/tests/unit/fab/www/views/test_views_custom_user_views.py
+```
+
+No authentication needed. 
+
+
+@author:
+Good call. I will try along these lines, wasnt so sure about wheteher we pull it locally, turns out we do!"
+55,bridgecrewio__checkov-4155@48ecaf7,bridgecrewio/checkov,checkov/terraform/checks/resource/azure/KeyVaultDisablesPublicNetworkAccess.py,functional,B,,,,"@user1:
+You can drop this condition, and the logic will remain the same"
+58,certbot__certbot-9208@2584184,certbot/certbot,certbot/certbot/_internal/auth_handler.py,functional,A,,,,"@user1:
+The leading `\n` here causes an excess newline when there are mixed HTTP/DNS challenges. It could be avoided by making it conditional on there being any `http01_achalls`.
+
+
+@author:
+This would only be an issue when Certbot actually would support mixed challenge types. Is that the case?
+
+@user1:
+    certbot certonly --manual -d example.com -d ""*.example.com"" --manual-auth-hook /bin/true --debug-challenges
+
+is one way to produce a mixed challenge type scenario.
+
+@author:
+Ah, cool, I did not know that. I thought the challenge type function would prefer having all challenges of the same type when I looked at the code, but perhaps it gives priority to what preference the authenticator has.
+
+Anyway, fixed the newline issue without requiring it to be conditional :slightly_smiling_face:"
+59,certbot__certbot-9208@2584184,certbot/certbot,certbot/certbot/_internal/auth_handler.py,functional,B,,,,"@user1:
+I think it's probably worth moving this block into its own function, which summarizes the challenges as a string."
+60,certbot__certbot-9208@2584184,certbot/certbot,certbot/certbot/_internal/auth_handler.py,functional,C,,,,"@user1:
+I think it's likely that people will accidentally copy-paste the trailing `:` in the URL without realizing. `\n` might be an alternative?"
+61,certbot__certbot-9208@2584184,certbot/certbot,certbot/certbot/_internal/auth_handler.py,functional,C,,,,"@user1:
+If we change `:` for HTTP, the same change should be made here."
+62,conan-io__conan-15153@ac4642f,conan-io/conan,conans/test/integration/build_requires/test_build_requires_source_method.py,style,?,yes,,,"@author:
+I have tried this approach, as we discussed, but this doesn't seem possible.
+The test fail at the local ``conan source`` command, while trying to execute this, because it doesn't have enough information to construct the ``buildenv``, the ``conan source`` command do not construct the graph or have dependencies at all. Inhibiting this so it doesn't do anything and it is no-op when it is a local ``conan source`` command is not straightforward at all.
+
+
+
+@user1:
+This was my fear when first proposed. Do you have any preferred fallback for this case?"
+63,conan-io__conan-16883@09d3616,conan-io/conan,conan/tools/cmake/toolchain/blocks.py,structural,A,,,,"@user1:
+Are you sure these quotes are to be removed? They can be very necessary when there are path containing spaces, can you please try to keep them?
+
+@author:
+It was causing cmake warnings previously. But you’re right, there is perhaps another approach to fix those. 
+
+@author:
+You already found the fix apparently :D"
+66,conan-io__conan-16942@e62c6eb,conan-io/conan,conans/client/rest/remote_credentials.py,functional,B,,,,"@user1:
+That fact that this is only the `remote.name` might hamper users from coming up with useful solutions, and they have no (easy) way to instantiate the proper `conan_api` either to re-resolve it. Maybe we can check if passing the whole `Remote` object would be better?
+
+@user2:
+Yes, using the remote ``url`` for example might be useful for users."
+67,conan-io__conan-6052@ca23055,conan-io/conan,conans/model/info.py,functional,A,,,,"@user1:
+I think we should aim for the follow ``package_id()``:
+
+```python
+def package_id(self):
+     if self.settings.compiler == ""intel"":
+            compatible = self.info.clone()
+            compatible.base_compatible()
+            ...
+     elif self.settings.compiler == ""Visual Studio"":
+           compatible = self.info.clone()
+           compatible.parent_compatible(compiler=""intel"", version=""18"")
+           ....
+```
+
+This means:
+- ``if self.full_settings.compiler.base`` shouldn't be checked, or if checked is to return an error if ""base"" is not there, not silently go away.
+- The compatibility methods are fully generic for any other compilers.
+
+
+@author:
+Yes, very nice ideas."
+68,cvat-ai__cvat-1396@bd228e1,cvat-ai/cvat,cvat/apps/annotation/annotation.py,functional,A,,,,"@user1:
+Is it possible that here `shape` will be with outside == True? Thus we will insert the shape but it looks wrong.
+
+@author:
+added filter to remove starting shapes with outside==True after processing"
+70,dask__dask-6143@3c16a2e,dask/dask,docs/source/debugging.rst,functional,C,,,,"@user1:
+Thoughts on converting this to YAML and writing the example as if you're in the dask-config?
+
+Otherwise we should have a strong warning that the changes here need to be applied before any workers are created (and perhaps before distributed is even imported. I don't recall what all is done at import time).
+
+
+@author:
+It would be nice to have both, but that would be rather long. I don't think there's an example of complex configuration by code elsewhere ( @user2 ?)
+
+@user1:
+To be clear, I'd say just have the YAML version.
+
+
+```yaml
+# ~/.config/dask/dask.yaml
+logging:
+  version: 1
+  handlers:
+    file:
+      class: logging.handlers.RotatingFileHandler
+...
+```
+
+I *think* that should work.
+
+
+@author:
+What is the `version: 1`, by the way?
+
+@user1:
+It's required by Python's logging config: https://docs.python.org/3/library/logging.config.html#dictionary-schema-details"
+72,dask__dask-7974@88a13f7,dask/dask,dask/highlevelgraph.py,style,C,,,,"@user1:
+Use `None` to avoid writing a file (e.g., for output in a jupyter notebook)"
+76,dask__dask-7974@88a13f7,dask/dask,dask/highlevelgraph.py,style,C,,,,"@user1:
+Still refers to ""dask graphs"", but we are not passing any of those."
+77,dask__dask-8869@24f8120,dask/dask,dask/dataframe/groupby.py,functional,B,,,,"@author:
+@user1-r-rose Is this way of dropping columns alright? I noticed there is a `drop_columns` dataframe-method, would it make sense to use that instead?
+
+https://github.com/dask/dask/blob/1b1a96b4ddf31d0879e718be463a731af7f1d086/dask/dataframe/methods.py#L379-L382
+
+@author:
+And, I'm also not sure about bundling drop-column logic in the top-level `def _fillna_groups()`. is this OK, or would it be better to do this in `fillna()` (line 2014)?
+
+@author:
+Just to note: I'm yet to add doctrings and comments :)
+
+@user2:
+I think using `df.drop` directly is okay. It looks like the `drop_columns` utility is primarily used for `map_partitions`, which doesn't really apply here.
+
+However, I think always dropping the zeroth column doesn't quite do what we want:
+1. The column we want to drop might not be the first one.
+2. The user might be grouping by multiple columns
+
+What if instead we also included a `by` argument in `_fillna_group` for the column(s) by which we are grouping, the dataframe can pass in `self.by`, and then we can drop them?
+
+@author:
+> What if instead we also included a by argument in _fillna_group for the column(s) by which we are grouping, the dataframe can pass in self.by, and then we can drop them?
+
+Yes! Thanks for this suggestion!"
+78,dbt-labs__dbt-core-1453@70206b1,dbt-labs/dbt-core,core/dbt/task/deps.py,functional,A,,,,"@user1:
+What's the intended logic here? This comment sounds to me like `self.warn_unpinned or other.warn_unpinned`, right? 
+
+@author:
+Whoops! My thought was that it should be False if either was False since it means that at least someone knew what they were doing and didn't want to be bothered. I'm not sure why I wrote `True` twice there in that comment."
+79,dbt-labs__dbt-core-5027@8dcfeb1,dbt-labs/dbt-core,core/dbt/contracts/graph/manifest.py,functional,A,,,,"@author:
+Do we allow other yaml-only resources (like sources) to be disabled? If so, we should implement this part
+
+@user1:
+Sources can be disabled, exposures cannot (but we should support this). In the past, it's only been possible to disable a source via the `sources:` block in `dbt_project.yml`.
+
+In v1.1, we'll be adding the ability to disable a source inline with its definition (https://github.com/dbt-labs/dbt-core/pull/5008):
+```yml
+sources:
+  - name: my_source
+    config:
+      enabled: False
+```"
+80,dbt-labs__dbt-core-5027@8dcfeb1,dbt-labs/dbt-core,core/dbt/contracts/graph/metrics.py,functional,A,,,,"@author:
+should this return the metric name? Or the `sql` expression? Or something else? Not 100% sure yet....
+
+@user1:
+When would the ResolvedMetricReference get stringified?
+
+@author:
+I think this would happen when you interpolate the results of the `metric()` function, so:
+
+```
+select
+  {{ metric('revenue') }}
+from {{ metric('revenue').model }}
+```
+
+would evaluate to
+```
+select
+  revenue
+from analytics.fct_revenue
+```
+
+So - returning the name of the metric is kind of useless, but I am unsure if we want to return anything more sophisticated than that? I guess we could return `self.node.sql` instead (which feels reasonable), but this doesn't extend well to the `ratio` metric type which does not have a `.sql` value
+
+So, uh, short answer: you probably wouldn't stringify it in practice?
+
+@user1:
+Maybe we shouldn't even have a __str__ method then? With the idea that it's better to fail noisily than fail silently."
+81,deepset-ai__haystack-1413@fc3b61a,deepset-ai/haystack,haystack/pipeline.py,documentation,B,,,,"@user1:
+Let's rather return a list of Documents here than just the ids
+
+@author:
+Done."
+82,deepset-ai__haystack-1413@fc3b61a,deepset-ai/haystack,test/test_pipeline.py,functional,C,yes,,,"@user1:
+I believe this for loop is not really needed. We can define the ids above together with the rest of the document content `{""id""=""a"",""text"": ""Sample text for document-1"", ""meta"": {""source"": ""wiki1""}}`
+
+@author:
+That totally slipped my mind. Done."
+87,deepset-ai__haystack-1861@36fe91e,deepset-ai/haystack,haystack/document_stores/elasticsearch.py,documentation,B,,,,"@user1:
+Why do we need `kwargs` here? 
+
+@author:
+mypy complaining that the signature would be incompatible with supertype ""BaseDocumentStore"""
+88,deepset-ai__haystack-1861@36fe91e,deepset-ai/haystack,haystack/document_stores/elasticsearch.py,functional,B,,,,"@user1:
+Why do we need kwargs here?
+
+@author:
+Same here: mypy complaining that the signature would be incompatible with supertype ""BaseDocumentStore"""
+89,deepset-ai__haystack-1861@36fe91e,deepset-ai/haystack,test/test_pipeline_extractive_qa.py,documentation,C,,,,"@user1:
+Wondering if we can lower the memory footprint / runtime of this test further :thinking: 
+Do we gain anything by having the reader in here? Wouldn't a `DocumentSearchPipeline` with a plain retriever be enough? Do we really want / need three retrievers here? 
+
+@author:
+Yep, we can do that... Just had the most common path in mind. But I totally agree with you, that memory footprint / runtime is currently a bigger pain. I chose the three such that the test ensures all retrievers compatible with ElasticsearchDocumentStore and actually searching with es propagate the headers correctly. 
+
+@author:
+done"
+90,deepset-ai__haystack-1861@36fe91e,deepset-ai/haystack,haystack/document_stores/base.py,functional,B,,,,"@user1:
+I guess you added the **kwargs here to allow lower-level doc store implementations to not implement `headers` ?  
+
+In general, we should be very careful about using **kwargs as it often starts with a good implementation reason but then ends up in a big mess where it's used for various cases and it's super hard to debug / maintain
+
+@author:
+Hm I see, as alternative we can introduce headers here as keyword param and leave most of the lower-level implementations doing nothing with it (which looks odd and inflates the signature) or we might add # type: ignore to all of them (which also seems to be pretty ugly). So I agree, this is not a perfect solution, but the others seemed to me even uglier, especially if we consider this param to only make sense with a single documentstore implementation."
+91,deepset-ai__haystack-1976@8f7a848,deepset-ai/haystack,haystack/utils/augment_squad.py,functional,A,,,,"@user1:
+`augment()` is called by `augment_squad()` and it passes the device as a str so this won't work as intended.
+
+@user1:
+same for `load_glove()`"
+93,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,haystack/nodes/file_converter/parsr.py,style,A,,,,"@user1:
+I would check if `meta` is `None` here, you could also move this ""initialization"" of the param at the beginning of the method, along with the others"
+97,deepset-ai__haystack-3837@e0d9ac8,deepset-ai/haystack,haystack/nodes/preprocessor/preprocessor.py,functional,C,,,,"@user1:
+1. ""lenght"" -> ""length""
+2. Do you think it's clear enough that nothing's actually been _done_ about the max length being exceeded? Or do you think the fact that it's just a warning conveys this adequately?
+
+@user2:
+Maybe we should consider renaming the variable to `max_chars_check`, so it's more clear that this variable is only used for checking the max number of chars?
+
+@author:
+@user2 I like the idea! I'll rename the variable :blush: 
+
+@author:
+I've improved a bit the error message as well"
+98,deepset-ai__haystack-5205@b596443,deepset-ai/haystack,haystack/nodes/prompt/invocation_layer/sagemaker_base.py,functional,B,,,,"@user1:
+Please check if the `# type:ignore` comments in this method can be removed,
+by using `typing.overload` as done here: https://github.com/deepset-ai/haystack/blob/82291b56ad1c397929f50f698430e9014fe3bff6/haystack/nodes/prompt/prompt_model.py#L120-L128
+
+@author:
+Great that you asked. Because you raised this concern I added 77c41322ce73954259331684ece9006e59dc7c5b"
+100,deepset-ai__haystack-5467@cc8b6d5,deepset-ai/haystack,haystack/preview/components/file_converters/txt.py,functional,B,,,,"@user1:
+Is 0.4 some well-known ratio, perhaps it deserve a constant or more explanation, even parameter setting, idk?
+
+@author:
+This was hard-coded in v1, I guess it makes sense to parametrize it."
+102,deepset-ai__haystack-9290@3f511f6,deepset-ai/haystack,haystack/components/agents/agent.py,functional,A,,,,"@user1:
+I just realized we are only passing the streaming call back to the ToolInvoker at init time. Which means the ToolResult can't be streamed if the streaming call back is only provided at run time. 
+
+I think we should follow the pattern we use for our chat generator and only pass the streaming callback at run time for the ToolInvoker too. Could you add streaming_callback as an option to the runtime of the ToolInvoker and pass it at runtime in the agent?"
+104,dmlc__dgl-3892@98afbd1,dmlc/dgl,examples/pytorch/graphsage/node_classification.py,documentation,B,,,,"@user1:
+Should we just remove these commented lines?
+
+@author:
+Reverted."
+105,dmlc__dgl-3892@98afbd1,dmlc/dgl,python/dgl/multiprocessing/pytorch.py,functional,A,,,,"@user1:
+Am I correct that we're not strictly synchronizing here, since process 0 could place the tensor in `queue` and the block on `queue_ack`. process 3 could then get from `queue` and put to `queue_ack`, it can continue on, but processes 1 and 2 won't have reached this call yet.
+
+Would a `mp.Barrier` object be better here instead of the second `Queue` (https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Barrier)?
+
+@author:
+Yeah `Barrier` looks better."
+106,dmlc__dgl-4620@5297d27,dmlc/dgl,tools/distpartitioning/utils.py,functional,C,,,,"@user1:
+- What goes after the colon symbol `:` should be the type of the argument.
+- The description does not make sense to me. Please reword."
+107,dmlc__dgl-4620@5297d27,dmlc/dgl,tools/dispatch_data.py,functional,A,,,,"@user1:
+Do we have checks that the number of partitions is equal to the number of IPs?
+
+@author:
+I don't think so"
+108,dmlc__dgl-4620@5297d27,dmlc/dgl,tools/distpartitioning/utils.py,functional,C,,,,"@user1:
+What is ""original one"" here? The error message will not make any sense to the users."
+109,dmlc__dgl-4623@edc9361,dmlc/dgl,tools/distpartitioning/dataset_utils.py,style,B,,,,"@user1:
+`etype_geid_offset` seems not be used below, why name it?
+
+@author:
+Done."
+114,getsentry__sentry-71942@a4f03f3,getsentry/sentry,src/sentry/issues/endpoints/organization_group_search_views.py,style,B,,,,"@user1:
+Can we define this in such a way (with types, or by using the serializer) so that we can guarantee that the keys here are correct? I'm worried that we might add a column and forget to modify this"
+115,getsentry__sentry-71942@a4f03f3,getsentry/sentry,src/sentry/api/serializers/models/groupsearchview.py,documentation,B,,,,"@user1:
+Can you add a response type here?
+
+@author:
+![image](https://github.com/getsentry/sentry/assets/55160142/3f8e6b61-4f03-4eb3-823b-276f6c6b29c1)
+
+Looks like mypy does not like that 
+
+@user1:
+Are you typing it as a TypedDict? I see other serializers that have done that: https://github.com/getsentry/sentry/blob/8d255a2b22c6d0f7e53ed7a8fe94fb080a2060d0/src/sentry/monitors/serializers.py#L36
+
+@author:
+Ah yes I was, I'll look at that one and see if I can make it work"
+117,getsentry__sentry-78778@17b738e,getsentry/sentry,src/sentry/api/analytics.py,functional,C,yes,,,"@user1:
+best not to mention any specific analytics provider in our code"
+118,gradio-app__gradio-10032@5f0c7d8,gradio-app/gradio,gradio/components/image.py,documentation,B,,,,"@user1:
+Thanks @author for the nice contribution! 
+
+I prefer we instead just let developers specify the [media constraints](https://developer.mozilla.org/en-US/docs/Web/API/Media_Capture_and_Streams_API/Constraints#applying_constraints) as a python dictionary and we pass that into the get_stream function. It will be more flexible that way. We can add docstring examples for controlling the height and width specifically. I think we can call this parameter `webcam_constraints`.
+
+BTW, you also need to specify the new props in `image/Index.svelte` and `image/ImageUploader.svelte` and pass them into the Webcam component.
+
+BTW can you do this for video as well now that you're at it? 😊"
+119,gradio-app__gradio-3275@067f582,gradio-app/gradio,guides/05_tabular-data-science-and-plots/creating-a-dashboard-from-supabase-data.md,functional,C,,,,"@user1:
+* typo:
+> you can skip sections and first two sections and go 
+
+you can skip ~sections and~ *the first two sections and go 
+
+* change 
+> [visualizing the data]()
+
+to `[visualizing the data](#visualizing-the-data-in-a-real-time-gradio-dashboard)`"
+122,gradio-app__gradio-4608@6dc45de,gradio-app/gradio,gradio/components/image.py,documentation,C,,,,"@user1:
+Actually I think PIL supports quite a few more image modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html"
+123,gradio-app__gradio-4933@8ceb23c,gradio-app/gradio,gradio/components/textbox.py,style,C,,,,"@user1:
+typo precedence"
+124,gradio-app__gradio-5232@5b83994,gradio-app/gradio,gradio/components/checkboxgroup.py,functional,A,,,,"@user1:
+this is actually incorrect and should be 
+`[self.choices[0][1]] if self.choices else None` for both raw and serialized (its also incorrect in main). Should be this way, similar to Dropdown multiselect, otherwise the code snippets in api docs don't work as expected. 
+
+@author:
+Yeah you're right"
+126,hpcaitech__ColossalAI-2374@05119a8,hpcaitech/ColossalAI,colossalai/amp/naive_amp/_fp16_optimizer.py,functional,A,yes,,,"@user1:
+where is multi_tensor_scale? do we need this line?
+
+@author:
+Fixed the typo."
+127,hpcaitech__ColossalAI-2374@05119a8,hpcaitech/ColossalAI,op_builder/layernorm.py,style,B,yes,,,"@user1:
+Why its name is FusedOptim?
+Does it build layer_norm?
+
+@author:
+Fixed the typo."
+129,hpcaitech__ColossalAI-4080@dc82ade,hpcaitech/ColossalAI,applications/Chat/coati/trainer/ppo.py,functional,A,,,,"@user1:
+This usage is wrong and you should fix it.
+
+@author:
+The original version wrote `prompts = next(iter(self.prompt_dataloader))`.
+
+https://github.com/hpcaitech/ColossalAI/blob/95e95b6d588d27aeba8d62e6656392f771b69aee/applications/Chat/coati/trainer/ppo.py#L149-L154
+
+
+
+@author:
+Isn't this written on purpose? 
+
+https://github.com/hpcaitech/ColossalAI/blob/95e95b6d588d27aeba8d62e6656392f771b69aee/applications/Chat/coati/trainer/ppo.py#L183-L186
+
+The usage of `pretrain_dataloader` also follows this pattern.
+
+@author:
+This is fixed in 128ec4f."
+132,huggingface__accelerate-255@12e4b18,huggingface/accelerate,src/accelerate/accelerator.py,functional,A,,,,"@user1:
+I realize we are missing the learning rate scheduler -> we should thus add it as an optional argument to the `save_state` function, or add a `register_for_checkpoints` method to the Accelerator object that would take objects not passed to the `prepare` method but the user still wants to save."
+133,huggingface__accelerate-255@12e4b18,huggingface/accelerate,src/accelerate/accelerator.py,functional,B,,,,"@user1:
+The names should probably be constants, so we only have to change them in one place ;-)"
+135,huggingface__datasets-2182@748e2e9,huggingface/datasets,src/datasets/arrow_dataset.py,functional,A,,,,"@user1:
+The `dataset_info.dataset_size` is the size of the dataset from `load_dataset`. If some users transform the dataset using `map` then `dataset_info.dataset_size` is not updated (we could add this feature though).
+Therefore currently using `is_small_dataset(dataset_info.dataset_size)` can only be used in `load_dataset`, not in `load_from_disk`. Here, you could instead check for the size of the arrow file.
+
+@author:
+Yes @user1, you are right: dataset_size is always None when `load_from_disk` is called. However, the argument passed to `load_from_disk` is a directory (not an Arrow file) and it might contain multiple subdirectories (train, test), with multiple Arrow files. Should I make a scan and sum up all Arrow data file sizes?
+
+@user1:
+I think the `is_small_dataset` check can be done only in `Dataset.load_from_disk` (`datasets.load.load_from_disk` amd `DatasetDict.load_from_disk` can just pass the `keep_in_memory ` argument). So yes I think you just need to take the list of arrow files and sum their sizes.
+
+In the code of `Dataset.load_from_disk` you can get the paths of the arrow files from `state[""_data_files""]`.
+For example the arrow files are used to load the table this way:
+
+https://github.com/huggingface/datasets/blob/2a05294e2f8bc66983137797f213b325c78737b5/src/datasets/arrow_dataset.py#L654-L657
+
+
+@author:
+Done @user1. However, note that for the test I have implemented, the file size is 512 while once loaded, the dataset size in-memory is just 148.
+
+@user1:
+Yea I guess this is because of how pyarrow does memory allocation, and also probably because of some metadata. The difference between the two values should stay close to a few KB."
+136,huggingface__datasets-2986@87e2ab7,huggingface/datasets,src/datasets/load.py,functional,B,,,,"@user1:
+I wouldn't log this warning from within the `download_dataset_script_from_master()` method because:
+- This implies this method is always dependent on some other method previously called. I would move this warning one level up, from within its caller (as the caller is responsible of calling the other method and this one).
+- The warning is already present in the caller `get_module()` (see line 465)
+
+@user1:
+Also note that once you remove the warning, both methods have the same implementation with different `revision` parameter values.
+
+@author:
+Good catch !
+
+@author:
+I merged both methods, and only kept the warning one level up."
+137,huggingface__datasets-2986@87e2ab7,huggingface/datasets,src/datasets/load.py,functional,A,yes,,,"@user1:
+I know this logic was implemented before your PR, but I don't completely understand it.
+
+- Which is the typical case where you don't pass revision (`self.revision is None`) and after the `FileNotFoundError` you then try a second time with `revision=""master""`?
+- On the other hand, if you pass explicitly `revision=""master""` and `FileNotFoundError` is thrown, do you reaaly wan to try a second time with `revision=""master""` as before?
+
+@author:
+Good questions !
+
+For question 1: There can be a weeks between the time a dataset in added on master and the time a new version of `datasets` is released. This fallback on the `master` branch makes it possible for anyone to load a dataset that was just added on `master` without waiting for a release or installing from source. In particular, the https://hf.co/datasets page is synced with the `master` branch, therefore user expect to be able to load any dataset from the website, and this features enables this.
+
+For question 2: you're right, we shouldn't try again if the user specified a `revision` (that could be master or any other revision). Thanks for catching this !
+
+@user1:
+Question 1: ~but if you don't pass revision in the first call, then ""master"" is used (as default), isn't it? Why calling a second time with `revision=master`?~
+Sorry, `__version__` is used. OK.
+
+@user1:
+Question 2: I just saw I was confused: if you pass explicitly `revision=master` in the first call and then it fails, the error is raised and no second call is done.
+
+@user1:
+I make another question:
+- Question 3: if a user has a specific value for `HF_SCRIPTS_VERSION` env variable, and then fails, does it make sense to make a second call and return the ""master"" revision?
+
+@author:
+Q3: It probably doesn't make sense to get the master version in this case. We should only look on master if nothing has been particularly specified by the user IMO. This way users can have control on the determinism of the library. I just changed that so that it only checks on master if both `revision` and `HF_SCRIPTS_VERSION ` are unspecified (which is the default). Let me know what you think"
+138,huggingface__datasets-2986@87e2ab7,huggingface/datasets,src/datasets/load.py,functional,B,,,,"@user1:
+Maybe create a method with this code?
+
+Note that this code is repeated in several other classes.
+
+@author:
+Which lines would you like to see in another method ?
+
+@user1:
+Sorry, something went wrong... I try again..."
+139,huggingface__datasets-2986@87e2ab7,huggingface/datasets,src/datasets/load.py,functional,B,,,,"@user1:
+The same as above for the naming of these 2 methods.
+
+Also note that their implementation is the same (apart from the param `dataset=False`). But not too important as this is only repeated twice."
+140,huggingface__datasets-3129@3d35ada,huggingface/datasets,src/datasets/features/audio.py,functional,A,,,,"@user1:
+I think this function should take a file-like object or a path as input right ? Then you can probably name the parameter `path_or_buf` in this case like pandas
+
+@user1:
+Also it looks like `_decode_example_with_librosa` only supports having a path as input, since `open` is called a few lines from here.
+
+@author:
+@user1 I think I should rename the functions because I see they are misleading! 😅 
+
+Before the addition of the bytes field, the audio was specified only by a path. I created 2 functions:
+- For non-MP3 audio files: `_decode_example_with_librosa`
+- For MP3 audio files: `_decode_example_with_torchaudio`
+
+With the possibility of specifying the audio with a bytes field (file-object):
+- For non-MP3 audio files:
+  - Note that `librosa` does NOT accept file-like objects as input; I copied the `librosa` implementation (under the hood it uses `soundfile`, which accepts file-like objects), but adapting it to file-like objects; I named it `_decode_example_with_soundfile`
+- For MP3 files: this is still pending to do, because I cannot test it locally (implementation with torchaudio requires `sox`, available only for Linux and my machine is Windows); that is why I implemented the Test Audio check in GitHub, to be able to test at least remotely).
+
+Therefore:
+- For non-MP3:
+  - If path, use `_decode_example_with_librosa`
+  - If bytes, use `_decode_example_with_soundfile`
+- For MP3:
+  - If path, use `_decode_example_with_torchaudio`
+  - If bytes, TODO"
+141,huggingface__datasets-4433@43a3326,huggingface/datasets,src/datasets/download/streaming_download_manager.py,functional,B,,,,"@user1:
+Why is this needed ? Is it related to the `del dirnames[i]` call ? If so maybe it's simpler to just remove `del dirnames[i]` instead. I feel like this optimization adds more confusion that it brings value
+
+Otherwise if you think we should keep it, feel free to add a comment to explain why
+
+@author:
+Yes. There is a comment that explains this inside the loop... It's outside of it now. And I removed the `[:]` syntax."
+145,hummingbot__hummingbot-2133@591c904,hummingbot/hummingbot,hummingbot/core/data_type/trade.py,functional,B,,,,"@user1:
+This can be just `trade.order_type`, right?"
+149,jina-ai__serve-2037@792b165,jina-ai/serve,jina/docker/hubio.py,functional,A,,,,"@user1:
+So I think here it should be `_dockerfile_path = 'Dockerfile'`, or alternatively something like `_check_result['Dockerfile'].split('/')[-1]` (to be better prepared for different dockerfile names, such as the one for GPU). This could also be changed in `_check_completeness`
+
+This is because in the call to the client below, `path=self.args.path` is passed, which means that the `dockerfile` location will be relative to that `path`. However in `_check_completness` the dockerfile path is obtained by joining `self.args.path` and `Dockerfile`. I think this was the reason that #1732 broke the hub builds.
+
+@user1:
+Also, back then the issue was that CI didn't catch this error for some reason. I hope now it will
+
+@author:
+hmm, the tests actually work locally. I've put them into the integration tests and let's see how ci says.
+
+@user1:
+Aaaah I figured it out! 
+
+The reason test worked and hub build broke was because in tests `args.path` is specified with an absolute path - for example `hub_build_test` uses `os.path.join(cur_dir, 'hub-mwu')`, where `cur_dir` is an absolute path, while building in Jina Hub is done using relative paths, e.g. `encoders/audio/MFCCTimbreEncoder/`. 
+
+Tests worked absolutely fine, but they were only done for the absolute path - where both `path` and `dockerfile` are absolute paths. If both are relative, then docker SDK tries to join them together, which doesn't work unless `dockerfile` is really just the name of the file inside `args.path`.
+
+So yes, extracting the path using `os.path.basename` as you are doing now is the right way (btw you have to do it in another location in the file, that's why the CI is failing). All that should be added is a test where `args.path` is passed as a relative path, and we are good to go :D
+
+@author:
+Great catch! Added another test on the relative pathes."
+150,jina-ai__serve-2297@e1aea7f,jina-ai/serve,tests/integration/sparse_pipeline/test_sparse_pipeline.py,functional,A,,,,"@user1:
+I think this was a bug, distances needs to be an array of arrays (for each vector I want the closest distances)
+
+@author:
+query is not done in batches"
+151,jina-ai__serve-4883@ca87c3e,jina-ai/serve,jina/parsers/orchestrate/pod.py,functional,A,yes,,,"@user1:
+it should be 3 right? plus wrong comment
+
+@author:
+Wrong comment, true, thanks for the catch.
+
+But I would leave the default to `None`, which allows to keep the previous policy in place: Try at least three times, but if there are more than 3 replicas, try every replica at least once. That seems reasonable to me, because otherwise there might be a healthy replica but the call still fails. If the default is 3, we don't know if it was user set, and can't implement the default policy.
+
+An alternative would be to always try every replica at least once, regardless of what the user puts in (`actual_num_retries = max(retries, num_replicas)`). But it feels a bit off to me to take that control away from the user.
+
+Edit: `None` doesn't work, changed it to `-1` with the same semantics"
+154,keephq__keep-1984@e524fe8,keephq/keep,keep/api/routes/topology.py,functional,A,,,,"@user1:
+And again, do we know what exceptions are expected here?"
+157,keephq__keep-4568@aaa03de,keephq/keep,keep/api/routes/alerts.py,functional,B,,,,"@user1:
+Just thinking out loud:
+Shouldn't the backend handle this internally?
+It seems more appropriate for the backend to enrich all alerts matching the provided CEL expression, rather than offloading that responsibility to the client.
+Also, having limit and offset parameters for enrichment feels a bit confusing to me.
+What do you think?
+Please let me know if I missed something.
+
+@author:
+Hi @user1, can you provide more explanation about the statement `Shouldn't the backend handle this internally? It seems more appropriate for the backend to enrich all alerts matching the provided CEL expression, rather than offloading that responsibility to the client.` since I don't get what is the client and backend in our context. Sorry, just a beginner to the software development journey :D 
+
+I add the option to provide limit and offset because the `QueryDTO` had it, also if you don't provide, the default value of limit will be `1000` and offset is `0`. What about either we add option that limit can be `-1` which is no limitation or change the default to no limitation instead of `1000`.
+
+@user1:
+What I meant is that if a client (e.g., someone triggering the backend endpoint—like Keep UI, for example) initiates a batch enrichment with a CEL expression like name.contains('CPU') and sets limit to 1000, but there are actually 1423 matching alerts—what happens to the remaining 423?
+
+My point is that the backend should ideally take care of this internally. If the total number of matching alerts exceeds the limit, the backend should handle pagination or batching automatically and ensure that all matching alerts get enriched, regardless of how many there are.
+
+From my perspective, the client should only need to provide the CEL expression. limit and offset should be managed internally by the backend.
+
+@author:
+Thanks @user1, I understand it.
+
+Just one more question: Is the reason for setting the default limit to 1000 to avoid returning a large amount of data?
+
+If so, should we consider implementing a technique to fetch all data in batches sequentially and then process enriching each batch, instead of imposing a hard limit of only `1000` ? For example if total count is `10000`, then we may have to process each batch `1000` one by one.
+
+@user1:
+Yes, I think it's a good way to go
+
+@author:
+Thanks @user1, for simplicity, I think we can go ahead and get this PR reviewed and merged first. We can introduce the improvements in future PRs. 😄
+
+@user1:
+I don't mind merging it.
+Left a final comment."
+159,keephq__keep-625@767a6e3,keephq/keep,keep/providers/mongodb_provider/mongodb_provider.py,functional,A,,,,"@user1:
+https://www.mongodb.com/docs/v4.2/reference/method/db.eval/ Eval is not supported on latest mongodb versions?"
+160,keephq__keep-904@9597dfd,keephq/keep,keep/api/models/db/preset.py,documentation,B,,,,"@user1:
+Then why have` is_private` as well?
+
+@user2:
+@author"
+161,letta-ai__letta-58@d3a3a21,letta-ai/letta,memgpt/agent.py,functional,A,,,,"@user1:
+shouldn't this be dependent on the model?"
+162,localstack__localstack-10041@68f3277,localstack/localstack,localstack/services/dynamodb/provider.py,style,B,,,,"@user1:
+can we move the client connection to the outer loop?"
+163,localstack__localstack-12496@22b4c31,localstack/localstack,localstack-core/localstack/services/stepfunctions/stepfunctions_utils.py,functional,B,,,,"@user1:
+small nit: we should have the same function already in [here](https://github.com/localstack/localstack/blob/4fac1ca9cbb2ea285204fb30f6da4f89bdeca402/localstack-core/localstack/services/sqs/utils.py#L189-L192). Could we maybe move it somewhere in the `utils` package and avoid this repetition?
+
+@author:
+Let me look into that
+
+@author:
+Moved to utils and updated sqs as well"
+164,marimo-team__marimo-3122@5536640,marimo-team/marimo,marimo/_cli/sandbox.py,functional,A,,,,"@user1:
+this should be `--python`"
+168,matplotlib__matplotlib-8938@d670a4f,matplotlib/matplotlib,lib/matplotlib/tests/test_axes.py,functional,C,,,,"@user1:
+Any chance this and the test below could be written in a way that allows reusing other test images in order to avoid further bloating the repo?
+
+@author:
+I've replaced the uint8 test with a numerical check that the patches end up in the right place. Can't think of an easy way to merge the rectangle with units, but could maybe just drop the image test and just check that a rectangle with units doesn't throw any errors?"
+169,microsoft__autogen-1616@7f23912,microsoft/autogen,test/agentchat/contrib/test_gpt_assistant.py,functional,C,,,,"@user1:
+Keep the original config_list as openai_config_list
+Add an aoai_config_list with filter_dict={""api_version"": [""2024-02-15-preview""]}
+Then test these two config_lists separately"
+173,microsoft__autogen-6529@23be68e,microsoft/autogen,python/packages/autogen-agentchat/src/autogen_agentchat/agents/_assistant_agent.py,style,B,,,,"@user1:
+minor tiny nit. But workbench probably doesnt need to change to workbenches. 
+Workbench can imply plural .. multiple things in it.
+
+@user2:
+This is also a breaking change, can we leave the name as is and support a single arg or a list
+
+@author:
+This change souldn't be breaking.
+`workbench: Workbench | List[Workbench] | None = None,`
+workbench is still input like this then converted to a list internally if a single workbench is input"
+175,modin-project__modin-2801@64caea0,modin-project/modin,modin/engines/base/frame/partition_manager.py,functional,B,,,,"@user1:
+Along with changes above, I would move this outside the class as a decorator and decorate all functions, first checking if `BenchmarkMode.get()` then executing the line below. This way, it's not an API that is explicitly available for users.
+
+@author:
+@user2-petersohn thanks for review! It's make sense. 
+
+`wait_computations` was made as decorator function and other wait ways were removed. Please review again :)"
+176,modin-project__modin-3765@d2d8bd2,modin-project/modin,modin/pandas/test/dataframe/test_indexing.py,functional,C,,,,"@user2:
+Also, if we move this into a separate test case, we can `@user1.mark.parametrize` by `""left,right""`.
+
+@user3:
+Done."
+177,modin-project__modin-3765@d2d8bd2,modin-project/modin,modin/pandas/test/dataframe/test_indexing.py,functional,C,yes,,,"@user1:
+ditto about moving funciton definitions out of the loop
+
+@user2:
+Done."
+182,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/forms/models.py,functional,B,,,,"@user1:
+This should not be necessary.
+
+@author:
+You cannot set or initialize a form on the reverse of the M2M field.  If we want to go this way, we would need to keep the save()"
+183,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/graphql/types.py,functional,A,,,,"@user1:
+We should probably leave the legacy `asn` field as-is, since we haven't made any changes to it.
+
+@author:
+It throws an error with a large AS Number"
+184,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/ipam/models/ip.py,functional,A,,,,"@user1:
+Pretty sure this should be a required field, no?
+
+@author:
+Corrected"
+188,netbox-community__netbox-8907@055c67f,netbox-community/netbox,netbox/utilities/templates/search/searchbar.html,functional,A,,,,"@user1:
+Why not leave this as-is?
+
+@author:
+By setting the value with a javascript, the cursor moves to the end of the input field.. if I just set the value, the cursor is at the start of the input field...
+
+
+@user1:
+But it doesn't even render the value until the user clicks the field, which doesn't resolve #8813. Just leaving it as `value=""{{ request.GET.q }}""` ensures the value is populated, and the cursor defaults to the end of the string on focus.
+
+@author:
+The autofocus part takes care of setting the focus. 
+If I leave out the onfocus part. then the cursor is at the start of the value.
+You need to merge that PR #8908 to make this work. The autofocus is currently overruled by the piece of javascript in the netbox.ts
+
+@user1:
+Ok. For now, can we change this to `value=""{{ request.GET.q }}""` just to close out #8813? I suspect #8908 might need some additional tweaking but I'm waiting for Matt to weigh in. We can add the autofocus bit under that PR to ensure it's correlated with the appropriate FR.
+
+@author:
+I removed the autocomplete and onfocus from this PR.. Moving that to the #8908
+
+@user1:
+Thanks!"
+193,networkx__networkx-5305@072b960,networkx/networkx,networkx/algorithms/tests/test_distance_measures.py,functional,C,,,,"@user1:
+Hm, this behavior seems inconsistent with the docstring, which indicates that `v` is expected to be a node. I'm not sure we want to enshrine this in the test suite, at least not without first deciding that this is indeed the desired behavior.
+
+@user2:
+Interesting... these tests seem to be testing the distinction between returning a value and returning a dict. When the input is an iterable/iterator of nodes, the output should be a dict -- even when there is only one value computed. When the input is a node, then the output should be a value.
+
+The blame on the code (and the commented out code at the top of the function) indicate that this treatment of the input `v` was indeed intended to handle input `v` that are lists. This behavior goes all the way back to the hg(pre-git) repository. So, we built in handling of list inputs without advertising it. Of course, the original docs didn't say anything about the input or output parameters. That was added later (still in the hg days) and didn't discuss inputs other than a node or None, even though the code handled it.
+
+So, I think it's fair to say that the behavior has been enshrined -- which does not mean it is the right choice for API. What would be the right choice?
+
+@author:
+Re: the question of whether to support `v` being a list - I think the answer should be ""yes,"" but I will defer to @user2  and @user1. I could just add to the docstring to indicate that `v` can be a list, as well.
+
+That being said, I do feel like this API decision may be out of scope for this ticket. As it stands, `v` can be a list, so I test this, just as it is tested in the unweighted case."
+194,networkx__networkx-5371@b446ef1,networkx/networkx,networkx/lazy_imports.py,functional,C,,,,"@user1:
+This makes the raised error text the same as for regular imports.
+That may cause confusion because the exception is raised potentially much later.
+Is there a reason to have a short exception message?
+I'd prefer a message that indicates that this is an exception caused by code that executed potentially long ago.
+
+@author:
+Yes, this was a change I made on purpose.
+
+Old behavior:
+
+```
+def foo(x):
+    import scipy.not_installed
+    scipy.not_installed(x)
+```
+
+This is what we had before lazy loading: it just raises the moment the function is called.  I'm not sure there is a reason to let the user know that we have a deferred import error now: they'll see, just as before, that scipy.x is missing only once the function tries to use it.
+
+@user1:
+Actually, before lazy loading it raised on the import statement itself.  Not on the function call.
+The traceback nicely explains that the import is what couldn't find the module.
+
+But with lazy loading the traceback doesn't show any import statement
+For example, the old behavior:
+```
+>>> nx.to_numpy_array(G)
+Traceback (most recent call last):
+  File ""<stdin>"", line 1, in <module>
+  File ""/Users/dschult/NXstefanv/networkx/convert_matrix.py"", line 1405, in to_numpy_array
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+```
+And the new behavior:
+```
+>>> nx.utils.misc.dict_to_numpy_array({})
+Traceback (most recent call last):
+  File ""<stdin>"", line 1, in <module>
+  File ""/Users/dschult/NXstefanv/networkx/utils/misc.py"", line 230, in dict_to_numpy_array
+    return dict_to_numpy_array2(d, mapping)
+  File ""/Users/dschult/NXstefanv/networkx/utils/misc.py"", line 248, in dict_to_numpy_array2
+    a = np.zeros((n, n))
+  File ""/Users/dschult/NXstefanv/networkx/lazy_imports.py"", line 93, in __getattr__
+    raise ModuleNotFoundError(f""No module named '{self.__import_name}'"")
+ModuleNotFoundError: No module named 'numpy'
+```
+There is no import statement in sight.    I guess it's not a big difference. But the tracebacks for lazy imports feel confusing enough. 
+
+I'd love something like:
+```
+>>> nx.utils.misc.dict_to_numpy_array({})
+Traceback (most recent call last):
+  File ""<stdin>"", line 1, in <module>
+  File ""/Users/dschult/NXstefanv/networkx/utils/misc.py"", line 230, in dict_to_numpy_array
+    return dict_to_numpy_array2(d, mapping)
+  File ""/Users/dschult/NXstefanv/networkx/utils/misc.py"", line 248, in dict_to_numpy_array2
+    a = np.zeros((n, n))
+  File ""/Users/dschult/NXstefanv/networkx/lazy_imports.py"", line 93, in __getattr__
+    raise ModuleNotFoundError(f""'import {self.__import_name}' failed"")
+ModuleNotFoundError: 'import numpy' failed lazily
+```
+
+@author:
+I will modify this to display a more informative error.
+
+@author:
+I changed the error message to look like this:
+
+```
+This error is lazily reported, having originally occured in
+  File /home/stefan/src/networkx/networkx/tests/test_lazy_imports.py, line 11, in test_lazy_import_basics
+
+----> anything_not_real = lazy.lazy_import(""anything_not_real"")
+```
+
+@user1:
+Wow -- so you tracked where the lazy_import was called?!?  That's Cool!
+
+I can't see the code though. Did you push?
+
+@author:
+🤦"
+197,numba__numba-9144@74a4cd4,numba/numba,numba/core/untyped_passes.py,functional,A,,,,"@user1:
+What happens if the `inc.name` isn't in the `typemap`?
+
+@author:
+In case `inc.name` is not in `typemap`, `typemap.get(inc.name)` will return `None` and the if stmt below will be evaluated to false. I will update this code to address the corner case if all `typemap.get(...) = [None, ..., None]`, then, the if statement should be false as well."
+201,numpy__numpy-17443@2ebb453,numpy/numpy,setup.py,style,C,,,,"@user1:
+```suggestion
+# keep this consistent with the `Programming Language :: Python :: ...` classifiers above
+if sys.version_info >= (3, 9):
+```"
+202,numpy__numpy-20310@a4daaf5,numpy/numpy,numpy/core/tests/test_einsum.py,functional,C,,,,"@user1:
+This is failing with `AssertionError: assert 95.270004 == 95.27`
+
+@user1:
+Also with `AssertionError: assert 95.27 == 95.26999999999998`''
+
+The problems are on arm64 and s390x.
+
+@author:
+arg, yeah it is a bit annoying: To trigger the issue I have to use non-integers but these rounding issues are tricky with pairwise summations.
+
+But: I just realized using `+0.5` should work, should give exact results but trigger the issue well enough."
+204,numpy__numpy-8423@0ec089a,numpy/numpy,numpy/lib/arraysetops.py,functional,A,,,,"@user1:
+I think we should this path for `dict` too, so that `'a' in dict(a=1)` matches `np.isin('a', dict(a=1))`. So maybe just `if not hasattr(test_elements, '__array__')`, to just ignore things that already know how to become arrays?"
+206,optuna__optuna-3629@f4f6b5f,optuna/optuna,optuna/study/study.py,functional,A,,,,"@user1:
+Should we prefer `atol=0.0` as described in https://numpy.org/doc/stable/reference/generated/numpy.isclose.html?
+
+```suggestion
+                    if np.isnan(param_value) or np.isclose(param_value, existing_param, atol=0.0):
+```"
+208,pandas-dev__pandas-31538@33e24a3,pandas-dev/pandas,pandas/tests/arithmetic/test_datetime64.py,functional,C,,,,"@user1:
+the reversed operation obj2 - obj1 should also raise right?  How about the addition ops?"
+209,pandas-dev__pandas-40372@51fe758,pandas-dev/pandas,pandas/tests/io/xml/test_to_xml.py,functional,C,yes,,,"@user1:
+Looks like this is failing a test, might have to choose a different word"
+211,pandas-dev__pandas-42635@59d4145,pandas-dev/pandas,pandas/tests/tools/test_to_datetime.py,functional,C,,,,"@user1:
+Could you simplify `times` just to be a short Series of non-monotonic Timestamps? e.g. `Series([pd.Timestamp('2002'), pd.Timestamp('1992'), pd.Timestamp(""2022"")])` 
+
+@author:
+Updated"
+214,pandas-dev__pandas-43930@fef88a7,pandas-dev/pandas,pandas/core/indexing.py,functional,A,,,,"@user1:
+That might need a fix in `ìs_bool_dtype` instead to recognize Index[boolean] ? 
+
+(it currently checks for Index is it is object dtype, and then checks the inferred dtype, but so that needs to be updated now also non-object dtype Index can be boolean)
+
+@user1:
+Can you check this comment? We currently have an explicit check for Index objects that only considers object dtype:
+
+https://github.com/pandas-dev/pandas/blob/5ee8cf1daed481bdfd28399468a1233736332db3/pandas/core/dtypes/common.py#L1316-L1322
+
+You can probably for non-object dtypes just check ``arr_or_dtype.inferred_type == ""boolean""`` (or explicitly check the name of the dtype, or check the `_is_boolean` attribute of the dtype for EAs)"
+217,psf__black-1940@55a46b8,psf/black,action.yml,functional,C,,,,"@user1:
+Python Version specifier (PEP440) - e.g. ""==20.8b1"""
+218,psf__black-2919@22a0d08,psf/black,tests/data/comments8.py,documentation,C,,,,"@user1:
+Can we shorten this code? The test can focus on just `#%%`, so no need for everything else.
+
+@author:
+sure, I was meaning it to be a `--preview` version of `comments3.py` - but shortening it and just testing `# %%` seems fine"
+219,psf__black-3035@549a094,psf/black,CHANGES.md,functional,B,,,,"@user1:
+This must go into the preview style first, following our stability policy. You'll have to add a new preview feature too; check the other PRs in the ""Preview style"" section for examples.
+
+Also, wording suggestion:
+```suggestion
+- Remove trailing newlines after `def` lines (#3035)
+```"
+220,pydantic__pydantic-11468@92c01bd,pydantic/pydantic,pydantic/mypy.py,functional,A,,,,"@user1:
+I think you'll have to update the `collect_config()` logic to handle both `validate_by_name` and `populate_by_name`. Mypy does static analysis so it can't be aware of the added logic in `ConfigWrapper.core_config()`.
+
+Also, I'm not sure if the plugin already handled this, but previously if `populate_by_name` was set, the following calls were allowed:
+
+```python
+class Model(BaseModel):
+    field: int = Field(alias='alias')
+
+    model_config = {'populate_by_name': True}
+
+Model(field=1)  # OK
+Model(alias=1)  # OK
+```
+
+If the plugin accepted both these calls, it will probably need to be updated to disallow the following:
+
+```python
+class Model(BaseModel):
+    field: int = Field(alias='alias')
+
+    model_config = {'validate_by_alias': True, 'validate_by_name': False}
+
+Model(field=1)  # Type checker error
+Model(alias=1)  # OK
+```
+
+@author:
+Agreed, definitely important. I've pushed a [commit](https://github.com/pydantic/pydantic/pull/11468/commits/2341a58997683df514a7dcd27a615a5d05678f55) to make this backwards compatible.
+
+The new behavior:
+
+```py
+from pydantic import BaseModel, ConfigDict, Field
+
+class Model1(BaseModel):
+    model_config = ConfigDict(validate_by_alias=False, validate_by_name=True)
+
+    my_field: str = Field(alias='my_alias')
+
+m1 = Model1(my_field='foo')
+
+class Model2(BaseModel):
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=False)
+
+    my_field: str = Field(alias='my_alias')
+
+m2 = Model2(my_alias='foo')
+
+class Model3(BaseModel):
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    my_field: str = Field(alias='my_alias')
+
+# for this case, we prefer the field name over the alias, as we did in the past
+# if populate_by_name was True
+m31 = Model3(my_field='foo')
+m32 = Model3(my_alias='foo')
+#> test.py:23: error: Missing named argument ""my_field"" for ""Model3""  [call-arg]
+
+class Model4(BaseModel):
+    my_field: str = Field(alias='my_alias')
+
+m4 = Model4(my_alias='foo')
+
+class Model5(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    my_field: str = Field(alias='my_alias')
+
+# for this case, we prefer the field name over the alias
+m51 = Model5(my_field='foo')
+m52 = Model5(my_alias='foo')
+#> test.py:39: error: Missing named argument ""my_field"" for ""Model5""  [call-arg]
+```"
+222,pydantic__pydantic-5009@5bd2abd,pydantic/pydantic,pydantic/_internal/_fields.py,functional,A,,,,"@user1:
+It looks to me like this may be a bug (if it's still present on main), since the typevars map is applied to all fields below, meaning this is a double-apply. Generally that won't cause issues, but it could if you try to sub `T` with `List[T]`, for example.
+
+@author:
+can I let you check that once this is merged?
+
+@user1:
+This was indeed a bug, fixed in #5209, with a previously-failing test added. (This was a harder case to hit than you might expect because it behaved correctly if you fully parametrized the typevar, or if you didn't have a default value for the field.)"
+223,pydantic__pydantic-7677@b6bbdcc,pydantic/pydantic,pydantic/mypy.py,functional,A,,,,"@user1:
+Might need to check if there's a default, I'm looking more closely.."
+224,pyg-team__pytorch_geometric-4635@498dbbf,pyg-team/pytorch_geometric,torch_geometric/data/hetero_data.py,style,B,,,,"@user1:
+Do you think its worth allowing also `List[str]` when you just want to filter node types out? 
+
+@user2:
+Good idea. Let's do this in a separate PR since I am not sure we want to re-use `subgraph` for this due its expensive re-labeling computation."
+226,pyg-team__pytorch_geometric-5422@20ad5b8,pyg-team/pytorch_geometric,torch_geometric/utils/homophily.py,structural,B,,,,"@user1:
+not used?
+
+@author:
+My bad. Will soon be removed."
+228,python-telegram-bot__python-telegram-bot-2335@e64ddb0,python-telegram-bot/python-telegram-bot,examples/deeplinking.py,style,B,,,,"@user1:
+doesn't `Bot` have a convenience property for the username? 🤔 
+
+@author:
+You're right, i just followed how it was done for other deeplinking levels without thinking, will change 👍"
+229,python-telegram-bot__python-telegram-bot-3426@857949a,python-telegram-bot/python-telegram-bot,tests/test_invoice.py,functional,C,,,,"@user1:
+please revert the changes for this tests, the tasks are not gathered and this decreases readeability IMO"
+232,python-telegram-bot__python-telegram-bot-4168@96ca73d,python-telegram-bot/python-telegram-bot,tests/test_update.py,documentation,C,,,,"@user1:
+I would have expected something like `assert isinstance(sender, Chat/User)` here making sure that we're getting the right attribute for the right use cases 🤔 
+
+@author:
+Right. this is why i intended to have two tests, although currently not working as you suggest..
+
+`test_effective_sender_non_anonymous`: makes sure sender is either `User` or `None`
+`test_effective_sender_anonymous`: makes sure sender is either `Chat`, `User` or `None`
+
+i'll make them them more clear 😅"
+235,python__mypy-11143@23a0e4b,python/mypy,mypy/test/testmodulefinder.py,structural,B,,,,"@user1:
+These functions seem to be in support of something, but I don't see what they are supposed to be used for. Perhaps you missed adding some test code before pushing?
+
+@author:
+They were used in the `ModuleFinderSitePackagesSuite` tests, but the test data doesn't really need to use `.pth` files anymore because we don't need to test `mypy.modulefinder.expand_site_packages()` anymore. So I've removed the `.pth` files from the test data and listed the packages directories manually."
+236,python__mypy-11244@3237b02,python/mypy,test-data/unit/check-typeddict.test,functional,C,,,,"@user1:
+Can you also try directly calling `foo.__setitem__` (e.g. `foo.__setitem__(""z"", ""a"")`)? It's not a big deal if this doesn't work as expected, but it should at least not crash."
+239,python__mypy-17309@b3c328e,python/mypy,mypyc/irbuild/mapper.py,functional,A,,,,"@user1:
+If it's `P.args` or `P.kwargs`, we use `tuple[object, ...]` and `dict[str, object]` as the upper bound of the ParamSpecType (respectively). Does that imply we should do something similar to the TypeVarType branch below?
+
+```suggestion
+            return self.type_to_rtype(typ.upper_bound)
+```
+
+@author:
+Good point, thanks!"
+240,python__mypy-4000@358ca96,python/mypy,mypy/semanal.py,functional,B,,,,"@user1:
+This condition is hard to understand. Add a comment describing what it does at a high level and maybe also give some concrete examples. It's also worth trying to simplify the nested boolean expression. Ideas:
+
+* Make the top-level expression of form `e1 and (...) and not e2` instead of `e1 and not (...) and not e2` -- the first `not` operator makes this a bit harder to understand, I think.
+* Use a temp variable to hold the result of `self.type or self.is_func_scope()` and give it a semantically meaningful name.
+
+@author:
+OK, fixed. I replaced this with three ``if``s and thus saved one nesting level for the rest of the body."
+241,python__mypy-4341@2456414,python/mypy,mypy/dmypy.py,functional,A,yes,,,"@user1:
+Should we display some information about the exception, since we are catching arbitrary exceptions? An exception could be caused by a bug in dmypy."
+246,python__mypy-7079@009f478,python/mypy,test-data/unit/check-generics.test,functional,A,,,,"@user1:
+I think that this should generate an error, since `T` is not in scope here. If this seems unrelated, you can create an issue about this (and add a TODO comment here)."
+251,qutebrowser__qutebrowser-5981@7f4897f,qutebrowser/qutebrowser,qutebrowser/config/qtargs.py,functional,A,,,,"@user1:
+This checks against the string ""None"" instead of checking against the [`None` constant](https://docs.python.org/3/library/constants.html#None) from Python. Instead, this should be something like:
+
+```suggestion
+        if val is None:
+```
+
+@author:
+I did this because when I start qutebrowser using the command
+
+`qutebrowser --temp-basedir -s qt.environ '{""QT_SCALE_FACTOR"": None}`
+
+for example I noticed that the literal None is never matched in this if statement however the string 'None' is so I assumed there was some sort of preprocessing that converts the None to 'None' before it got to this point in the code. Is this a problem or am I just misunderstanding how this is supposed to work?
+
+@user1:
+I think you'll get the expected behavior via `qutebrowser --temp-basedir -s qt.environ '{""QT_SCALE_FACTOR"": null}'` (`null` rather than `None`), because YAML is used to parse config options from text. This certainly should be documented better, though."
+254,ray-project__ray-50590@3dad0b2,ray-project/ray,python/ray/data/_internal/datasource/iceberg_datasink.py,functional,B,,,,"@user1:
+Please add type annotations"
+255,reflex-dev__reflex-4406@5ec2c11,reflex-dev/reflex,reflex/vars/datetime.py,functional,B,,,,"@user1:
+no need for isTrue when the result is strictly boolean (and also you're missing the imports for that)"
+257,run-llama__llama_index-19234@e7810e8,run-llama/llama_index,llama-index-integrations/memory/llama-index-memory-mem0/tests/test_mem0.py,functional,B,yes,,,"@user1:
+Actually, the serializer should properly handle serialization before calling model_dump on the memory 👀 (If you look inside the code for that class, it detects framework components and pydantic objects)
+
+@author:
+Oh yeah true: do you suggest using directly InMemoryDictState instead of JsonSerializer? I was testing only the serializer because it was the thing that was failing in the code
+
+@user1:
+JsonSerializer is fine here actually, thats the core thing that needs to be tested"
+263,skypilot-org__skypilot-1144@36893af,skypilot-org/skypilot,sky/backends/wheel_utils.py,functional,B,,,,"@user1:
+Refactor out? A previous func uses `**/<this var>`.
+
+@author:
+Good point. Fixed. Thanks!"
+264,skypilot-org__skypilot-1144@36893af,skypilot-org/skypilot,sky/backends/wheel_utils.py,functional,A,,,,"@user1:
+Shall we throw a RuntimeError just in case the glob fails?
+
+@author:
+Good point! Added. Thanks!"
+265,skypilot-org__skypilot-1297@fd5782f,skypilot-org/skypilot,sky/cli.py,functional,A,,,,"@user1:
+Great catch! How about we use the programmatic API `core.autostop` instead?
+
+Also, should we make this an `elif idle_minutes_to_autostop is not None` after L718?
+
+@author:
+Good point!"
+267,skypilot-org__skypilot-1505@e7e933d,skypilot-org/skypilot,sky/clouds/service_catalog/data_fetchers/fetch_aws.py,functional,C,,,,"@user1:
+At first glance not sure what ""region integrity"" means. 
+
+@author:
+Fixed the helpstr and changed option name. How does that look?"
+268,skypilot-org__skypilot-1622@2c08184,skypilot-org/skypilot,tests/test_optimizer_dryruns.py,functional,C,yes,,,"@user1:
+Maybe add the `8.0` and `'8'` variants for the last resource.
+
+@author:
+Fixed."
+269,skypilot-org__skypilot-1718@1b51ae2,skypilot-org/skypilot,sky/skylet/providers/lambda_cloud/node_provider.py,functional,A,,,,"@user1:
+Can we have some rate limit error handling / retrying for the place we call the lambda API? One possible problem that I could image here is we run `sky launch -c test1 --cloud lambda` and `sky launch -c test2 --cloud lambda` in parallel, and they could fail each other.
+
+I am thinking if we can have the retry logic built-in the `LambdaClient`, i.e. if the API rate limit is reached, retry the function call with some backoff.
+
+@author:
+Hmm, let me think about this. In this case, the backoff time would require some randomness (or else the `test1` and `test2` would keep failing each other).
+
+@user1:
+You may want to use the the backoff tool here if needed.
+https://github.com/skypilot-org/skypilot/blob/4e7d7172f2a3c9196315f5c2e42c68bd5ec967e8/sky/utils/common_utils.py#L98-L123"
+270,skypilot-org__skypilot-1718@1b51ae2,skypilot-org/skypilot,sky/backends/cloud_vm_ray_backend.py,functional,A,,,,"@user1:
+Can we only increase this number for Lambda, as that will increase the waiting time for the quota limit error for other clouds?
+
+@author:
+Updated! I turned `_NODES_LAUNCHING_PROGRESS_TIMEOUT` into a dictionary."
+271,skypilot-org__skypilot-1718@1b51ae2,skypilot-org/skypilot,sky/skylet/providers/lambda_cloud/node_provider.py,functional,A,,,,"@user1:
+Do we want to raise an error and have more information in the error message to make it easier to debug in the future? We can use `subprocess_utils.handle_returncode()`
+
+@author:
+Good idea.
+
+@author:
+Done."
+274,skypilot-org__skypilot-5030@0acc040,skypilot-org/skypilot,sky/utils/kubernetes/deploy_remote_cluster.sh,functional,B,,,,"@user1:
+Can we make these a function? Looks like we just repeat it multiple times
+
+@author:
+Yes, I have updated this."
+275,skypilot-org__skypilot-5030@0acc040,skypilot-org/skypilot,sky/utils/kubernetes/deploy_remote_cluster.sh,structural,B,,,,"@user1:
+This code snippet is used pretty often in this file, can we have a macro/function that can be reused instead of copy pasting? 
+
+@author:
+Yes, sorry for this."
+276,skypilot-org__skypilot-5435@50d9632,skypilot-org/skypilot,tests/smoke_tests/smoke_tests_utils.py,functional,B,,,,"@user1:
+This is also potentially replaceable with `/sky/skypilot_config.py:_parse_config_file()`"
+281,sqlfluff__sqlfluff-1803@a822a1f,sqlfluff/sqlfluff,src/sqlfluff/rules/L019.py,functional,A,,,,"@author:
+This is the fix. If we ""edit"", it corrupts the parse tree by making the newly placed comma segment a _child_ of the code segment. This is wrong. It should be a sibling. We achieve this by using ""create"" instead. This requires using a different anchor: the segment _following_ the last code segment, not the last code segment itself.
+
+This bug is a bit similar to the #1304 bug from a month or so ago where lint fixes end up placing whitespace segments in weird places they don't belong. Noting this because there's an open question whether the core linter could help detect or avoid such issues. I suggest we continue fixing the individual rules while we can, but this deeper improvement may prove necessary at some point."
+284,sqlfluff__sqlfluff-2285@2a45c67,sqlfluff/sqlfluff,test/fixtures/rules/std_rule_cases/L009.yml,functional,C,,,,"@user1:
+Why is this a valid pass_str? Should it be `{{ ""\n\n"" }}\n`?
+
+@author:
+The vertical bar (`|`) character tells YAML this is a multiline string, and that we want to preserve newlines at the end of lines. Most other rules use multiline format, but this one mostly uses quoted strings. I'll change the test to the equivalent quoted string, as in your example above. 🙏🏽"
+285,sqlfluff__sqlfluff-2510@8c37232,sqlfluff/sqlfluff,src/sqlfluff/dialects/dialect_bigquery.py,documentation,B,,,,"@user1:
+Can this commented-out code be removed?
+
+@author:
+Yup. It's gone."
+291,sympy__sympy-16133@82bdbae,sympy/sympy,sympy/logic/boolalg.py,functional,B,,,,"@user1:
+You can use/modify `ibin` from iterables.
+
+@author:
+Thanks!"
+292,sympy__sympy-16133@82bdbae,sympy/sympy,sympy/logic/boolalg.py,functional,A,,,,"@user1:
+it doesn't look like a check is done that the list has `bits` bits in it; that should probably be verified
+
+@author:
+OK! I was thinking that _maybe_ it also secretly supported some sort of generator, since the original code plainly made `list` out of everything. But that may in hindsight be to support tuples etc.
+
+Indeed makes sense!"
+293,sympy__sympy-18410@189871b,sympy/sympy,sympy/solvers/tests/test_ode.py,functional,C,,,,"@user1:
+Since these ODEs can already be solved on master these tests should specify the hint as in `hint='nth_..._undetermined_coefficients'`.
+
+@author:
+> What happens if the rhs includes both a hyperbolic function and exp(x)? Does it get confused? We should add a test for this.
+
+It treats them seperately and i have added test for this ."
+294,sympy__sympy-18591@5505065,sympy/sympy,sympy/ntheory/factor_.py,style,B,,,,"@user1:
+```suggestion
+        odd = [(b, e) for b, e in facs.items() if e%2]  # only 1 odd exponent
+```"
+297,sympy__sympy-18630@9ca7e3a,sympy/sympy,sympy/functions/special/hyper.py,functional,A,,,,"@user1:
+```suggestion
+            return super()._eval_nseries(self, x, n, logx)
+```
+
+@user1:
+I'm not sure of this, though. The docs say that if the second argument of `super` is omitted, then the method will be unbound but I don't know what will happen if both arguments are omitted. However, there is an example that seems to indicate that the returned method will be bound to `self`. Perhaps that should be tested.
+
+@user1:
+Tests seem to show that the method will be bound. So better leave this unchanged.
+
+@author:
+I think what you are saying is the way it was done in python 2 and in python 3 both the arguments can be left omitted."
+299,sympy__sympy-19406@f6e5af5,sympy/sympy,bin/test_travis.sh,documentation,B,,,,"@user1:
+Does this run the normal flake8 checking twice?
+
+@author:
+I'm not sure. It seems so, but I can't find anything in the `flake8` documentation that says whether or not the code is also checked with the `--doctests` flag.
+
+edit: I found a reference here: https://bugs.launchpad.net/pyflakes/+bug/1223150 so it seems that the normal checking truly is done twice."
+301,sympy__sympy-21459@382ea94,sympy/sympy,sympy/solvers/ode/riccati.py,functional,B,,,,"@user1:
+I don't think this should use SinglePatternODESolver.
+
+Rather the code here should just be a bunch of functions for doing the different parts of the algorithm. Then we can make a Solve class in single.py that wraps this for the current dsolve framework.
+
+@author:
+So we don't need the `RationalRiccati` class? What would the `Solve` class constitute?
+
+@user1:
+The solver class would basically be this one except that it wouldn't have all of these methods. Instead it would just call the functions from the ricatti module.
+
+These classes exist just for the current pattern-matching structure of dsolve but we might want to move beyond that to a different structure later so an algorithm like this should not be tied to that structure."
+302,sympy__sympy-21883@418efae,sympy/sympy,sympy/solvers/tests/test_solvers.py,functional,B,,,,"@user1:
+```suggestion
+```"
+306,sympy__sympy-26515@2c01ca9,sympy/sympy,sympy/polys/sqfreetools.py,functional,C,,,,"@user1:
+``K[x, y]`` and ``k[x, y]``
+
+@author:
+Fixed."
+309,sympy__sympy-27352@b3187d6,sympy/sympy,sympy/polys/matrices/ddm.py,functional,A,,,,"@user1:
+Using `//` here is incorrect. This is not how fraction-free algorithms work: exact division (`exquo`) can be used but floor division should not.
+
+@author:
+Okay, I used `/` at first but after installing `python-flint`, `/` started giving  me  this` ""error:  flint.utils.flint_exceptions.DomainError: fmpz division is not exact ""`
+
+
+@author:
+but i will work around it, thank you for the nuggets. 
+
+@user1:
+If the domain is a field then `/` can be used.
+
+@author:
+what are the domains the `qr` method should support?  The current implementation only supports integers (ZZ).
+
+@user1:
+The QR decomposition should be computable for any field. To learn more about the domains see:
+https://docs.sympy.org/latest/modules/polys/domainsintro.html"
+310,tobymao__sqlglot-1123@23610af,tobymao/sqlglot,sqlglot/tokens.py,functional,A,,,,"@user1:
+why are you doing 2 * identifier_end, shouldn't you use escape?
+
+@author:
+Yeah, I think you're right. I wanted to make it so transpilation yields the same SQL, but we can probably do that by expanding a single `""` into two inside the generator.
+
+@author:
+Fixed"
+311,tobymao__sqlglot-1729@8be14c1,tobymao/sqlglot,sqlglot/dialects/hive.py,functional,B,,,,"@user1:
+let's move this out to the dialect? because it's in both tokenizer and generator, and then it can get passed in to both
+
+@author:
+yeah, good point
+
+@author:
+done"
+312,tobymao__sqlglot-2096@1794bf3,tobymao/sqlglot,sqlglot/dialects/hive.py,functional,A,,,,"@user1:
+why are you adding only_kind everywhere? float should basically always equal float right?
+
+array == array
+
+array[int] != array[str]
+
+@author:
+> float should basically always equal float right?
+
+this is basically the same as in https://github.com/tobymao/sqlglot/pull/2096#discussion_r1299437320: the reason i implemented it like this was to ensure we don't assume any kind of equality between types that don't share the same precision"
+316,vega__altair-3426@b0d0e5c,vega/altair,altair/utils/data.py,style,B,,,,"@author:
+Marked for removal: `altair.utils.data.curry`"
+317,vega__altair-3426@b0d0e5c,vega/altair,altair/utils/_importers.py,functional,B,,,,"@author:
+Marked for removal: `altair.utils._importers.import_toolz_function`.
+
+Alternatively, could be made generic, if this functionality is useful for other modules/packages?
+
+@user2:
+I don't know if this is useful for any other module, @user1 do you know?
+
+@user1:
+Nope. No idea. 
+
+@author:
+Realising now that comment hasn't highlighted the contents of the function. 
+
+Also the deprecation part might be distracting from the part that could be useful.
+```py
+...
+try:
+    module = import_module(""toolz.curried"")
+except ImportError as err:
+    msg = f""{msg} {err.args[0]}""
+    raise ImportError(msg) from err
+...
+``` 
+
+The other functions in `_importers`:
+- `import_pyarrow_interchange`
+- `import_vl_convert`
+- `import_vegafusion`
+
+They all do fairly similar things, although based on version constraints and use regular imports, like `import vl_convert as vlc` instead of `import_module(""vl_convert"")`:
+
+<details>
+<summary>import_vl_convert</summary>
+
+```py
+def import_vl_convert() -> ModuleType:
+    min_version = ""1.3.0""
+    try:
+        version = importlib_version(""vl-convert-python"")
+        if Version(version) < Version(min_version):
+            raise RuntimeError(
+                f""The vl-convert-python package must be version {min_version} or greater. ""
+                f""Found version {version}""
+            )
+        import vl_convert as vlc
+
+        return vlc
+    except ImportError as err:
+        raise ImportError(
+            f""The vl-convert Vega-Lite compiler and file export feature requires\n""
+            f""version {min_version} or greater of the 'vl-convert-python' package. \n""
+            f""This can be installed with pip using:\n""
+            f'   pip install ""vl-convert-python>={min_version}""\n'
+            ""or conda:\n""
+            f'   conda install -c conda-forge ""vl-convert-python>={min_version}""\n\n'
+            f""ImportError: {err.args[0]}""
+        ) from err
+```
+
+</details>
+
+
+So rather than having a **dedicated function per import** to maintain and keep consistent - you could do something like below. 
+I've taken this from my own code I was working on during #3420, as it shows a larger number of optional dependencies: 
+
+```py
+from types import ModuleType
+from typing import NamedTuple
+
+class ModuleAvailable(NamedTuple):
+    module: ModuleType | None = None
+    available: bool = True
+
+
+_init_modules = (
+    ""msgspec"",
+    ""tomli_w"",
+    ""aiofiles"",
+    ""xlsxwriter"",
+    ""plotly"",
+    ""altair"",
+    ""lxml"",
+    ""ftfy"",
+    ""playwright"",
+    ""keyring"",
+)
+_available_modules: dict[str, ModuleAvailable] = {
+    name: ModuleAvailable() for name in _init_modules
+}
+
+def import_optional(
+    module_name: str,
+    /,
+    scope: _UserDefinedScope | str | Literal[""ignore""],
+    extra: str = """",
+) -> ModuleType:
+    if item := _available_modules.get(module_name):
+        if module := item.module:
+            return module
+        elif not item.available:
+            msg = _optional_module_msg(scope, module_name, extra) # defined elsewhere
+            raise ModuleNotFoundError(msg)
+    return _import(module_name, scope, extra)
+
+def _import(
+    module_name: str, /, scope: _UserDefinedScope | str, extra: str
+) -> ModuleType:
+    global _available_modules
+    lib_name = module_name.split(""."", 1)[0]
+    try:
+        module = import_module(module_name)
+        _available_modules[module_name] = ModuleAvailable(module=module)
+        if module_name != lib_name:
+            _available_modules[lib_name] = ModuleAvailable(module=sys.modules[lib_name])
+    except ImportError:
+        unavailable = ModuleAvailable(available=False)
+        _available_modules[module_name] = unavailable
+        if module_name != lib_name:
+            _available_modules[lib_name] = unavailable
+        msg = _optional_module_msg(scope, module_name, extra) # defined elsewhere
+        raise ModuleNotFoundError(msg) from None
+    return module
+```
+
+Something like [polars.dependencies](https://github.com/pola-rs/polars/blob/687dee3095ae00137ff7fdb31533ecf960b324e7/py-polars/polars/dependencies.py) is a much more developed spin on this - particularly [dependencies.import_optional](https://github.com/pola-rs/polars/blob/687dee3095ae00137ff7fdb31533ecf960b324e7/py-polars/polars/dependencies.py#L231) which has version bounds.
+
+
+
+@author:
+Just to be clear, this is more me floating an idea - not something that needs to be tied to this PR
+
+@user1:
+Thanks for mentioning this suggestions! Can we remove this `import_toolz_function()` function? I don't think it is used anywhere anymore.
+
+@author:
+Sure thing @user1
+
+Fixed in 88fbd1141b39ca74b47106d254969661e77bdabf"
+319,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,B,,,,"@user1:
+Just let the `user` inside the `if else`."
+321,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,B,,,,"@user1:
+Does this lines be redundant?"
+324,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,C,,,,"@user1:
+`Duplicate api-keys exists, please check your configuration`"
+325,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,B,yes,,,"@user1:
+48 is too long. We do not have to be same with OpenAI.
+Just 10 is fine"
+329,xorbitsai__inference-2079@5ae18b2,xorbitsai/inference,xinference/model/llm/vllm/core.py,functional,B,yes,,,"@user1:
+Only add a tokenizer beyond the VLLMModel? Why not calling the base load method first?"
+330,xorbitsai__inference-2079@5ae18b2,xorbitsai/inference,xinference/model/llm/vllm/core.py,functional,A,,,,"@user1:
+Shall we consider the `vision` ability?"
+331,ansible__ansible-77944@0f6d2a8,ansible/ansible,lib/ansible/inventory/manager.py,functional,A,,,,"@user1:
+It seems like this needs to be reversed - if the host is new (result_item is truthy), save it to the cache. If the host is not new, then we should populate inventory with the host info in the cache.
+
+@author:
+it is not testing for the result being change/successful, but that the result is populated at all, makes the distinction between being called from playbook vs being called from refresh process.
+
+@author:
+switched to specific key on refresh, since another corner case required more data
+
+@user1:
+> it is not testing for the result being change/successful
+
+I didn't say it was, the logic was backwards. You fixed it, refreshing occurs now when it should. :+1:
+
+@author:
+ah .. yep, i was looking at newer code, not what was posted, good catch."
+335,netbox-community__netbox-13563@4da93f4,netbox-community/netbox,netbox/utilities/forms/bulk_import.py,functional,A,,,,"@user1:
+Should `delimiters` include a space? Should this be a tab (`\t`) instead?
+
+@author:
+I tried but the internals for sniff simply iterate over the single char like `[key for key in delimiters]` due to which it's not really possible to pass `\t`. I tried using a list of strings but my IDE was telling me the expected type is `str` or `None` only,
+
+@user2:
+Maybe I'm misunderstanding, but seems to work here?
+
+```
+>>> data = """"""test1\ttest2\ttest3
+... dss\tdsds\tdsds""""""
+>>> print(data)
+test1   test2   test3
+dss     dsds    dsds
+>>> dialect = csv.Sniffer().sniff(data.strip(), delimiters=',;\t')
+>>> dialect.delimiter
+'\t'
+```
+
+Also:
+
+```
+>>> [key for key in "",;\t""]
+[',', ';', '\t']
+```
+
+@author:
+This is odd, when I tried from the Import UI, the code blew up because it could not detect the delimiter
+
+@author:
+It's my fault I guess to assume the issue originated at the sniff function, rather it was with header checks
+
+![image](https://github.com/netbox-community/netbox/assets/5083532/9de59190-eb8e-4fed-96cb-01e0ffe64350)
+
+
+@user3:
+This screenshot makes no sense, you're trying to put \t into the web form? That's not the same as a tab character.
+
+Try creating a text file in Notepad with tabs seperating the fields and copy-paste this into the form instead."
+336,netbox-community__netbox-13563@4da93f4,netbox-community/netbox,netbox/utilities/forms/bulk_import.py,functional,B,,,,"@user1:
+It would probably be a good idea to provide the user a mechanism for overriding this as well, like what we do for bulk import formats (CSV/JSON/auto).
+
+@author:
+If you want specific selectors in the form we can get rid of this logic and simply pass the `delimiter` to the reader. Using sniff seemed more manageable in case we decide to include more delimiters or even provide ways for the user to set this in the configuration.
+
+@user1:
+We should retain the automatic detection as the default behavior, but also offer the option for the user to override it.
+
+@author:
+I have made some changes to the code, see if that fits what you were articulating. It may need more cleanup though."
+338,RasaHQ__rasa-5818@693ab41,RasaHQ/rasa,scripts/release.py,functional,A,,,,"@user1:
+I am not sure if this has changed recently, the most recent PEP I am aware of is https://www.python.org/dev/peps/pep-0440/#pre-releases which uses the `1.2.3a2` format instead of `alpha`.
+
+If there is no newer PEP suggesting `alpha`, we should stick with `a`
+
+@author:
+ok, so that's why! sadly they diverged from strict semver 😢"
+339,RasaHQ__rasa-5818@693ab41,RasaHQ/rasa,scripts/release.py,functional,A,yes,,,"@user1:
+optional: since we might soon want to cut an `rc`, can we easily make this more generic to also support these versions?
+
+@author:
+good, so we would add support for `X.YrcN` from PEP spec"
+340,python__cpython-30745@6ab18ef,python/cpython,.gitattributes,functional,B,,,,"@user1:
+Does `linguist` follow `[attr]` declarations in `.gitattributes`?  If so, it might be nicer to add `[attr]generated linguist-generated diff=generated`, and then we just need to tag the generated files with `generated` rather than the full `linguist-generated=true diff=generated`.  That also makes it just one place to change things if we later want to add another tag to generated files.
+
+@author:
+Oooooh, that's a nice thought. I'll check if that is possible.
+
+@author:
+Tested and verified on my fork. Thanks! 🍰 🥳 🎉 
+
+@author:
+(I'll update the no-EOL and CRLF sections with macros in a separate PR.)"
+342,saleor__saleor-5254@efbebcc,saleor/saleor,saleor/graphql/middleware.py,documentation,B,,,,"@user1:
+unused import
+
+@author:
+The import is used through `ot`
+
+@author:
+Ah I see the bot is saying it is not used... but it is. Then I will do `... import tags as ot_tags` less good looking but at least the robot will be happy"
+344,freqtrade__freqtrade-8083@592eebe,freqtrade/freqtrade,setup.sh,functional,A,,,,"@user1:
+If i'm honest, then my approach would've been to force this downgrade if freqai-rl (or dev) is selected (we do something similar with cython for raspberry installations).
+
+It's not really optional - and we know for a fact that installation will fail if this requirement is not matched - so we're basically asking the user ""would you like to have the installation fail - or not?"" - without saying it out loud 😆 
+
+It's not a global downgrade anyway, and will only impact the current virtual environment - so it's not problematic i'd think.
+
+
+
+@author:
+So that's a funny thing. In the fresh, newly created venv the version is actually `59.6.0` it doesn't even pass the check if that check is after `source .env/bin/activate`. Maybe we can only leave it in the freqai requirements for the setup.sh. It will still not work if trying to install system-wide (through `pip install -r ....`). It will only work in setup.sh.
+
+@author:
+Still again even if the version is `59.6.0` in venv if the version is not fixed in the requirement it fails to build gym.
+
+@author:
+Ok, can't get simpler than that, just let people know in the docs haha
+
+@user1:
+that obviously works 😆 
+
+i did a few tests (always on clear systems) - and found a working method for the setup.sh script.
+combined with the documentation - that will have to suffice.
+
+@author:
+Looks great, thank you for getting to the bottom of this :)"
+347,netbox-community__netbox-17716@8a8c328,netbox-community/netbox,netbox/netbox/utils.py,style,A,,,,"@user1:
+We probably want to namespace these by app or Python path. Otherwise, we risk a name collision among jobs from different plugins."
+348,netbox-community__netbox-17716@8a8c328,netbox-community/netbox,netbox/core/management/commands/rqworker.py,functional,B,,,,"@user1:
+Could we do away with the `system_enabled` attribute and just check whether `system_interval` is defined? The former seems redundant since we're already registering system jobs automatically."
+350,cupy__cupy-2872@158ac6a,cupy/cupy,cupy/core/_routines_statistics.pyx,functional,A,,,,"@user1:
+I am a bit concerned with the order `'bhilq'`. Which return type is chosen when `argmin(..., dtype=None, ...)` is called? I thought we'd need to put `'q'` as the leading character to match NumPy default, but I could be wrong. (I don't have access now to test this PR.)
+
+@author:
+Thank you for pointing out! It seems you are correct. Some of the tests were failing.
+Fixed in eb90e95d5e3a421d31a56c2eaec4d32a0471780d."
+355,dbt-labs__dbt-core-10664@4a736f4,dbt-labs/dbt-core,core/dbt/contracts/graph/unparsed.py,structural,B,,,,"@user1:
+Instead of redefining this class, can we instead just reuse the `CustomGranularity` class defined in core/dbt/artifacts/resources/v1/model.py. The classes are exactly the same _except_ in their class name (unless I'm misreading something, which is absolutely possible). We could actually do the same with the `UnparsedTimeSpine` vs `TimeSpine` class, but that is a separate matter.
+
+@author:
+Good call! Removed duplicates for both!"
+358,geldata__gel-6352@24b4f19,geldata/gel,edb/server/protocol/protocol.pyx,functional,A,,,,"@user1:
+I think this should be the `""sub""` in the JWT token or the username in the `Basic` authorization value, or `cfg::Auth.user` won't work if it's set to non-`edgedb` values. But that's probably an acceptable unimplemented feature at this moment, because this endpoint wasn't protected at all.
+
+@author:
+`sub` isn't always present in the JWTs we generate, though. Ones for local instances have no `sub` but do have `""edgedb.server.any_role""` set.
+
+Our cloud tokens do have a `sub` set, and it seems to be a random alphanumeric string; does it actually correspond to a role in edgedb?
+
+@user2:
+`sub` in the cloud token is the id of the cloud user, no relation to role, as those are specified in token scope instead.  We have the `X-EdgeDB-User` header to communicate the desired role instead.  Default to `edgedb` if it isn't present I guess."
+363,geldata__gel-4469@95cccee,geldata/gel,tests/test_edgeql_casts.py,functional,C,yes,,,"@user1:
+Add a test where we apply it to a set of ids where *one* of the ids is missing and the rest are there, to make sure that that raises an error.
+
+@author:
+Ha. It turns out that this does not raise an error. Did I do something wrong with contexts?
+
+@user1:
+Ok, I think we do need to make sure that the set appears in the scope tree, like this:
+https://github.com/edgedb/edgedb/blob/master/edb/edgeql/compiler/casts.py#L480-L483
+
+When you test this out, make sure to take a look at the scope tree with and without doing this, to get a feel for what is going on
+
+@user1:
+(Interestingly, I bet that if you had `with` bound the set you were casting, and then cast that *name*, it would have worked. This is because compiling that *name* would have put the path in the scope tree)
+
+@author:
+Hmmm, after I added UUID into the error message this now passes. Is this the consequence of the strange scope tree rules?
+
+@user1:
+Ha, yeah.
+In the original take, the reference to the anchor appeared only in a subquery. (And like, triply so: inside of SET OF argument, inside a select statement, inside a filter clause thereof.)
+But once the error message was added, it was referred to in the scope *outside* of the SET OF argument to `assert_exists`, so that is where it gets bound..."
+364,geldata__gel-4469@95cccee,geldata/gel,edb/edgeql/compiler/casts.py,functional,C,,,,"@user1:
+Can we make the error message here actually include the id?
+
+@author:
+Yes, but that would compute the error message at runtime, for each id, even if the function does not fail.
+
+Do we want that, thinking from performance standpoint?
+
+@user1:
+Yeah, that's a good question. Let's try benchmarking it.
+
+@user1:
+Otherwise I would go with something like
+```
+could not find <typename> with specified id
+```
+I think that including the id would be pretty nice, though. So if it is slow, it might be worth looking into way to make it not too bad?
+
+
+@author:
+I've tried using this:
+```
+> time edb cli query ""select (for i in _gen_series(1, 10000000000) union (select <Person><uuid>'b90b4f92-4331-11ed-adee-17dbc27f8b02' filter .first_name = 'non-existent'));""
+edb cli query   0.52s user 0.06s system 99% cpu 0.589 total
+```
+and it from 0.49s - 0.55s, no matter if I have ids in error message or not.
+
+So I'm keeping it in."
+365,frappe__frappe-15891@ec9ae72,frappe/frappe,frappe/model/base_document.py,style,C,,,,"@user1:
+@author is preserving the type important for the goal of this PR? My expectation would be that Document always parses date/-times that were passed as strings and always provides a date/-time object back.
+
+@author:
+The docstring wasn't updated. Have changed it now."
+370,home-assistant__core-121178@b09b3b5,home-assistant/core,homeassistant/components/shelly/sensor.py,functional,A,,,,"@user1:
+Shouldn't we test for get('freq') is None like we do for xfreq ?
+
+@author:
+According to the documentation `freq` is always a number
+![obraz](https://github.com/home-assistant/core/assets/478555/99adf272-2067-4f60-aa1a-4afc3e7967bb)
+But I think we need here to check the type of the input. If I understand correctly `freq` is available only for the type `count`
+https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Input#status
+
+@user1:
+yup, `percent `and `xpercent` for **analog**, `freq` and `xfreq` for **count**"
+374,saleor__saleor-4617@9c2907b,saleor/saleor,saleor/graphql/account/mutations/base.py,documentation,B,,,,"@user1:
+This function could be moved to `saleor/account/emails`. If we added the ability to trigger a password reset for customers from the dashboard, it could be reused. I would also add short docstring e.g. ""Trigger sending a password reset email for the given user."""
+376,saleor__saleor-4617@9c2907b,saleor/saleor,saleor/core/utils/url.py,functional,A,,,,"@user1:
+Can raise `ValueError`"
+380,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,functional,A,,,,"@user1:
+There doesn't seem to be any error handling in place. At a minimum, we should catch any fatal errors and re-raise them with some context for the user. Some comments would also be helpful to explain what requests are being made and why.
+
+Additionally, we should avoid declaring `url` multiple times: If the value isn't being reused, we can pass the string(s) directly to `requests.get()` instead.
+
+@author:
+For error checking I think the error from the API call would contain the most info so I've added extra logging but re-raise the error."
+384,netbox-community__netbox-14754@44cf93a,netbox-community/netbox,netbox/extras/views.py,functional,C,,,,"@user1:
+Can we move this to a method on the Report & Script classes? That would keep the code closer to the models, and obviate needing to pass `jobs` as context under every view.
+
+(If not, the function should at least be moved to `utils.py`.)
+
+@author:
+Yup, definitely"
+385,netbox-community__netbox-16426@759cbc3,netbox-community/netbox,netbox/extras/choices.py,style,B,,,,"@user1:
+This ordering isn't technically by name, as not all model have a `name` attribute (circuits, for instance). Let's change this to ""alphabetical"" to be more accurate."
+386,netbox-community__netbox-16426@759cbc3,netbox-community/netbox,netbox/extras/dashboard/widgets.py,style,C,,,,"@user1:
+We should define the base queryset (`Bookmark.objects.filter(user=request.user)`) once, and then effect ordering one way or the other depending on the selected option. This ensures that any future modifications to the base queryset are needed only once."
+394,scikit-learn__scikit-learn-14660@850cd0a,scikit-learn/scikit-learn,sklearn/metrics/pairwise.py,functional,C,yes,,,"@user1:
+Distance between them isn't right
+
+@author:
+should be kernel?
+
+@author:
+Fittingly I was just listening to this: https://www.youtube.com/watch?v=Qv5fqunQ_4I"
+395,scikit-learn__scikit-learn-12486@15a4397,scikit-learn/scikit-learn,sklearn/metrics/scorer.py,functional,C,,,,"@user1:
+should we say ""got predict_proba of shape""?
+
+@author:
+That seems like a good idea, because that is what is actually happening.  
+
+*But*, will the *user* understand that?  Is there some place in the documentation where we can write:
+>When obtaining predictions from a classifier, if it is only one class, the returned ValueError will be ""got predict_proba of shape"".  That means it returns one column all with same probabilities (equal to 1). 
+**Q:** How to fix this?
+**A:** Must use a classifier with 2 classes.
+
+Or will they be able to see it from the test below:  
+`with pytest.raises(ValueError, match=""use classifier with two classes"")`
+I would feel better if the user had explicit feedback on how to solve the error.
+
+cc:  @user2
+
+
+
+@user1:
+Are you saying the current error message is not informative enough? The test is just to make sure that the error that is raised is actually informative.
+I suggested adding the predict_proba shape to the error message, not replace the message that's there now.
+
+@author:
+That works.
+I tried making the update myself but ran into multiple problems:  [errors list](https://gist.github.com/reshamas/93af459fd61aed10ff3c162ca62a8a98)
+
+@author:
+ok, making progress.  Please let me know next steps. 
+
+cc:  @user2"
+396,scipy__scipy-18152@d349c38,scipy/scipy,scipy/stats/tests/test_stats.py,documentation,C,,,,"@user1:
+To avoid repetition, please use [`pytest.mark.parametrize`](https://docs.pytest.org/en/6.2.x/parametrize.html)."
+398,pandas-dev__pandas-24968@0ea6653,pandas-dev/pandas,pandas/tests/plotting/test_frame.py,functional,C,,,,"@user1:
+Rather than these individual checks can you parametrize all of the combinations?
+
+@author:
+thanks! @user1 i parametrize the combinations."
+401,pandas-dev__pandas-35974@d0a8a68,pandas-dev/pandas,pandas/io/excel/_base.py,style,B,,,,"@author:
+should be possible to just take the maximum in that list, right?"
+403,pandas-dev__pandas-35974@d0a8a68,pandas-dev/pandas,pandas/io/excel/_base.py,style,B,,,,"@user1:
+Is this required? Looks like there are already checks within the subsequent functions for int values, no?"
+404,pandas-dev__pandas-20550@c1dfe56,pandas-dev/pandas,pandas/tests/frame/test_indexing.py,functional,C,,,,"@user1:
+can you assign with a numpy array that you construct directly"
+405,pandas-dev__pandas-29356@cadbdc3,pandas-dev/pandas,pandas/tests/test_multilevel.py,structural,C,,,,"@user1:
+can you make this a bit more programatic, rather than hardcoding these values, it would  be easier to copy-paste
+
+@author:
+Thanks for the feedback, @user1! Reproduced the same behaviour with simpler input data."
+406,pandas-dev__pandas-28802@33c889c,pandas-dev/pandas,pandas/core/reshape/tile.py,functional,A,,,,"@author:
+@user1 Not entirely sure where this should go - Adding `x.astype(int)` under  `elif is_bool_dtype(x)` higher up throws an error in tests with the existing `np.where(x.notna(), x.view(np.int64), np.nan)` statement if x is ndarray - it passes if x is Series though.
+ `AttributeError: 'numpy.ndarray' object has no attribute 'isnan'`
+    
+It passes if adding i`s_bool_dtype(x)`  with new `np.where` condition using `~np.isnan(x)` like i've done here to account for x being an ndarray
+
+@user1:
+so don't use ``np.isnan``, change this to 
+
+```x = np.where(notna(x), x.astype(np.int64, copy=False), np.nan)```
+
+@author:
+I've gone with doing the integer conversion in the `elif` block higher up and leaving `dtype` as `None` as @user2 suggested, rather than making any changes here."
+408,scikit-learn__scikit-learn-8835@4bef1da,scikit-learn/scikit-learn,sklearn/utils/class_weight.py,style,A,,,,"@user1:
+why not `_dtype=y.dtype`...
+
+is it so you can have `y.dtype` to be `int` and `weight` to be of `float`?"
+409,scikit-learn__scikit-learn-8835@4bef1da,scikit-learn/scikit-learn,sklearn/linear_model/tests/test_logistic.py,functional,C,,,,"@user1:
+Can you ensure (maybe using `astype`?) `X, Y1` are of `float64` before this test? (If in future it is changed, this test will still pass)"
+411,scipy__scipy-16508@3d7cf12,scipy/scipy,scipy/interpolate/tests/test_rgi.py,functional,C,,,,"@user1:
+Aha. I'm going to be annoying and ask to restructure this test. Consider num_trailing_dims=2. Let `values.shape = (6, 7, 8, 9, 2, 3)`, just for the sake of an example. The first four  entries are interpolation axes, and there are 2*3=6 trailing values to broadcast over. I think the test should actually loop over these six values, not only three values it does now. 
+
+The shape of the result is checked above (line 533), so here we only check the values themselves. Options: 1) restrict to the test to two trailing dimensions, type the double loop manually; 2) reshape values to squash the trailing dimensions into one, keep the single for loop, restore the shape of the result before `assert_allclose` in line 548 below --- whichever feels more natural to you."
+412,matplotlib__matplotlib-24111@3f99c20,matplotlib/matplotlib,lib/matplotlib/cm.py,functional,A,,,,"@user1:
+We may want to transform this into a ValueError. `get_cmap` is less a lookup and more a transformation function.
+
+@author:
+I have a slight preference for `KeyError` to mirror `__getitem__`.  Maybe it should raise both and add another check that `cmap` is actually a string and then raise a `ValueError`?  There are ways to call this now that will get ""not hashable"" errors etc.
+
+@user2:
+If you're going to check strings, then I'd think it would be `if isinstance(cmap, str): return valid or raise ValueError; else: raise TypeError`, and maybe no `KeyError` at all?"
+414,jina-ai__serve-5607@900d9e3,jina-ai/serve,jina/serve/stream/__init__.py,functional,B,,,,"@user1:
+this is weird, it is either an input parameter or read from a private method, but seems weird this usage"
+415,jina-ai__serve-5607@900d9e3,jina-ai/serve,docs/concepts/flow/executor-args.md,functional,A,yes,,,"@user1:
+this is wrong
+
+@author:
+The devbot has gone crazy. I have a proper linear branch from the master branch.
+```
+* c477d6eb98 (HEAD -> introduce-client-prefetch, origin/introduce-client-prefetch) style: fix overload and cli autocomplete
+* 8995046c07 test: relax assertion due to different runtimes in ci and local
+* 9222fac100 fix: remove unused prefetch arugment from Client args to avoid conflicts
+* 8a0d2b3dc7 feat: use optional prefetch before checking class or metadata value
+* 722066c54b fix: revert changes to Client constructor
+* 900d9e3710 style: fix overload and cli autocomplete
+* 4c8cc8d35c feat: add prefetch to client post method
+* 6eb4078f68 (origin/master, origin/HEAD, master) docs(contributing/callbacks): fix links and formatting (#5571)
+* 72f2eedace feat: use single gateway streamer for CompositeGateway (#5598)
+```
+
+@user2:
+I don't think there is anything wrong with the devbot. This argument shouldn't exist because prefer_platform does not exist for executors. Try: jina executor --help"
+417,pandas-dev__pandas-19021@fd1e7a5,pandas-dev/pandas,doc/source/whatsnew/v0.23.0.txt,functional,C,,,,"@user1:
+can you add the case this is actually addressing (e.g. categorical)"
+418,scipy__scipy-15905@171e94e,scipy/scipy,scipy/stats/_stats_py.py,functional,A,,,,"@author:
+@user1 thanks for your help today. This issue is related to that one (gh-10821) in that it also involves catastrophic cancellation when computing a moment from data.
+
+In gh-10821, you looked for the variance being zero (`< np.finfo(dtype).tiny`) and did something to compensate. When this happened, you didn't really need to calculate the variance very accurately because it signaled that the optimization need not consider that value of `lmbda`.
+
+This is general n-th order moment computation code, so there's not much we can do to compensate when precision loss occurs. So here, I'm looking for the relative difference between data and the mean being less than some tolerance, and I just want to warn the user that some sort of precision loss has occurred. I could probably be more specific about how much precision loss and exactly where it has occurred, but that can be left to a follow-up.
+
+Do you have any thoughts on this PR?
+
+@user1:
+It's a trade off to me. Adding a precision loss check adds more computational, but it gives warnings when something looks wrong. My concern is the heuristic for checking the precision loss and making sure that does not warn for valid input. For example, how was `1e6` decided when computing `eps`?
+
+As for the PR, if you want the bare mimumum change, one can directly detect the near constant case in `skew` and raise a specific warning for that.
+
+@author:
+Thanks @user1!  We already have an exact equality check in `skew` and `kurtosis`, but afterward we got a another report for which that check was insufficient. Also, we've gotten the same sort of issue in a few contexts, so I thought I'd treat more broadly. 
+`1e6` was arbitrary, but it corresponds with a loss of approximately 10 decimal digits of precision for `float64`. This may be too noisy, so I'll reduce it so that this only warns when there is almost complete loss of precision.
+Thanks!"
+419,scikit-learn__scikit-learn-14427@0f2047d,scikit-learn/scikit-learn,sklearn/utils/testing.py,functional,A,,,,"@user1:
+As far as I know `shell=True` should be avoided. See https://stackoverflow.com/a/3172488/1791279
+
+Why do you think that `cwd` doesn't work without it? I couldn't find anything about it in the docs.
+
+@author:
+Ah it is working correctly. Changing working directly does not automatically add that path to the `PYTHONPATH`. This PR was updated to add cwd to `PYTHONPATH`."
+420,pandas-dev__pandas-37676@22a6bff,pandas-dev/pandas,pandas/tests/series/indexing/test_setitem.py,functional,C,,,,"@user1:
+can you also replicate the `.loc` case in the OP
+
+@author:
+Yes, done.
+
+@user2:
+i think what jreback was asking for here is to do `ser.loc[mask] = ` in addition to `ser[mask] = `, not putting `ser.loc[mask]` on the RHS.
+
+@author:
+Misunderstood this, adjusted the test
+
+@user1:
+ok this *should* also work for Float EA types, I think we need a fixture that is any_numeric_dtype == any_nullable_int_dtype + float_ea_dtype
+
+@author:
+Added the fixture. Tests pass locally."
+422,pandas-dev__pandas-25914@87c183e,pandas-dev/pandas,pandas/io/formats/html.py,functional,B,,,,"@user1:
+does this really need to be in ``__init__``, rather have this call a method in the base class which is overriden here, e.g.
+
+``self.columns = self._get_columns_formatted_values()``
+
+@user2:
+> rather have this call a method in the base class which is overriden here
+
+in #24651, i separated out the notebook functionality from `HTMLFormatter` into `NotebookFormatter` using `HTMLFormatter` as the base class. the base class of `HTMLFormatter` is `TableFormatter` which is also the base class of `DataFrameFormatter` (used for `to_string` and `to _latex`) and `LatexFormatter`.
+
+I envisaged that at some point in the development cycle it may become desirable to also create a `ToHTMLFormatter` using `HTMLFormatter` as the base.
+
+IMO `HTMLFormatter` and `NotebookFormatter` are not the appropriate location for non-markup related formatting issues that are common across output-formatting methods. I think this issue is in that category and should ideally be in `DataFrameFormatter` or `TableFormatter`.
+
+However, if to close the open issue the fix is somewhere in `io/formats/html.py`, then i think a  TODO to remove the code at a later date should be added. 
+
+@author:
+>> and the bug was present in `to_html(notebook=False)` as well
+>
+> I would argue it is not a bug here. since the display options should not affect the to_html() output. compare with the display options, `max_rows`, `max_columns`, `show_dimensions`, `max_colwidth`, etc. which only apply to the notebook display.
+
+I think I'm getting a bit confused here. Doesn't this mean that this is not an issue that is common across formatters? Because `to_html` should only check display preferences when used for display purposes in a notebook and not when generating HTML for a web page?
+
+@user2:
+yeah. i can understand why your confused, there is a slight problem with the current class hierarchy. the workaround for `max_colwidth` was to use `with option_context` to ignore the display option for `to_html`, see #24841
+
+
+@user2:
+i think the ideal solution would be to have say a `use_display_options` attribute in `DataFrameFormatter` and then in `HTMLFormatter` we just have `self.fmt.use_display_options = False` and in `NoteBookFormatter` we have `self.fmt.use_display_options = True` and then all the display formatting could be handled in `io/formats/format.py`.
+
+But this is way outside the scope of this PR. So a `with option_context` work-around would be fine for now IMO."
+424,scipy__scipy-13893@4fcbd8b,scipy/scipy,scipy/optimize/_linprog_highs.py,functional,C,,,,"@user1:
+This needs to be moved/copied over to `_linprog_doc.py` to appear in the documentation. 
+
+@author:
+Copied over to `_linprog_doc.py`
+
+@user1:
+This went into the ""Options"" of  `method='highs'` only. It should be in""Returns"" of  `method='highs'`, `method='highs-ipm'`, and `method='simplex'`. 
+
+@author:
+Yep, I did this incorrectly, thanks for seeing that.  I'll have time to fix this and review your comment below in the next few days
+
+@author:
+Latest push moves the entry from Options -> Results in `method='highs'` and adds the same entry to `method='highs-ipm` and `method='highs-ds`"
+425,scikit-learn__scikit-learn-23370@1dde56f,scikit-learn/scikit-learn,sklearn/preprocessing/tests/test_polynomial.py,functional,C,,,,"@user1:
+This should be a stronger assert statement, something like `assert_array_equal(_X, np.ones(...))`.
+
+@author:
+Updated as suggested :)"
+426,scipy__scipy-7353@0a59715,scipy/scipy,scipy/linalg/tests/test_lapack.py,functional,A,yes,,,"@user1:
+https://travis-ci.org/scipy/scipy/jobs/227275929 looks real. On my machine the abs difference is of the order of 1e-9."
+427,scipy__scipy-10410@3a58e13,scipy/scipy,scipy/stats/tests/test_distributions.py,functional,C,,,,"@user1:
+Why this combinbation of tolerances? 
+Assuming that the numbers come from chi2 distribution for nc=0 and ncx2 for nc != 0, the tolerances could/should be made way tighter, close 1e-15 or some such."
+428,pandas-dev__pandas-18831@4821f05,pandas-dev/pandas,pandas/tests/series/test_operators.py,structural,C,,,,"@user1:
+can you parametrize these last ones they seem pretty similar
+
+@author:
+This is part of a 127 line test that is all over the place.  I'd prefer to clean it up in a follow-up.
+
+@user1:
+ok, this needs parameterization / refactor, but can follow up."
+429,pandas-dev__pandas-16247@fa4e036,pandas-dev/pandas,doc/source/whatsnew/v0.21.0.txt,functional,C,,,,"@user1:
+``.rolling(...).quantile()`` and use :func:`Series.quantile` and :func:`DataFrame.quantile`
+
+@user1:
+add the issue number #9413 and #16211"
+430,hummingbot__hummingbot-4889@d8a242a,hummingbot/hummingbot,test/hummingbot/connector/exchange/mexc/test_mexc_exchange.py,functional,C,,,,"@user1:
+You can use the same approach as in the previous test to eliminate the waiting here and the remainder of tests using this approach to testing."
+433,scipy__scipy-13918@c98fbe5,scipy/scipy,scipy/stats/_qmc.py,functional,B,,,,"@author:
+This shouldn't be renamed, I think? P large is the array with positions of cells, and p small is the new sample (which you renamed). The same happens in a few other places.
+
+@author:
+Ah, sorry. I see this is already renamed in the newest commit."
+434,scipy__scipy-13918@c98fbe5,scipy/scipy,scipy/stats/_qmc.py,functional,B,,,,"@author:
+This should be a parameter for the sampling, it's the minimum distance between the samples
+
+@user1:
+Fixed in a later commit"
+435,scipy__scipy-13918@c98fbe5,scipy/scipy,scipy/stats/_qmc.py,functional,B,,,,"@author:
+```k``` also should be tunable, I think. 30 is a good guess for most applications (at least in lower dimensions), so it can be a default value. However, in some cases in high dimensions, drawing more candidate samples may be required to have a good distribution. 
+
+@user1:
+Ok I can add a parameter. Do you have a better name than `k`? What about `candidates`?
+
+@author:
+Yes, ``candidates`` is a good name I think."
+436,scipy__scipy-14703@23a2014,scipy/scipy,doc/source/tutorial/stats/sampling_hinv.rst,functional,C,,,,"@user1:
+Is this entirely correct? This phrasing implies that reducing the u-error by decreasing the u-resolution comes at the cost of the number of intervals, but they in fact increase, which seems to be a positive factor in reducing the u-error. 
+
+I think you may have meant that 
+```suggestion
+Note that this comes at the cost of computation time as a result of the increased setup time and number of intervals. 
+```
+
+@author:
+> Is this entirely correct? This phrasing implies that reducing the u-error by decreasing the u-resolution comes at the cost of the number of intervals, but they in fact increase, which seems to be a positive factor in reducing the u-error.
+
+Ah, yes. This makes sense.
+
+> I think you may have meant that
+
+Yes, that's exactly what I meant!
+
+@author:
+Changed it this way, thanks!"
+437,pandas-dev__pandas-34056@d001e97,pandas-dev/pandas,pandas/core/dtypes/cast.py,functional,B,yes,,,"@user1:
+don't use pd
+
+@user1:
+you can either import (best) or return a string ""Int64"""
+438,pandas-dev__pandas-25008@2cdd367,pandas-dev/pandas,scripts/validate_docstrings.py,documentation,A,yes,,,"@user1:
+Why these specific whitespace characters and not just  \s?
+
+@author:
+At first, I used `\s`, but was receiving this deprecation warning:
+
+```
+scripts/validate_docstrings.py:695
+  /Users/danielcosta/pandas-daniel/scripts/validate_docstrings.py:695: DeprecationWarning: invalid escape sequence \s
+    '\n\s*return' +
+```
+
+[re documentation](https://docs.python.org/3/library/re.html) shows that `\s` is equivalente to `[ \t\n\r\f\v]`, so I just removed the end line and carriage return (`\n` and `\r`), which are not what I intend to consume there, and left the others. Sincerely, I couldn't find out the meaning of `\f` and `\v`.
+
+That said, I just tested using `\s` again and it seems that while using `re.VERBOSE` I don't get any more warnings. That leaves me wondering if using `\s` in regex is really discouraged by some reason or if it was just a wrongful warning that I was receiving. Maybe you can help me clarifying this.
+
+I'll hold on with making the substitution until then.
+
+@author:
+I found out that the deprecation warning didn't go away with the `re.VERBOSE`, but with the usage of a raw string, and now I understand why it was happening in the first place.
+
+Thus I replaced `[ \t\f\v]` for `\s`."
+439,pandas-dev__pandas-35231@2f4902c,pandas-dev/pandas,pandas/tests/indexes/test_numeric.py,functional,C,,,,"@user1:
+possible to paramaterize?"
+442,pandas-dev__pandas-18604@8c9061b,pandas-dev/pandas,pandas/io/excel.py,functional,A,,,,"@user1:
+This is not generalizable.  What happens if I were to pass in an argument called ""Sheet"" ?  Your check wouldn't catch that.  You should develop a more general checker that checks for **any** keywords that don't correspond to ones that we accept."
+443,pandas-dev__pandas-16428@0bdc8ed,pandas-dev/pandas,doc/source/whatsnew/v0.20.2.txt,functional,C,,,,"@user1:
+Bug in ``df.drop([])`` for DataFrame with non-unique indices"
+445,pandas-dev__pandas-18440@65fbc91,pandas-dev/pandas,pandas/tests/indexes/test_multi.py,functional,C,,,,"@user1:
+use ``tm.assert_index_equal``, IOW construct the expected MI"
+446,pandas-dev__pandas-18440@65fbc91,pandas-dev/pandas,pandas/tests/indexes/test_multi.py,style,C,,,,"@user1:
+use assert_index_equal"
+447,scipy__scipy-10423@df1fef2,scipy/scipy,scipy/fft/_pocketfft/version.md,structural,B,,,,"@user2:
+@user1 are you pushing the same changeset? If so then we don't need this right @author?
+
+@user1:
+I think you still need it, because `scipychanges.patch` refers to a specific (by now pretty outdated) commit in the pypocketfft repository.
+
+
+@author:
+I see @user1 has updated pypocketfft, I'll redo this.
+
+@author:
+@user1, `scipy.fft` is actually up to date with pypocketfft master as of a few hours ago (#10393 merged).
+
+@user1:
+Sorry, I wasn't aware of this. I still assumed that this kind of synchronisation would be done once the dust of the first merge had settled."
+449,intel__ipex-llm-5097@9525134,intel/ipex-llm,python/chronos/src/bigdl/chronos/model/autoformer/Autoformer.py,functional,B,,,,"@user1:
+I think we should allow users to set scheduler / milestones (I think this might be a better choice). Furthermore ,they may be allowed to disable scheduler.
+
+@author:
+done"
+451,pandas-dev__pandas-24186@504de70,pandas-dev/pandas,doc/source/visualization.rst,functional,C,,,,"@user1:
+I think we probably leave the semicolon at theend of the second line, to avoid displaying the plot representation. Did you render the html?
+
+@author:
+Added semicolon. Build looks good."
+452,pandas-dev__pandas-23886@d6a2d5b,pandas-dev/pandas,pandas/core/frame.py,functional,C,,,,"@user1:
+I think we can simply remove the quotes. But in any case, we should fix the validation script to not report cases where the first character is not a letter.
+
+@author:
+So, which fix should I make? Removing the quotes or fixing the validation script? Or both?
+
+@user1:
+in this PR remove the quotes, if you want to change the script, that should be im a separate PR"
+454,scipy__scipy-13313@b564f3b,scipy/scipy,scipy/spatial/qhull.pyi,functional,B,,,,"@user1:
+`qhull_options` should be `str` I think.
+
+@author:
+I did try `str`, but it's converted later to `bytes` which mypy will complain about and I'm not mypy-savy enough to figure out how to get it working"
+455,freqtrade__freqtrade-5846@da4344d,freqtrade/freqtrade,freqtrade/rpc/rpc.py,functional,A,,,,"@user1:
+we should try to not use `utcnow()` - but instead use `now(timezone.utc)`.
+
+utcnow() will return a timezone native object - processing this further can result in the wrong day depending on the timezone offset you're in (especially near midnight).
+
+@author:
+Ok got it. The /daily commands uses also the timezone naive method: `today = datetime.utcnow().date()`
+Should we change it now or it should be included in a bugfix PR?
+
+@user1:
+good catch - i'd leave that up to you ... :) 
+
+@author:
+Ok great! It will be in another commit in case it needs to be reverted."
+459,pandas-dev__pandas-33962@fc4993f,pandas-dev/pandas,pandas/io/json/_json.py,documentation,B,,,,"@user1:
+add typing to new args (existing ones if you can / want)
+
+@author:
+Okay"
+460,pandas-dev__pandas-33962@fc4993f,pandas-dev/pandas,pandas/io/json/_json.py,functional,B,,,,"@user1:
+Can you implement this at a lower level? I think should be done in the C extension to match behavior of other IO methods
+
+@author:
+I have not worked with lower-level extension till now. If it's to be done there, I will look into it
+Also, it would be very nice to get some direction on how to achieve it.
+
+@user2:
+I actually don't think we need to implement this on a lower level  (lines is not implemented that way currently).
+
+rather you need to slice this differently to avoid putting all of this into memory
+
+e.g. you can do this: https://stackoverflow.com/questions/3862010/is-there-a-generator-version-of-string-split-in-python
+
+to create a generator on the split rows, then islice them, process and repeat"
+461,pandas-dev__pandas-34363@f3c7e18,pandas-dev/pandas,pandas/tests/frame/methods/test_isin.py,functional,C,,,,"@user1:
+pls parametrize this for the cases.
+
+@author:
+@user1 I have made the necessary changes. Please review it. Sorry for the inconvenience."
+462,pandas-dev__pandas-34363@f3c7e18,pandas-dev/pandas,pandas/tests/frame/methods/test_isin.py,functional,C,,,,"@user1:
+What's the difference between these two? Can you just use one, call it `expected`, and use it for both assertions?"
+464,goauthentik__authentik-12630@7fed46f,goauthentik/authentik,authentik/stages/authenticator_email/stage.py,functional,B,,,,"@user1:
+```suggestion
+```
+Never used"
+465,goauthentik__authentik-12630@7fed46f,goauthentik/authentik,web/src/admin/stages/authenticator_email/AuthenticatorEmailStageForm.ts,style,B,,,,"@user1:
+Some leftovers to cleanup"
+466,goauthentik__authentik-12630@7fed46f,goauthentik/authentik,authentik/stages/authenticator_email/models.py,functional,B,,,,"@user1:
+This looks very duplicated from authentik.stages.email.models.get_template_choices. Should probably be refactored to somewhere like authentik.lib.utils.templates"
+474,scipy__scipy-9488@9e81f03,scipy/scipy,scipy/stats/tests/test_stats.py,functional,B,,,,"@user1:
+Here and for mstats have you considered using `rtol` as an argument? I think it would be more understandable than asking for `significant` and converting it to a tolerance.
+
+@author:
+When I changed the argument of `significant` to `rtol`, I also have concerned this issue. 
+but the most of the code in test use the argument of `significant` or `decimal`' for testing a tolerance.
+
+If I change the argument, the other parts of the test code should be changed, in my option.
+How about your opinion? If it is needed, I will fix the argument.
+
+@user1:
+As it stands the code is already converting to `rtol`:
+
+``` rtol = np.float_power(10, -1.0 * significant)```
+
+This seems to be a very roundabout way of setting the tolerance, and should probably be avoided. Luckily, all the tests pass with the provided tolerance, and so replacing ``significant=7`` with ``rtol=1e-7``  (replace 7 with the actual value) should work.
+
+This should also be applied to the tests in `mstats`.
+
+@author:
+OK, I understand.
+I fix the argument of `siginificant` to `rtol`."
+479,ccxt__ccxt-21513@c661f32,ccxt/ccxt,ts/src/bitget.ts,functional,B,,,,"@user1:
+We should store this in options instead of hardcoding
+
+@user1:
+besides that, not sure this should be handled by us
+
+@author:
+1) i don't think its place should be in options, because they are not actually changeable ""options"" per se for user supposed to change/override, it's hardlimits given by exchange. but ok, i'll move them into options.
+2)  this is the only way we can make this work, it is needed in calculations
+
+@author:
+that list defines at what distance we switch from ""current"" to ""historical"" endpoint. this is how we do on other exchanges too (i.e. okx ...)
+
+@user1:
+If you keep it in options and the exchange decides to update those values it's easier to override on the user side
+
+@author:
+yes, I had moved them in options already."
+480,saleor__saleor-4508@69bc9d9,saleor/saleor,saleor/static/dashboard-next/theme.ts,functional,B,,,,"@user1:
+`buttonText` and `textColor` belong to `Record<""default"" | ""gray"", string>` type."
