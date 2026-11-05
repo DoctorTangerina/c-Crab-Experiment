@@ -68,6 +68,44 @@ def load_existing_result(output_dir: Path, instance_id: str) -> dict | None:
     return None
 
 
+USAGE_SUM_KEYS = (
+    "total_cost_usd",
+    "input_tokens",
+    "output_tokens",
+    "cache_read_input_tokens",
+    "cache_creation_input_tokens",
+    "num_turns",
+)
+
+
+def summarize_usage(all_results: list[dict]) -> dict:
+    """Sum Claude Code usage over instances that actually recorded it.
+
+    Instances without usage (skipped, older result.json files, unparsable CLI
+    output) are counted separately instead of being treated as zero cost.
+    """
+    totals = {k: 0 for k in USAGE_SUM_KEYS}
+    with_usage = 0
+    for r in all_results:
+        u = r.get("agent_usage") or {}
+        if u.get("total_cost_usd") is None:
+            continue
+        with_usage += 1
+        for k in USAGE_SUM_KEYS:
+            totals[k] += u.get(k) or 0
+    totals["total_cost_usd"] = round(totals["total_cost_usd"], 6)
+    return {
+        **totals,
+        "instances_with_usage": with_usage,
+        "instances_without_usage": len(all_results) - with_usage,
+        "mean_cost_usd_per_instance": (
+            round(totals["total_cost_usd"] / with_usage, 6) if with_usage else None
+        ),
+        "note": "total_cost_usd is Claude Code's API-equivalent price; on a "
+                "subscription it is not the amount billed.",
+    }
+
+
 def write_summary(
     output_dir: Path,
     all_results: list[dict],
@@ -120,6 +158,7 @@ def write_summary(
         "model": model,
         "tool": tool,
         "agent": "claude-code",
+        "usage": summarize_usage(all_results),
         "repo_summary": list(repo_data.values()),
         "instance_results": [
             {
@@ -129,6 +168,8 @@ def write_summary(
                 "num_tests": r.get("num_tests", 0),
                 "num_tests_passed": r.get("num_tests_passed", 0),
                 "test_pass_rate": r.get("test_pass_rate", 0.0),
+                "cost_usd": (r.get("agent_usage") or {}).get("total_cost_usd"),
+                "output_tokens": (r.get("agent_usage") or {}).get("output_tokens"),
                 "error": r.get("error"),
             }
             for r in all_results
@@ -430,15 +471,23 @@ def main():
     total_elapsed = time.time() - start_time
     summary = write_summary(output_dir, all_results, total_elapsed, args.tool)
 
+    usage = summary["usage"]
     logger.info(
         "=== DONE === %d instances, %d/%d tests passed (%.1f%%), "
-        "%d errors, %.0fs elapsed",
+        "%d errors, %.0fs elapsed, Claude cost $%.4f "
+        "(%d in / %d out / %d cache-read / %d cache-write tokens; %d instances with usage)",
         summary["total_instances"],
         summary["total_tests_passed"],
         summary["total_tests"],
         summary["test_pass_rate"] * 100,
         summary["total_errors"],
         total_elapsed,
+        usage["total_cost_usd"],
+        usage["input_tokens"],
+        usage["output_tokens"],
+        usage["cache_read_input_tokens"],
+        usage["cache_creation_input_tokens"],
+        usage["instances_with_usage"],
     )
     logger.info("Summary: %s", output_dir / "summary.json")
 

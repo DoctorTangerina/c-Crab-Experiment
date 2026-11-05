@@ -10,6 +10,7 @@ set of changes.
 
 from __future__ import annotations
 
+import json
 import logging
 import tempfile
 from dataclasses import dataclass, asdict
@@ -186,17 +187,59 @@ def setup_claude_in_container(session: DockerContainerSession) -> None:
         )
 
 
+_USAGE_TOKEN_KEYS = (
+    "input_tokens",
+    "output_tokens",
+    "cache_read_input_tokens",
+    "cache_creation_input_tokens",
+)
+
+
+def _parse_claude_json(stdout: str) -> tuple[str, dict]:
+    """Split `claude -p --output-format json` output into (result text, usage dict).
+
+    Never raises: if stdout is not the expected JSON object (CLI crash, timeout,
+    empty output), the raw stdout is returned as text and usage carries a
+    `parse_error` so missing data is not mistaken for zero cost.
+    """
+    try:
+        obj = json.loads(stdout)
+    except (json.JSONDecodeError, TypeError) as e:
+        return stdout or "", {"parse_error": f"stdout is not JSON: {e}"}
+    if not isinstance(obj, dict):
+        return stdout, {"parse_error": f"unexpected JSON type: {type(obj).__name__}"}
+
+    raw_usage = obj.get("usage") or {}
+    usage = {
+        "total_cost_usd": obj.get("total_cost_usd"),
+        **{k: raw_usage.get(k) for k in _USAGE_TOKEN_KEYS},
+        "num_turns": obj.get("num_turns"),
+        "duration_ms": obj.get("duration_ms"),
+        "duration_api_ms": obj.get("duration_api_ms"),
+        "is_error": obj.get("is_error"),
+        "subtype": obj.get("subtype"),
+        "model_usage": obj.get("modelUsage"),
+    }
+    text = obj.get("result")
+    return (text if isinstance(text, str) else stdout), usage
+
+
 def invoke_claude_in_container(
     session: DockerContainerSession,
     prompt: str,
     model: str,
+    usage_out: dict | None = None,
 ) -> tuple[str, int]:
     """Run claude -p --dangerously-skip-permissions as the agent user.
 
     Writes the prompt to a temp file inside the container to avoid
     shell quoting issues, then pipes it to claude via stdin.
 
-    Returns (stdout, returncode).
+    Claude Code runs with `--output-format json`; the returned text is the
+    session's final `result`. If `usage_out` is given, it is filled with the
+    session's token usage and cost (see `_parse_claude_json`).
+
+    Returns (result_text, returncode).
     """
     # Write prompt to a file inside the container to avoid quoting issues.
     # Place it in agent's home dir so it's readable by the agent user.
@@ -220,7 +263,7 @@ def invoke_claude_in_container(
         "su", "-", "agent", "-s", "/bin/bash", "-c",
         f"cd /workspace && "
         f"cat {prompt_path} | {claude_bin} -p --dangerously-skip-permissions "
-        f"--model {model}",
+        f"--output-format json --model {model}",
     ]
 
     logger.info("  Claude command: %s", cmd[:200])
@@ -229,7 +272,12 @@ def invoke_claude_in_container(
         logger.warning(
             "  Claude stderr: %s", (result.stderr or "")[:500]
         )
-    return result.stdout, result.returncode
+    text, usage = _parse_claude_json(result.stdout)
+    if "parse_error" in usage:
+        logger.warning("  Could not read Claude usage: %s", usage["parse_error"])
+    if usage_out is not None:
+        usage_out.update(usage)
+    return text, result.returncode
 
 
 def verify_with_test(

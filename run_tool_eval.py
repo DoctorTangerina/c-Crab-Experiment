@@ -144,6 +144,7 @@ def process_tool_instance(
             "num_tests_passed": 0,
             "test_pass_rate": 0.0,
             "results": [],
+            "agent_usage": {},
             "error": "No successful Stage 3 tests found",
         }
         (instance_dir / "result.json").write_text(json.dumps(result, indent=2, default=str))
@@ -188,6 +189,7 @@ def process_tool_instance(
 
     test_results: list[dict] = []
     agent_diff = ""
+    agent_usage: dict = {}
 
     try:
         session.start()
@@ -215,6 +217,7 @@ def process_tool_instance(
                 "num_tests_passed": 0,
                 "test_pass_rate": 0.0,
                 "results": [],
+                "agent_usage": agent_usage,
                 "error": error,
             }
             (instance_dir / "result.json").write_text(json.dumps(result, indent=2, default=str))
@@ -231,9 +234,18 @@ def process_tool_instance(
             repo=repo,
         )
         logger.info("  Invoking Claude Code for %d finding(s)...", len(findings))
-        agent_stdout, agent_rc = invoke_claude_in_container(session, prompt, model)
+        agent_stdout, agent_rc = invoke_claude_in_container(
+            session, prompt, model, usage_out=agent_usage
+        )
         logger.info(
-            "  Claude Code returned (rc=%d, output=%d chars)", agent_rc, len(agent_stdout)
+            "  Claude Code returned (rc=%d, output=%d chars, cost=$%s, "
+            "in=%s out=%s cache_read=%s cache_write=%s tokens, turns=%s)",
+            agent_rc, len(agent_stdout),
+            agent_usage.get("total_cost_usd"),
+            agent_usage.get("input_tokens"), agent_usage.get("output_tokens"),
+            agent_usage.get("cache_read_input_tokens"),
+            agent_usage.get("cache_creation_input_tokens"),
+            agent_usage.get("num_turns"),
         )
 
         # Capture git diff
@@ -314,6 +326,7 @@ def process_tool_instance(
         "num_tests_passed": num_tests_passed,
         "test_pass_rate": test_pass_rate,
         "results": test_results,
+        "agent_usage": agent_usage,
     }
 
     result_file = instance_dir / "result.json"
