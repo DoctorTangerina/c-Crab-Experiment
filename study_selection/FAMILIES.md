@@ -125,15 +125,3 @@ folder. With both set, the catalog reports 184 cases and 234 targets.
 - `pull_stage4_images.py`: pulls the 182 public images from GHCR and retags them as
   `reviewbench/<slug>:latest`, the name the c-CRAB code expects.
 - `ghcr_sizes.json`: registry sizes and layers of the 182 public images (fetched 2026-11-04).
-
-## Open issues
-
-1. **Disk vs. the 150 GB batch limit.** The evaluation set must stay on disk for the
-   whole run. In the split above it takes about 245 GB on disk counting shared layers
-   once (about 300 GB counting each image separately). That exceeds the limit while
-   `engine.py` stays unchanged.
-2. **Two images to build** (see above): posthog-7569 is family B, skypilot-3017 is
-   family A. If skypilot-3017 fails again, dropping it removes one family A case.
-3. **c-CRAB checkout has local changes to tracked files** (`.gitattributes`,
-   `.gitignore`, build overrides, and line endings). `continual_review prepare` refuses
-   to run on it. Commit them and pin the new commit in `expected_ccrab_commit`.
