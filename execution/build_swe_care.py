@@ -15,6 +15,7 @@ from datetime import datetime
 from pathlib import Path
 
 from datasets import load_dataset
+from dotenv import load_dotenv
 
 from .build_log_checks import analyze_build_log_text, has_python_retry_signal
 from .docker_env import (
@@ -1199,6 +1200,8 @@ def _build_one(task: BuildTask, args: argparse.Namespace, run_dir: Path) -> dict
 
 
 def main() -> int:
+    # Load c-Crab-Experiment/.env (e.g. HF_TOKEN) before any downloads; real env vars win.
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=False)
     args = parse_args()
     split_expr = _normalize_split_expr(args.split, args.limit)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

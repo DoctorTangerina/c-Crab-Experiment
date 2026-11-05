@@ -141,9 +141,11 @@ def prepare_build_context(
     )
 
     if overrides.dockerfile_path is not None:
-        dockerfile_path.write_text(overrides.dockerfile_path.read_text(encoding="utf-8"))
+        dockerfile_path.write_text(
+            overrides.dockerfile_path.read_text(encoding="utf-8"), newline="\n"
+        )
     else:
-        dockerfile_path.write_text(_render_dockerfile(spec))
+        dockerfile_path.write_text(_render_dockerfile(spec), newline="\n")
     if overrides.setup_repo_path is not None:
         _write_executable(setup_script, overrides.setup_repo_path.read_text(encoding="utf-8"))
     else:
@@ -252,6 +254,8 @@ def build_image(
                 cmd,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=build_timeout_sec,
                 env=build_env,
             )
@@ -1048,6 +1052,9 @@ def _render_install_deps_script_python(spec: PREnvironmentSpec) -> str:
         '  sed -E -i "s#git\\+git://github.com/#git+https://github.com/#g" "$file_path"',
         '  sed -E -i "s#git://github.com/#https://github.com/#g" "$file_path"',
         '  sed -E -i "s|^([[:space:]]*)sklearn([[:space:]]*)(#.*)?\\$|\\1scikit-learn\\3|" "$file_path"',
+        # Legacy `URL#egg=name==ver&subdirectory=dir` -> PEP 508 `name @ URL#subdirectory=dir`
+        # (uv mis-names these, e.g. zulip's python-zulip-api archive pins).
+        '  sed -E -i "s|^([[:space:]]*)((git\\+)?https?://[^#[:space:]]+)#egg=([A-Za-z0-9_.-]+)(==[^&[:space:]]*)?&subdirectory=([^&[:space:]]+)|\\1\\4 @ \\2#subdirectory=\\6|" "$file_path"',
         '  sed -E -i "s@^([[:space:]]*)(-e|--editable)[[:space:]]+\\.[[:space:]]*(#.*)?\\$@\\1# reviewbench-skip-local-editable\\3@" "$file_path"',
         '  sed -E -i "s|^([[:space:]]*)\\.[[:space:]]*(#.*)?\\$|# reviewbench-skip-local-path\\2|" "$file_path"',
         "}",
@@ -1384,7 +1391,7 @@ def _render_install_deps_script_python(spec: PREnvironmentSpec) -> str:
         "    fi",
         "  fi",
         "",
-        '  if grep -q "The user requested (constraint) setuptools<" "$pip_log"; then',
+        '  if grep -Eq "The user requested \\(constraint\\) setuptools<|you require setuptools[^ ]* and setuptools<" "$pip_log"; then',
         '    constraint_mode="none"',
         '    if run_pip_requirements_install "$patched_req" "$pip_log" "$constraint_mode"; then',
         "      return 0",
@@ -1617,7 +1624,7 @@ def _render_install_deps_script_python(spec: PREnvironmentSpec) -> str:
         "    fi",
         "  fi",
         "",
-        '  if grep -q "The user requested (constraint) setuptools<" "$pip_log"; then',
+        '  if grep -Eq "The user requested \\(constraint\\) setuptools<|you require setuptools[^ ]* and setuptools<" "$pip_log"; then',
         '    if try_repo_install_with_mode_for_repo "none" "$pip_log"; then',
         "      return 0",
         "    fi",
@@ -1797,7 +1804,8 @@ def _render_install_deps_script_python(spec: PREnvironmentSpec) -> str:
 
 
 def _write_executable(path: Path, content: str) -> None:
-    path.write_text(content)
+    # Force LF: on Windows, write_text would emit CRLF and break shebangs in the container.
+    path.write_text(content, newline="\n")
     current_mode = path.stat().st_mode
     path.chmod(current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
@@ -1833,7 +1841,7 @@ def _write_build_log(
         "===== STDERR =====",
         stderr,
     ]
-    log_path.write_text("\n".join(body))
+    log_path.write_text("\n".join(body), encoding="utf-8")
 
 
 def _get_repo_seed_lock(repo: str) -> threading.Lock:
@@ -1845,6 +1853,16 @@ def _get_repo_seed_lock(repo: str) -> threading.Lock:
         return lock
 
 
+def _clear_readonly_and_retry(func, path, _exc) -> None:
+    # Git object files are read-only; on Windows rmtree cannot delete them otherwise.
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def _remove_tree(path: Path) -> None:
+    shutil.rmtree(path, onexc=_clear_readonly_and_retry)
+
+
 def _prepare_cached_repo_seed(
     spec: PREnvironmentSpec,
     *,
@@ -1852,7 +1870,7 @@ def _prepare_cached_repo_seed(
     cached_repos_dir: Path | None,
 ) -> bool:
     if seed_dir.exists():
-        shutil.rmtree(seed_dir)
+        _remove_tree(seed_dir)
 
     if cached_repos_dir is None:
         seed_dir.mkdir(parents=True, exist_ok=True)
@@ -1886,6 +1904,6 @@ def _prepare_cached_repo_seed(
                 exc.stderr.strip() if exc.stderr else exc,
             )
             if seed_dir.exists():
-                shutil.rmtree(seed_dir)
+                _remove_tree(seed_dir)
             seed_dir.mkdir(parents=True, exist_ok=True)
             return False

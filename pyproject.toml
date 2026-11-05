@@ -14,6 +14,7 @@ dependencies = [
     "matplotlib>=3.10.8",
     "matplotlib-venn>=1.1.2",
     "pytest>=9.0.2",
+    "python-dotenv>=1.2.2",
     "venn>=0.1.3",
 ]
 
