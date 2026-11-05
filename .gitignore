@@ -1,4 +1,20 @@
+# Python / tooling
 .venv/
 .pytest_cache/
 __pycache__/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Upstream repo checkouts
 repos/
+
+# Local run output (regenerate; do not commit)
+*.log
+# Rebuilt by study_selection/build_stage4_testgen.py, which refuses to overwrite it
+results_testgen_stage4/
+
+# Machine-specific launchers
+run_build_bg.cmd

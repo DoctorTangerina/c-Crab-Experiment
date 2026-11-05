@@ -1,2 +1,5 @@
 execution/assets/claude filter=lfs diff=lfs merge=lfs -text
 execution/assets/uv filter=lfs diff=lfs merge=lfs -text
+*.sh text eol=lf
+Dockerfile text eol=lf
+execution/assets/swe_care_build_overrides/** text eol=lf
