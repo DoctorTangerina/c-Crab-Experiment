@@ -1,0 +1,36 @@
+target_no,instance_id,path,first_pass_family,first_pass_borderline,family,concern,alt_family,rationale
+4,Lightning-AI__pytorch-lightning-4654@89b962d,pytorch_lightning/trainer/connectors/callback_connector.py,A,,B,B.convention,A,Use COLAB_GPU env check as elsewhere in the codebase (consistency); detection condition changes.
+18,ansible__ansible-33909@d516d5b,lib/ansible/modules/network/iosxr/iosxr_interface.py,A,yes,C,C.doc-external,B,DOCUMENTATION block should declare `type: bool` instead of True/False choices.
+27,ansible__ansible-44951@91cfd5c,lib/ansible/modules/cloud/ovirt/ovirt_cluster.py,A,,C,C.doc-external,,EXAMPLES block shows an invalid cluster name with spaces.
+40,ansible__ansible-58383@531e457,lib/ansible/modules/windows/win_domain_user.ps1,A,,B,B.redundant,,Skip the credential test when update_password=always (result unused); simplify the condition.
+96,deepset-ai__haystack-3546@a260299,haystack/nodes/retriever/multimodal/retriever.py,A,,B,B.typing,A,Question about doc-store compatibility led to removing `# type: ignore` (typing fix is what the test checks).
+99,deepset-ai__haystack-5284@60a39ef,haystack/nodes/prompt/invocation_layer/hugging_face.py,C,yes,B,B.convention,,Use `raise ... from e` exception chaining (idiom; framed as slight improvement).
+101,deepset-ai__haystack-8457@2dd3777,haystack/components/converters/docx.py,A,,B,B.redundant,,"Remove always-true init_parameters guard, keep table_format guard."
+116,getsentry__sentry-71942@a4f03f3,src/sentry/issues/endpoints/organization_group_search_views.py,A,,B,B.convention,A,"Feature-flag-disabled endpoint should return 404 like elsewhere, not 405."
+134,huggingface__accelerate-255@12e4b18,src/accelerate/accelerator.py,B,,A,A.state-resource,,Random-state checkpoint file must be per process; a shared file collides across processes.
+153,keephq__keep-1984@e524fe8,keep/api/routes/topology.py,A,yes,B,B.convention,A,Catch specific exceptions instead of a blanket `except Exception`.
+155,keephq__keep-3054@2d23bf3,tests/e2e_tests/docker-compose-e2e-postgres.yml,A,yes,C,C.test-design,A,E2E test compose file carries a PostHog key; remove it (test env must not report telemetry).
+156,keephq__keep-3054@2d23bf3,tests/e2e_tests/docker-compose-e2e-mysql.yml,A,,C,C.test-design,A,E2E test compose: remove PostHog keys and set POSTHOG_DISABLED=true.
+172,microsoft__autogen-5843@e07fb7a,python/packages/autogen-agentchat/src/autogen_agentchat/teams/_group_chat/_swarm_group_chat.py,B,,A,A.compat,B,Keyword-only marker makes a backward-incompatible change to a public constructor (reverted).
+179,netbox-community__netbox-10171@249b8b0,netbox/extras/tables/tables.py,A,,B,B.performance,,Use changed_object accessor so the column is prefetched (query optimisation).
+215,pandas-dev__pandas-50366@1e7613f,pandas/_libs/tslib.pyx,A,yes,C,C.message,,"Error message suffix ""(search)/(match)"" is odd; unify the message."
+216,pandas-dev__pandas-55938@b36d8d1,asv_bench/benchmarks/indexing.py,A,,C,C.test-design,A,"Benchmark setup overwrites the object-dtype frame, so it measures the wrong scenario."
+234,python__cpython-104029@f78e70e,Tools/build/generate_opcode_h.py,C,,B,B.structure,,Move footer text into a variable like the header.
+248,pytorch__vision-8316@92ec2fb,torchvision/transforms/v2/functional/_augment.py,B,,C,C.doc-inline,,Outdated TODO comment claims the function is not TorchScript-compatible.
+250,qutebrowser__qutebrowser-3590@872cff2,qutebrowser/mainwindow/tabbedbrowser.py,A,yes,B,B.redundant,,`if tab and tab is not None` is redundant; `is not None` suffices.
+253,ray-project__ray-49918@04cf1ee,python/ray/tests/test_actor_failures.py,B,,C,C.test-oracle,,Assertions left commented out in a test.
+260,scipy__scipy-20393@c92a476,scipy/special/_add_newdocs.py,A,,C,C.doc-inline,A,Docstrings with backslashes must be raw strings (escapes corrupt them; a test fails).
+272,skypilot-org__skypilot-3017@1f526ee,llm/mixtral/serve.yaml,A,,B,B.structure,A,"Azure nccl.conf workaround (with side effects) belongs in the Azure template, not one example YAML."
+287,sqlfluff__sqlfluff-541@c5a16c3,src/sqlfluff/core/templaters/base.py,A,,C,C.doc-inline,,Docstring refers to `full_templated`; parameter is templated_str.
+289,sympy__sympy-11818@ab1bcd5,sympy/sets/fancysets.py,A,,B,B.structure,,Union logic relies on ComplexRegion internals; coerce via ComplexRegion.from_real.
+305,sympy__sympy-24666@7d194c7,sympy/functions/elementary/tests/test_piecewise.py,B,,C,C.test-design,B,Test uses SymPy Tuple and float 0.5; use a Python tuple and exact S.Half.
+315,tobymao__sqlglot-5284@3f57fcd,sqlglot/dialects/databricks.py,A,,B,B.simplify,,Lambda wrapper is unnecessary; map to groupconcat_sql directly.
+337,saleor__saleor-5085@f8ed729,.pre-commit-config.yaml,A,,B,B.convention,,Pin the black pre-commit hook to python3.8.
+349,ManimCommunity__manim-1140@ed7dc3d,manim/grpc/impl/frame_server_impl.py,B,yes,A,A.unintended-change,B,"Cleanup removed stub creation in untested renderer code; unclear it is safe, restore it."
+362,geldata__gel-5130@2e5341f,edb/edgeql/compiler/context.py,C,yes,B,B.interface,C,Make disallow_dml Optional[str] so it can carry the context for the error message.
+368,All-Hands-AI__OpenHands-8343@9d4e2af,openhands/core/logger.py,B,yes,A,A.unintended-change,B,Unrelated change of the default JSON log level key; revert.
+389,langflow-ai__langflow-918@c710c1c,src/backend/langflow/services/database/models/user/crud.py,C,,B,B.typing,,Annotate as Optional[User].
+390,pandas-dev__pandas-23866@45e5f06,ci/azure/linux.yml,B,,A,A.logic,B,CI activates the conda env before it is created.
+397,RasaHQ__rasa-7797@3d69847,.github/workflows/continous-integration.yml,B,,A,A.logic,B,Copy-pasted `if:` restricts the docs-wait CI job to tags/main; remove it.
+468,pandas-dev__pandas-34933@de64663,pandas/core/frame.py,C,,B,B.typing,,Add the bool type annotation for ignore_index.
+482,zulip__zulip-25349@67de2a4,web/src/scheduled_messages.js,C,,B,B.naming,A,"Typo ""succes"" in identifier name (the target test checks the success callback signature)."

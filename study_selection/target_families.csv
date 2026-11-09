@@ -1,5 +1,5 @@
-target_no,instance_id,repo,path,comment_type,family,borderline,reviewed,note,comment_text
-2,Avaiga__taipy-1042@a76a34b,Avaiga/taipy,tests/core/test_taipy.py,style,C,,,,"@user1:
+target_no,instance_id,repo,path,family,concern,borderline,alt_family,rationale,recheck_family,recheck_concern,recheck_note,accepted,reviewed,note,comment_text
+2,Avaiga__taipy-1042@a76a34b,Avaiga/taipy,tests/core/test_taipy.py,C,C.test-design,,,Test setup passes instance-level name/tags to configure_scenario; reviewer asks for representative test scenarios.,C,C.test-design,Test setup made representative.,yes,,,"@user1:
 Usually, the name and the tags are specific to a scenario instance. They are not passed when building a scenario configuration, but they are provided as parameters during the scenario creation.
 
 You can have an example in my previous comment.
@@ -7,7 +7,7 @@ You can have an example in my previous comment.
 
 @author:
 All right, I see. Thank you for clarifying this. I will change it."
-4,Lightning-AI__pytorch-lightning-4654@89b962d,Lightning-AI/pytorch-lightning,pytorch_lightning/trainer/connectors/callback_connector.py,functional,A,,,,"@user1:
+4,Lightning-AI__pytorch-lightning-4654@89b962d,Lightning-AI/pytorch-lightning,pytorch_lightning/trainer/connectors/callback_connector.py,B,B.convention,yes,A,Use COLAB_GPU env check as elsewhere in the codebase (consistency); detection condition changes.,B,B.convention,Use the env check used elsewhere; reason given is consistency.,yes,,,"@user1:
 ```suggestion
         if os.getenv('COLAB_GPU') and refresh_rate < 20:
 ```
@@ -18,39 +18,39 @@ Does this work for Colab CPU and TPU runtimes too?
 
 @user1:
 Yes. Its actually a string. On other runtimes its value is '0'."
-10,PrefectHQ__prefect-14313@d428713,PrefectHQ/prefect,docs/integrations/prefect-docker/index.mdx,documentation,C,,,,"@user1:
+10,PrefectHQ__prefect-14313@d428713,PrefectHQ/prefect,docs/integrations/prefect-docker/index.mdx,C,C.doc-external,,,Outdated link in docs page.,C,C.doc-external,Docs link corrected.,yes,,,"@user1:
 I think this link is no longer accurate
 
 @user2:
 Good catch, I missed one. 😅"
-11,PrefectHQ__prefect-14313@d428713,PrefectHQ/prefect,docs/3.0rc/deploy/index.mdx,documentation,C,,,,"@user1:
+11,PrefectHQ__prefect-14313@d428713,PrefectHQ/prefect,docs/3.0rc/deploy/index.mdx,C,C.doc-external,,,Remove leftover mkdocs metadata from docs front matter.,C,C.doc-external,Leftover docs metadata removed.,yes,,,"@user1:
 ```suggestion
 ```
 
 @user1:
 tags and search->boost are left over metadata from mkdocs that we should remove."
-13,PrefectHQ__prefect-18444@1ffae47,PrefectHQ/prefect,tests/_internal/test_websockets.py,functional,B,,,,"@user1:
+13,PrefectHQ__prefect-18444@1ffae47,PrefectHQ/prefect,tests/_internal/test_websockets.py,B,B.convention,yes,C,Deferred import inside a test function; settings already imported at top level (import convention).,B,B.convention,Function-level import moved to module imports in a test file.,yes,,,"@user1:
 wondering if this was intentionally deferred since we already import settings top level? i saw claude do this the other day and i don't think we're suggesting that in CLAUDE.md anywhere but i can double check
 
 @author:
 I totally wrote this Claude didn't write this... good catch, updated ;)"
-14,ansible__ansible-20646@f695114,ansible/ansible,lib/ansible/modules/cloud/amazon/rds.py,functional,A,,,,"@user1:
+14,ansible__ansible-20646@f695114,ansible/ansible,lib/ansible/modules/cloud/amazon/rds.py,A,A.logic,,,"Condition `in [True, False]` drops non-boolean optional params; should be `is not None`.",A,A.logic,Condition dropped non-boolean params.,yes,,,"@user1:
 I think this should instead be `is not None`, since there are optional parameters that are neither true or false, such as `iops`, `size`, and `license_model`."
-15,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,functional,B,,,,"@user1:
+15,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,B,B.redundant,,,Exception/region handling duplicated: boto3_conn already handles it.,B,B.redundant,Exception handling already done by boto3_conn.,yes,,,"@user1:
 boto3_conn handles this too :)"
-16,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,functional,A,,,,"@user1:
+16,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,A,A.unintended-change,,,PR unintentionally changed the module's returned key; revert.,A,A.unintended-change,Return key changed by accident; restored.,yes,,,"@user1:
 I assume this changes the results that this module returns? I also note that the module is in preview mode and that might be acceptable.
 
 @author:
 Good catch! No reason for me to be changing this, fixed it."
-17,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,functional,B,,,,"@user1:
+17,ansible__ansible-27435@da1a331,ansible/ansible,lib/ansible/modules/cloud/amazon/elb_classic_lb_facts.py,B,B.redundant,,,Explicit missing-region check is redundant: boto3_conn handles it.,B,B.redundant,Region check already handled by boto3_conn.,yes,,,"@user1:
 boto_conn now handles missing regions, no need to do it here."
-18,ansible__ansible-33909@d516d5b,ansible/ansible,lib/ansible/modules/network/iosxr/iosxr_interface.py,documentation,A,yes,,,"@user1:
+18,ansible__ansible-33909@d516d5b,ansible/ansible,lib/ansible/modules/network/iosxr/iosxr_interface.py,C,C.doc-external,yes,B,DOCUMENTATION block should declare `type: bool` instead of True/False choices.,C,C.doc-external,Only the DOCUMENTATION block changed.,yes,,,"@user1:
 You can replace this with `type: bool`
 
 @author:
 sure"
-20,ansible__ansible-36996@4b45ffc,ansible/ansible,lib/ansible/modules/cloud/misc/terraform.py,functional,A,,,,"@user1:
+20,ansible__ansible-36996@4b45ffc,ansible/ansible,lib/ansible/modules/cloud/misc/terraform.py,A,A.logic,,,terraform init should run only when force_init is true; unconditional init can fail the module.,A,A.logic,Unconditional init can fail the module.,yes,,,"@user1:
 I think this should be behind a conditional so that it only runs if `force_init` is true, since the TF docs state:
 
 >  Though subsequent runs may give errors, this command will never delete your existing configuration or state.
@@ -60,27 +60,27 @@ So while I think it is safe to run, it may cause the module to error out when th
 
 @author:
 Yeah, nice remark. I'll fix it."
-27,ansible__ansible-44951@91cfd5c,ansible/ansible,lib/ansible/modules/cloud/ovirt/ovirt_cluster.py,style,A,,,,"@user1:
+27,ansible__ansible-44951@91cfd5c,ansible/ansible,lib/ansible/modules/cloud/ovirt/ovirt_cluster.py,C,C.doc-external,,,EXAMPLES block shows an invalid cluster name with spaces.,C,C.doc-external,EXAMPLES value corrected.,yes,,,"@user1:
 There can't be spaces in cluster name."
-29,ansible__ansible-51415@fb988f5,ansible/ansible,lib/ansible/modules/network/meraki/meraki_admin.py,style,C,,,,"@user1:
+29,ansible__ansible-51415@fb988f5,ansible/ansible,lib/ansible/modules/network/meraki/meraki_admin.py,C,C.doc-external,,,DOCUMENTATION lacks description of tags dict keys.,C,C.doc-external,DOCUMENTATION suboptions added.,yes,,,"@user1:
 This tag/access isn't defined in the description for tags. Can you add that information like you did for the json dict for networks?
 
 @author:
 I've updated this so please take a look and let me know if what I have is more obvious."
-31,ansible__ansible-54268@403b068,ansible/ansible,lib/ansible/module_utils/redfish_utils.py,functional,B,,,,"@user1:
+31,ansible__ansible-54268@403b068,ansible/ansible,lib/ansible/module_utils/redfish_utils.py,B,B.interface,,,"Hard-coded ""/redfish/v1"" URI; pass it in like other methods do.",B,B.convention,"Hard-coded URI replaced by the module-provided one, as elsewhere.",yes,,,"@user1:
 Is it possible to not use `""/redfish/v1""` here but instead pass it from the module like we do with most other methods?
 
 @user2:
 Good catch on the `""/redfish/v1""`. I agree."
-32,ansible__ansible-55379@060b0e9,ansible/ansible,lib/ansible/modules/cloud/ovirt/ovirt_template.py,functional,B,yes,,,"@user1:
+32,ansible__ansible-55379@060b0e9,ansible/ansible,lib/ansible/modules/cloud/ovirt/ovirt_template.py,B,B.interface,yes,A,Remove option cloud_init_persist: meaningless for templates (no run-once).,B,B.interface,Option has no meaning for templates; removed.,yes,,,"@user1:
 It doesn't make sense in case of template as there is no run-once, so plaese remove it."
-34,ansible__ansible-56679@5e79e31,ansible/ansible,lib/ansible/modules/system/hostname.py,style,B,,,,"@user1:
+34,ansible__ansible-56679@5e79e31,ansible/ansible,lib/ansible/modules/system/hostname.py,B,B.reuse,,,Duplicated choices list; derive from STRATS.keys().,B,B.reuse,Choices derived from STRATS instead of a duplicate list.,yes,,,"@user1:
 Could you do something like `choices=STRATS.keys()` here to avoid duplicating the list?"
-38,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,B,yes,,,"@user1:
+38,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,B,B.redundant,yes,A,Success check needlessly tests token handle; rely on LogonUser return value only.,B,B.redundant,Handle check not needed.,yes,,,"@user1:
 No need to check the handle value, just base it off the LogonUser return value."
-39,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,functional,A,,,,"@user1:
+39,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,A,A.logic,,,Setting changed=$false can overwrite an earlier true change flag.,A,A.logic,Reset of changed flag overwrites earlier true.,yes,,,"@user1:
 You shouldn't set this to `$false` as it could overwrite code above that set it to `$true`. Just rely on an implicit value of no changes and only set to `$true` if a change occurred."
-40,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,structural,A,,,,"@user1:
+40,ansible__ansible-58383@531e457,ansible/ansible,lib/ansible/modules/windows/win_domain_user.ps1,B,B.redundant,,,Skip the credential test when update_password=always (result unused); simplify the condition.,B,B.redundant,Unneeded credential test for always; condition simplified.,yes,,,"@user1:
 We also don't want to test the credentials if `update_password` is `on_create` and we didn't create a new user. Right now this will always check and update the password for both `on_create` and `when_changed` effectively making them the same thing. We could always make this more efficient by not testing the credentials when `update_password` is `always` as we will always update it regardless of this result.
 
 @author:
@@ -127,7 +127,7 @@ It did seem a bit confusing when I was reading through it originally so if you c
 @author:
 Sometimes you can't see the forest for the trees...
 It's now way easier."
-45,ansible__ansible-59946@fbe8544,ansible/ansible,lib/ansible/utils/display.py,functional,A,,,,"@user1:
+45,ansible__ansible-59946@fbe8544,ansible/ansible,lib/ansible/utils/display.py,A,A.input-handling,,,Keep the truthiness guard so None whitelist does not reach any().,A,A.input-handling,Keep guard so None does not reach any().,yes,,,"@user1:
 shouldn't we keep the previous check also (make it an `and`) to avoid `None` values instead of list or list of empty items?
 
 @author:
@@ -135,15 +135,15 @@ Probably
 
 @author:
 Done."
-46,ansible__ansible-60622@19d2ad7,ansible/ansible,lib/ansible/modules/cloud/docker/docker_image_info.py,functional,C,,,,"@user1:
+46,ansible__ansible-60622@19d2ad7,ansible/ansible,lib/ansible/modules/cloud/docker/docker_image_info.py,C,C.doc-external,,,Markup typo O(pull) in module DOCUMENTATION; should be C(pull).,C,C.doc-external,Doc markup typo.,yes,,,"@user1:
 O() doesn't exist right? Typo?
 https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_documenting.html#linking-within-module-documentation
 
 @author:
 Typo indeed! Should have been `C(...)`. Thanks for spotting!"
-48,ansible__ansible-62373@30950ec,ansible/ansible,lib/ansible/plugins/action/__init__.py,style,B,,,,"@user1:
+48,ansible__ansible-62373@30950ec,ansible/ansible,lib/ansible/plugins/action/__init__.py,B,B.redundant,,,Start become_kwargs empty instead of duplicating modify_module defaults.,B,B.redundant,Explicit defaults duplicated.,yes,,,"@user1:
 Instead of setting these all to their defaults from `modify_module`, just use `become_kwargs = {}` to start, it will achieve the same goal without duplicating defaults that could lead to issues later."
-49,ansible__ansible-71136@621cec5,ansible/ansible,lib/ansible/executor/task_executor.py,functional,A,,,,"@user1:
+49,ansible__ansible-71136@621cec5,ansible/ansible,lib/ansible/executor/task_executor.py,A,A.logic,,,Combining inventory host vars applies wrong password/settings to the delegated host.,A,A.logic,Host vars combined into delegated vars; wrong password applied.,yes,,,"@user1:
 no, combine vars with inventory_hostname variables is specifically what we want to avoid, this does not only bring the `-k` defined password but any that where set in inventory for the inventory_hostname, then applying possibly wrong password (among other settings) to the delegated_to host.  What we do need to do is pull the play_context passwords  (in the end they should really be applied to the task, but that is future fix) and let delegated_to host override if set.
 
 @user1:
@@ -183,12 +183,12 @@ I'll be creating a backport for this so the next 2.9 release will include it. Un
 
 @user2:
 yes I saw them, what about 2.11 ?"
-51,apache__airflow-16732@8ec4f26,apache/airflow,tests/dags/test_chain_xcomargs.py,functional,C,,,,"@user1:
+51,apache__airflow-16732@8ec4f26,apache/airflow,tests/dags/test_chain_xcomargs.py,C,C.test-design,,,New test DAG file; add cases to the existing test module instead.,C,C.test-design,Cases belong in the existing test module.,yes,,,"@user1:
 This shouldn't be a new file, but some extra cases with asserts here https://github.com/apache/airflow/blob/fa811057a6ae0fc6c5e4bff1e18971c262a42a4c/tests/models/test_baseoperator.py#L381-L401
 
 @author:
 Added similar cases for `XComArgs`."
-52,apache__airflow-26766@cf0c9a6,apache/airflow,airflow/providers/cncf/kubernetes/utils/xcom_sidecar.py,functional,B,,,,"@user1:
+52,apache__airflow-26766@cf0c9a6,apache/airflow,airflow/providers/cncf/kubernetes/utils/xcom_sidecar.py,B,B.interface,,,Provider code must not read core Airflow settings; configure via connection/param.,B,B.structure,Provider must not depend on core settings; config moved to connection/param.,yes,,,"@user1:
 stuff in the k8s provider should not refer to core settings.  we're trying to keep these separate.  core should only be referred to for k8s executor.  if you want to be able to modify the xcom container, should do so via airflow connection instead... or... possibly.... through an operator param... but i think airflow connection is better.  look in KPO how you can reference attrs on the hook through `self.hook`.  this can get you access to params defined in the connection.
 
 @author:
@@ -196,23 +196,23 @@ I will get moving on the changes.
 
 @author:
 @user1 I moved the configuration to the connection."
-54,apache__airflow-8749@161c96c,apache/airflow,airflow/providers/amazon/aws/operators/step_function_get_execution_output.py,functional,B,,,,"@user1:
+54,apache__airflow-8749@161c96c,apache/airflow,airflow/providers/amazon/aws/operators/step_function_get_execution_output.py,B,B.redundant,,,Manual xcom_push unnecessary: return value is already pushed to XCom.,B,B.redundant,Manual XCom push not needed.,yes,,,"@user1:
 This is not needed because you are pushing it to xcom via `return execution_output` automatically. And you can access this value via xcom key `return_value` of this ti.
 
 @author:
 removed"
-56,certbot__certbot-7270@65f464e,certbot/certbot,certbot/tests/util_test.py,functional,B,,,,"@user1:
+56,certbot__certbot-7270@65f464e,certbot/certbot,certbot/tests/util_test.py,B,B.redundant,yes,C,Delete leftover Windows-runtime helper in a test module.,B,B.redundant,"Unneeded helper deleted (generic, in a test module).",yes,,,"@user1:
 This should be deleted.
 
 @author:
 Done."
-57,certbot__certbot-9076@01f570d,certbot/certbot,tools/finish_release.py,functional,A,,,,"@user1:
+57,certbot__certbot-9076@01f570d,certbot/certbot,tools/finish_release.py,A,A.api-use,,,Script crashes: `version` no longer defined; add a fetch function.,A,A.api-use,version undefined; script crashes.,yes,,,"@user1:
 Have you not had a chance to test this yourself yet? This script crashes for me on this line because `version` is no longer defined. To fix that, maybe we could make a simple function called something like `fetch_version_number` that contains the code to grab the version number from Azure Pipelines?"
-64,conan-io__conan-16942@e62c6eb,conan-io/conan,conans/client/migrations.py,style,B,,,,"@user1:
+64,conan-io__conan-16942@e62c6eb,conan-io/conan,conans/client/migrations.py,B,B.redundant,,,Auth-plugin migration unnecessary since no default plugin will ship.,B,B.redundant,Migration unnecessary.,yes,,,"@user1:
 Conan will not provide a default plugin, so a migration will not be necessary"
-65,conan-io__conan-16942@e62c6eb,conan-io/conan,conans/client/rest/remote_credentials.py,functional,B,yes,,,"@user1:
+65,conan-io__conan-16942@e62c6eb,conan-io/conan,conans/client/rest/remote_credentials.py,B,B.redundant,yes,A,Drop empty default plugin; treat a missing file as no plugin (missing file must not raise).,B,B.redundant,Empty default plugin removed.,yes,,,"@user1:
 We don't need an empty default plugin, better consider the non-existence of the file as user didn't provide one and do nothing."
-69,cvat-ai__cvat-4062@ff04d8f,cvat-ai/cvat,cvat/apps/dataset_manager/formats/transformations.py,functional,B,,,,"@user1:
+69,cvat-ai__cvat-4062@ff04d8f,cvat-ai/cvat,cvat/apps/dataset_manager/formats/transformations.py,B,B.performance,,,Use OpenCV for ellipse rasterisation (faster).,B,B.performance,OpenCV chosen for speed.,yes,,,"@user1:
 I suspect, opencv may be a bit faster, did you try to check it?
 
 @author:
@@ -220,14 +220,14 @@ I'll investigate this point
 
 @author:
 Yes, OpenCV about 2.5 times faster, I updated the code."
-71,dask__dask-7974@88a13f7,dask/dask,dask/base.py,documentation,C,,,,"@user1:
+71,dask__dask-7974@88a13f7,dask/dask,dask/base.py,C,C.doc-inline,,,Docstring wrongly changed: function accepts several graphs.,C,C.doc-inline,Docstring summary corrected.,yes,,,"@user1:
 **THIS** function does indeed take as many graphs as you like, the original docstring was correct. It's only for the `self.visualize` that the graph in question is already implied and there is no way to show more.
 
 @author:
 Oh! Didn't know that :heavy_check_mark:"
-73,dask__dask-7974@88a13f7,dask/dask,dask/base.py,functional,C,,,,"@user1:
+73,dask__dask-7974@88a13f7,dask/dask,dask/base.py,C,C.doc-inline,,,Docstring documents parameter `dsk`; real parameter is *args.,C,C.doc-inline,Docstring parameter corrected.,yes,,,"@user1:
 This parameter is, however, wrong. `*args` is the set of dask graphs to show, one or more of them."
-74,dask__dask-7974@88a13f7,dask/dask,dask/highlevelgraph.py,functional,C,yes,,,"@user1:
+74,dask__dask-7974@88a13f7,dask/dask,dask/highlevelgraph.py,C,C.doc-inline,,,Docstring states wrong default file extension.,C,C.doc-inline,Docstring default extension.,yes,,,"@user1:
 Doesn't the extension you get depend on the `format` argument?
 
 @author:
@@ -294,35 +294,35 @@ EDIT: format would overwrite the filename (if the filename has an extension atta
 x.dask.visualize(filename=""whatextension.png"", format='pdf') # whatextension.png.pdf
 x.dask.visualize(filename=""whatextension"", format=None) # whatextension.png
 ```"
-75,dask__dask-7974@88a13f7,dask/dask,dask/base.py,functional,C,,,,"@user1:
+75,dask__dask-7974@88a13f7,dask/dask,dask/base.py,C,C.doc-inline,,,Docstring mentions undocumented cmap kwarg; document separately or remove.,C,C.doc-inline,Docstring mention of cmap removed.,yes,,,"@user1:
 If we're being thorough, then `cmap` should be a separate kwargs in this list with a better description than given here; or just remove it, since we don't say anywhere what kind of object cmap can be (and it is probably not tested).
 
 @author:
 Right!"
-83,deepset-ai__haystack-1413@fc3b61a,deepset-ai/haystack,test/test_pipeline.py,documentation,C,,,,"@user1:
+83,deepset-ai__haystack-1413@fc3b61a,deepset-ai/haystack,test/test_pipeline.py,C,C.test-oracle,yes,B,Duplicated identical assertion in a test.,C,C.test-oracle,Duplicate assertion in a test; assertions rewritten.,yes,,,"@user1:
 Twice the same assert
 
 @author:
 Oops."
-84,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/sql.py,documentation,B,,,,"@user2:
+84,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/sql.py,B,B.interface,,,"Align delete_labels with delete_documents (ids parameter, same structure).",B,B.interface,Aligned with delete_documents.,yes,,,"@user2:
 Also this part can probably be aligned with the equivalent for `delete_documents()`. Please sync with @user1"
-85,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/elasticsearch.py,functional,B,,,,"@user2:
+85,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/elasticsearch.py,B,B.interface,,,Make delete_labels signature consistent with delete_documents (separate ids param).,B,B.interface,Signature aligned with delete_documents.,yes,,,"@user2:
 @user1 Just worked on enabling the deletion of documents by ids. The signature there looks different as she decided to go for a separate `ids` param in addition to `filters`. I have no strong opinion about either of the two designs but we should make it consistent. Can the two of you please discuss and decide which signature we want to use?
 
 @user2:
 https://github.com/deepset-ai/haystack/pull/1606"
-86,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/elasticsearch.py,style,B,,,,"@user1:
+86,deepset-ai__haystack-1604@78e9795,deepset-ai/haystack,haystack/document_store/elasticsearch.py,B,B.interface,yes,C,Do not expose Elasticsearch-internal `_id` to users; consistent id across stores (anchored on docstring example).,B,B.interface,Hide Elasticsearch internal _id from the user-facing filter; consistency across stores.,yes,,,"@user1:
 I know that the id field in elasticsearch has the `_` prefix but we usually abstract this away from the user (for example when writing new docs by passing a dict the field is just `id`. Let's also make it here consistent across all doc stores"
-92,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,haystack/nodes/file_converter/parsr.py,style,A,,,,"@user1:
+92,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,haystack/nodes/file_converter/parsr.py,A,A.logic,,,Uses self.extract_headlines instead of the per-call extract_headlines argument.,A,A.logic,Uses instance attribute instead of the per-call value.,yes,,,"@user1:
 should this be `if extract_headlines`?
 
 @author:
 Good catch"
-94,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,haystack/nodes/file_converter/parsr.py,structural,B,,,,"@user1:
+94,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,haystack/nodes/file_converter/parsr.py,B,B.convention,,,Magic number 1000 as sentinel; use sys.maxsize to make intent explicit.,B,B.convention,Magic number replaced by sys.maxsize; nit about intent.,yes,,,"@user1:
 nit: if you use `sys.maxsize` instead of 1000, your intent is more obvious (for example, at first I was wondering if 1000 was somehow special in this context)"
-95,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,test/nodes/test_file_converter.py,documentation,C,,,,"@user1:
+95,deepset-ai__haystack-3488@e07a8b3,deepset-ai/haystack,test/nodes/test_file_converter.py,C,C.test-oracle,,,Test should assert len(docs)==2 so every expectation is checked.,C,C.test-oracle,Assert the number of docs so all expectations run.,yes,,,"@user1:
 should we assert the number of docs is exactly 2 before getting here? The second item in `expected_headlines` wouldn't be tested if some day `docs` contained only one item."
-96,deepset-ai__haystack-3546@a260299,deepset-ai/haystack,haystack/nodes/retriever/multimodal/retriever.py,functional,A,,,,"@user1:
+96,deepset-ai__haystack-3546@a260299,deepset-ai/haystack,haystack/nodes/retriever/multimodal/retriever.py,B,B.typing,yes,A,Question about doc-store compatibility led to removing `# type: ignore` (typing fix is what the test checks).,B,B.typing,Thread resolves into removing the type: ignore.,yes,,,"@user1:
 Would this stop MultiModal retriever from using all the document stores?
 
 @user2:
@@ -332,7 +332,7 @@ My understanding is that any document store still works because the default impl
 @user3-risch @user1 Ok I ran all multimodal tests of `test_retriever.py` locally using `OpenSearchDocumentStore` and added another one that uses `retrieve_batch`. All tests were fine. I added the `retrieve_batch` test using `InMemoryDocumentStore` as all the others.
 I know that `#type: ignore` is not really nice here, so I resolved the `query_embs` one by allowing for multi-dimensional `np.ndarray`s. 
 For the other one I'll open another PR to resolve this. It would be just too big for this one I guess."
-99,deepset-ai__haystack-5284@60a39ef,deepset-ai/haystack,haystack/nodes/prompt/invocation_layer/hugging_face.py,functional,C,yes,,,"@user1:
+99,deepset-ai__haystack-5284@60a39ef,deepset-ai/haystack,haystack/nodes/prompt/invocation_layer/hugging_face.py,B,B.convention,,,Use `raise ... from e` exception chaining (idiom; framed as slight improvement).,B,B.convention,Exception chaining with from e; framed as slight improvement.,yes,,,"@user1:
 ```suggestion
             raise RuntimeError(f""The task of {model} could not be checked because of the following error: {e}"") from e
 ```
@@ -341,19 +341,19 @@ I feel it can be slightly improved. (Read [this](https://www.pythontutorial.net/
 
 @author:
 Thanks, I didn't know about this feature."
-101,deepset-ai__haystack-8457@2dd3777,deepset-ai/haystack,haystack/components/converters/docx.py,functional,A,,,,"@user1:
+101,deepset-ai__haystack-8457@2dd3777,deepset-ai/haystack,haystack/components/converters/docx.py,B,B.redundant,,,"Remove always-true init_parameters guard, keep table_format guard.",B,B.redundant,Always-true init_parameters guard dropped; table_format guard kept.,yes,,,"@user1:
 Those two keys are always going to be present - we can remove this check.
 
 @user1:
 Whoops, this  `table_format` key won't be present in existing serialized pipelines - we should still check for that. Sorry about the confusion."
-103,deepset-ai__haystack-92@accd8b1,deepset-ai/haystack,haystack/database/elasticsearch.py,style,B,,,,"@user1:
+103,deepset-ai__haystack-92@accd8b1,deepset-ai/haystack,haystack/database/elasticsearch.py,B,B.naming,,,Method name does not fit what it does; rename (get_all_documents_in_index).,B,B.naming,Method renamed.,yes,,,"@user1:
 Can we make this fct private?
 Can we rename it? Since it applies filters on the docs and e.g. in the finder just returns the questions. That doesnt really fit the name.
 
 @user2:
 Wouldn't make it private as we call it from retriever.eval().
 As the functionality is overlapping with ""get_all_documents()"", we could a) extend this one and get rid of the new implementation or b) rename the new one to ""get_all_documents_in_index()"
-110,frappe__frappe-13065@dfc23eb,frappe/frappe,frappe/api.py,functional,A,,,,"@user1:
+110,frappe__frappe-13065@dfc23eb,frappe/frappe,frappe/api.py,A,A.logic,,,sbool converts every request parameter; only boolean params should be converted.,A,A.logic,Bool conversion applied to all params.,yes,,,"@user1:
 this would convert in all these cases
 
 ![image](https://user-images.githubusercontent.com/28212972/119487423-fb9b9480-bd76-11eb-9b62-dda6068bd695.png)
@@ -367,13 +367,13 @@ One idea that I have is that can we keep the util and apply it to a parameter if
 Given the scope of its usage at this point, this becomes a problem when you'd have a field named `y`,`n`, `true`, `false` and `order_by` that field, or have the same values for a `document name` that `parent` parameter would accept out of all those that Frappe REST allows.
 
 OTOH, since only debug and as_dict can have boolean values, might as well just convert them 😄 . Nice catch"
-111,getmoto__moto-7406@26efd90,getmoto/moto,moto/route53domains/models.py,functional,A,,,,"@user1:
+111,getmoto__moto-7406@26efd90,getmoto/moto,moto/route53domains/models.py,A,A.compat,yes,B,PEP 604 `int | None` annotations break on supported Python 3.8.,A,A.compat,PEP 604 syntax unsupported on Python 3.8.,yes,,,"@user1:
 Moto still supports Python 3.8, which doesn't support the |-operand. So they should all be converted:
 `Optional[int] = None`
 
 @author:
 Fair enough, although I really like the new `|` operator"
-112,getsentry__sentry-71711@d1652c4,getsentry/sentry,src/sentry/api/endpoints/organization_pinned_searches.py,style,A,,,,"@user1:
+112,getsentry__sentry-71711@d1652c4,getsentry/sentry,src/sentry/api/endpoints/organization_pinned_searches.py,A,A.api-use,,,Misspelled keyword argument `organizaiton` passed to create_or_update.,A,A.api-use,Misspelled keyword argument.,yes,,,"@user1:
 `organization`
 
 @user2:
@@ -382,21 +382,21 @@ Let's make sure there is a test in place which would catch this, if there isn't 
 @author:
 🤦 
 Thanks for catching this! Fixing now"
-113,getsentry__sentry-71711@d1652c4,getsentry/sentry,src/sentry/api/endpoints/organization_pinned_searches.py,style,A,,,,"@user1:
+113,getsentry__sentry-71711@d1652c4,getsentry/sentry,src/sentry/api/endpoints/organization_pinned_searches.py,A,A.logic,,,"`position` must be part of the upsert select criteria (unique key org,user,position).",A,A.logic,Upsert must select on position (unique key).,yes,,,"@user1:
 I think the position should be part of the select criteria, since the unique is `org, user, position`"
-116,getsentry__sentry-71942@a4f03f3,getsentry/sentry,src/sentry/issues/endpoints/organization_group_search_views.py,style,A,,,,"@user1:
+116,getsentry__sentry-71942@a4f03f3,getsentry/sentry,src/sentry/issues/endpoints/organization_group_search_views.py,B,B.convention,yes,A,"Feature-flag-disabled endpoint should return 404 like elsewhere, not 405.",B,B.convention,"Project usually returns 404 here; ""not a big deal"".",yes,,,"@user1:
 Not that big of a deal, but we usually return a 404 for this kind of thing. 405 is specific to the method, we just want to behave like the endpoint doesn't exist."
-120,gradio-app__gradio-3275@067f582,gradio-app/gradio,guides/05_tabular-data-science-and-plots/creating-a-dashboard-from-supabase-data.md,functional,C,,,,"@user1:
+120,gradio-app__gradio-3275@067f582,gradio-app/gradio,guides/05_tabular-data-science-and-plots/creating-a-dashboard-from-supabase-data.md,C,C.doc-external,,,Guide: add link and fix grammar typo.,C,C.doc-external,Guide link and typo.,yes,,,"@user1:
 maybe add a link to supabase.com? 
 
 typo:
 > data from Supabase plot it in
 
 data from Supabase *and plot it in"
-121,gradio-app__gradio-3275@067f582,gradio-app/gradio,guides/05_tabular-data-science-and-plots/creating-a-dashboard-from-supabase-data.md,functional,C,,,,"@user1:
+121,gradio-app__gradio-3275@067f582,gradio-app/gradio,guides/05_tabular-data-science-and-plots/creating-a-dashboard-from-supabase-data.md,C,C.doc-external,,,Guide: make sign-up URL a clickable link.,C,C.doc-external,Guide link.,yes,,,"@user1:
 make the link clickable 
 `[https://app.supabase.com/](https://app.supabase.com/)`"
-125,home-assistant__core-110255@a9d173a,home-assistant/core,homeassistant/components/bmw_connected_drive/__init__.py,structural,A,,,,"@user1:
+125,home-assistant__core-110255@a9d173a,home-assistant/core,homeassistant/components/bmw_connected_drive/__init__.py,A,A.api-use,,,Removing the device directly can delete devices shared with other config entries; detach entry instead.,A,A.api-use,Detach config entry instead of deleting possibly shared device.,yes,,,"@user1:
 Please instead update the device entries and remove the config entry id from them. If there are no other config entries remaining the device entry will be removed automatically. That's safer than removing the device entry directly as it's (theoretically) possible for multiple config entries (from any integration) to be connected to the same device entry.
 
 Example:
@@ -404,17 +404,17 @@ https://github.com/home-assistant/core/blob/7dc9ad63bd0503cc3298f99ae415a2718cb7
 
 @author:
 Thanks - copied from the wrong integration :)"
-128,hpcaitech__ColossalAI-4080@dc82ade,hpcaitech/ColossalAI,applications/Chat/coati/trainer/base.py,documentation,B,,,,"@user1:
+128,hpcaitech__ColossalAI-4080@dc82ade,hpcaitech/ColossalAI,applications/Chat/coati/trainer/base.py,B,B.interface,,,"Dataloader belongs in fit(), not the trainer constructor (API design).",B,B.interface,Dataloader moved out of the constructor.,yes,,,"@user1:
 Why pass data loader in `__init__()`? This is usually passed in `fit()`.
 
 @author:
 This is fixed in 211dfb5 and 69ab71b."
-130,hpcaitech__ColossalAI-6059@802df11,hpcaitech/ColossalAI,colossalai/quantization/fp8.py,functional,A,,,,"@user1:
+130,hpcaitech__ColossalAI-6059@802df11,hpcaitech/ColossalAI,colossalai/quantization/fp8.py,A,A.compat,,,Module-level CUDA capability query fails without a device; guard with try/except.,A,A.compat,Module-level GPU query guarded so import works without CUDA.,yes,,,"@user1:
 use try-catch block to get better compatibility
 
 @author:
 Fixed"
-131,hpcaitech__ColossalAI-6059@802df11,hpcaitech/ColossalAI,colossalai/zero/low_level/bookkeeping/tensor_bucket.py,structural,B,,,,"@user1:
+131,hpcaitech__ColossalAI-6059@802df11,hpcaitech/ColossalAI,colossalai/zero/low_level/bookkeeping/tensor_bucket.py,B,B.performance,,,Keep all_gather_into_tensor in the non-fp8 path (faster).,B,B.performance,Faster gather call restored.,yes,,,"@user1:
 and keep this unchanged
 
 @author:
@@ -425,9 +425,9 @@ all_gather_into_tensor has better performance
 
 @author:
 Fixed"
-134,huggingface__accelerate-255@12e4b18,huggingface/accelerate,src/accelerate/accelerator.py,functional,B,,,,"@user1:
+134,huggingface__accelerate-255@12e4b18,huggingface/accelerate,src/accelerate/accelerator.py,A,A.state-resource,,,Random-state checkpoint file must be per process; a shared file collides across processes.,A,A.state-resource,Random state file must be per process.,yes,,,"@user1:
 Same ehre + one for each process."
-142,huggingface__datasets-586@034c1c0,huggingface/datasets,datasets/text/text.py,functional,A,,,,"@user1:
+142,huggingface__datasets-586@034c1c0,huggingface/datasets,datasets/text/text.py,A,A.error-handling,yes,B,Argument validation via assert is skipped under -O; raise ValueError instead.,A,A.error-handling,Assert-based validation disappears under -O.,yes,,,"@user1:
 Let's merge the PR on multi-threaded `text` and add it in the new script before?
 
 @user2:
@@ -442,7 +442,7 @@ if not self.config.data_files:
 
 @author:
 Yes indeed I'll change that"
-143,huggingface__diffusers-4015@c63a53a,huggingface/diffusers,src/diffusers/pipelines/stable_diffusion_xl/pipeline_stable_diffusion_xl_img2img.py,functional,B,,,,"@user1:
+143,huggingface__diffusers-4015@c63a53a,huggingface/diffusers,src/diffusers/pipelines/stable_diffusion_xl/pipeline_stable_diffusion_xl_img2img.py,B,B.interface,,,Replace integer-step parameters with fractional denoising_start/end (public API design).,B,B.interface,Integer step params replaced by fractional API.,yes,,,"@user1:
 ```suggestion
         denoising_end: Optional[float] = None,
 ```
@@ -506,36 +506,36 @@ so in the example `num_inference_step = 27`, `strength= 0.73`,  we will have `fi
 
 @author:
 ive tested this, and while it seems like it should work, it has really broken the results for me, overall. i am digging into it."
-144,huggingface__diffusers-792@90385bb,huggingface/diffusers,src/diffusers/pipelines/stable_diffusion/safety_checker.py,functional,B,,,,"@user1:
+144,huggingface__diffusers-792@90385bb,huggingface/diffusers,src/diffusers/pipelines/stable_diffusion/safety_checker.py,B,B.simplify,,,Dtype-conditional cast unnecessary; always call .float() before numpy().,B,B.simplify,Conditional cast replaced by always casting.,yes,,,"@user1:
 I don't think we need an `if` statement here as `.float()` should always work and be correct (e.g. we can't do `fp16` on CPU either and doing `numpy()` will move it to `fp32` anyways
 
 @user2:
 @user1 why would `numpy()` move the arrays to `fp32`? I thought that numpy arrays support `fp16`?
 I believe we should use `.half()` instead which should work on CPU also?"
-146,iterative__dvc-2596@37847e7,iterative/dvc,scripts/completion/dvc.bash,functional,A,,,,"@user1:
+146,iterative__dvc-2596@37847e7,iterative/dvc,scripts/completion/dvc.bash,A,A.logic,,,Hyphen not replaced in COMP_WORDS[1]; completion breaks for import-url/get-url.,A,A.logic,Hyphen not replaced; invalid variable name.,yes,,,"@user1:
 You need to replace hyphen in `COMP_WORDS[1]` here too, otherwise you'll get an error on `import-url` and `get-url`, because it would evaluate to `_dvc_import-url_...`, which is invalid."
-147,iterative__dvc-2596@37847e7,iterative/dvc,scripts/completion/dvc.bash,style,B,,,,"@user1:
+147,iterative__dvc-2596@37847e7,iterative/dvc,scripts/completion/dvc.bash,B,B.structure,yes,A,Define helper as nested function to avoid global namespace collisions.,A,A.state-resource,Global helper may collide; reviewer's stated reason is the collision risk.,no,yes,"Resolved by the study owner, 2026-11-09. Kept B against the re-check: the reviewer is worried about a possible name collision, but nothing fails.","@user1:
 Not quite sure how bash is handling namespacing for completion scripts, so a bit worried about it colliding with something and so wouldn't place this function like that, but would just define it inside of `_dvc` function as a nested function. That way there is no chance of it colliding with anything."
-148,jina-ai__serve-1256@2f495e3,jina-ai/serve,jina/clients/python/grpc.py,style,B,,,,"@user1:
+148,jina-ai__serve-1256@2f495e3,jina-ai/serve,jina/clients/python/grpc.py,B,B.redundant,,,Redundant `:d` format specifier in f-string.,B,B.redundant,Pointless :d specifier removed.,yes,,,"@user1:
 this `:d` seems odd
 
 @author:
 It's a formatting code, like the 's' and 'f'. But yeah, it doesn't add anything. I can remove them"
-152,keephq__keep-100@6a8be21,keephq/keep,keep/parser/tests_for_parser/test_parser.py,style,B,,,,"@user1:
+152,keephq__keep-100@6a8be21,keephq/keep,keep/parser/tests_for_parser/test_parser.py,B,B.naming,yes,C,Variable named `self` in a free test function; name it parser.,B,B.naming,Local variable named self in a free function (generic naming in a test file).,yes,,,"@user1:
 parser = Parser()"
-153,keephq__keep-1984@e524fe8,keephq/keep,keep/api/routes/topology.py,functional,A,yes,,,"@user1:
+153,keephq__keep-1984@e524fe8,keephq/keep,keep/api/routes/topology.py,B,B.convention,yes,A,Catch specific exceptions instead of a blanket `except Exception`.,B,B.convention,"Reviewer asks for narrower exceptions, gives no bug; best-practice request.",yes,yes,"Resolved by the study owner, 2026-11-09. Changed from A to B: the reviewer names no bug or risk, so rule 3 does not apply.","@user1:
 Can we use more specified exceptions here?"
-155,keephq__keep-3054@2d23bf3,keephq/keep,tests/e2e_tests/docker-compose-e2e-postgres.yml,documentation,A,yes,,,"@user1:
+155,keephq__keep-3054@2d23bf3,keephq/keep,tests/e2e_tests/docker-compose-e2e-postgres.yml,C,C.test-design,yes,A,E2E test compose file carries a PostHog key; remove it (test env must not report telemetry).,C,C.test-design,E2E compose: telemetry disabled in the test environment.,yes,,,"@user1:
 This Posthog key too"
-156,keephq__keep-3054@2d23bf3,keephq/keep,tests/e2e_tests/docker-compose-e2e-mysql.yml,functional,A,,,,"@user1:
+156,keephq__keep-3054@2d23bf3,keephq/keep,tests/e2e_tests/docker-compose-e2e-mysql.yml,C,C.test-design,yes,A,E2E test compose: remove PostHog keys and set POSTHOG_DISABLED=true.,C,C.test-design,E2E compose: telemetry disabled in the test environment.,yes,,,"@user1:
 Please remove POSTHOG keys from here and set POSTHOG_DISABLED=true"
-158,keephq__keep-4568@aaa03de,keephq/keep,keep/api/models/alert.py,structural,B,,,,"@user1:
+158,keephq__keep-4568@aaa03de,keephq/keep,keep/api/models/alert.py,B,B.interface,,,Do not expose limit/offset in the public request model; hardcode at use site.,B,B.interface,limit/offset removed from public request model.,yes,,,"@user1:
 Let's maybe remove these limit/offset parameters from batch enrichment request and hardcode limit:1000 offset:0
 in the place where it's used now. I think no need to make limit and offset being part of public api especially because it's gonna be change in future.
 
 @author:
 Deleted at https://github.com/keephq/keep/pull/4568/commits/524d00c72d1ec0b5f985577dbb7f21a67a0dc34c."
-165,marimo-team__marimo-4080@8a73f89,marimo-team/marimo,marimo/_runtime/runtime.py,functional,A,,,,"@user1:
+165,marimo-team__marimo-4080@8a73f89,marimo-team/marimo,marimo/_runtime/runtime.py,A,A.logic,,,Package names are added to a set of module names that is later mapped module->package.,A,A.logic,Package names mixed into module names.,yes,,,"@user1:
 Should this be adding module names, not package names?
 
 @author:
@@ -559,22 +559,22 @@ for e in module_not_found_errors:
 
 @author:
 ah i see now, cleaning it up"
-166,matplotlib__matplotlib-17892@cb25841,matplotlib/matplotlib,lib/matplotlib/cbook/__init__.py,style,B,,,,"@user1:
+166,matplotlib__matplotlib-17892@cb25841,matplotlib/matplotlib,lib/matplotlib/cbook/__init__.py,B,B.interface,,,Make the new flag a keyword-only argument.,B,B.interface,Parameter made keyword-only.,yes,,,"@user1:
 can you make this a keyword only argument?
 
 @author:
 It's done. Thanks for the suggestion!"
-167,matplotlib__matplotlib-30199@b5dfb32,matplotlib/matplotlib,lib/matplotlib/pyplot.py,functional,C,,,,"@user1:
+167,matplotlib__matplotlib-30199@b5dfb32,matplotlib/matplotlib,lib/matplotlib/pyplot.py,C,C.doc-inline,,,Code comment wrongly marks hand-written overloads as autogenerated.,C,C.doc-inline,Wrong autogenerated marker comment removed.,yes,,,"@user1:
 This isn't autogenerated.
 
 @author:
 Oops, forgot that one — fixed!"
-170,microsoft__autogen-2225@9cf65ed,microsoft/autogen,autogen/agentchat/contrib/capabilities/transforms.py,functional,A,,,,"@user1:
+170,microsoft__autogen-2225@9cf65ed,microsoft/autogen,autogen/agentchat/contrib/capabilities/transforms.py,A,A.logic,,,"Cache set key omits min_tokens, so it never matches the _cache_get key.",A,A.logic,Cache key differs between set and get.,yes,,,"@user1:
 To align with `_cache_get` I think this line should be:
 `key = f""{json.dumps(content)}_{self._min_tokens}""`"
-171,microsoft__autogen-4044@e5bddfc,microsoft/autogen,dotnet/Directory.Build.props,structural,B,,,,"@user1:
+171,microsoft__autogen-4044@e5bddfc,microsoft/autogen,dotnet/Directory.Build.props,B,B.redundant,,,Remove global System.Text.Json reference and duplicate-package workaround (build config).,B,B.redundant,Global package reference and workaround removed.,yes,,,"@user1:
 Maybe try simply removing the S.T.J package reference in `Directory.Build.props` instead? We probably don't need that global reference after updating M.E.A.I version"
-172,microsoft__autogen-5843@e07fb7a,microsoft/autogen,python/packages/autogen-agentchat/src/autogen_agentchat/teams/_group_chat/_swarm_group_chat.py,functional,B,,,,"@user1:
+172,microsoft__autogen-5843@e07fb7a,microsoft/autogen,python/packages/autogen-agentchat/src/autogen_agentchat/teams/_group_chat/_swarm_group_chat.py,A,A.compat,yes,B,Keyword-only marker makes a backward-incompatible change to a public constructor (reverted).,A,A.compat,Breaking change to public signature reverted.,yes,,,"@user1:
 Potentially a breaking change, but it's small enough that I think it is likely okay. Probably should have been this way from the start anyway
 
 @author:
@@ -582,7 +582,7 @@ Yeah... It should have been this way. I am planning to make it clear in the rele
 
 @author:
 I reverted this ... let's wait until a good time."
-174,mlflow__mlflow-1658@3f53b0b,mlflow/mlflow,mlflow/store/local_artifact_repo.py,functional,A,,,,"@author:
+174,mlflow__mlflow-1658@3f53b0b,mlflow/mlflow,mlflow/store/local_artifact_repo.py,A,A.logic,,,list_artifacts appends the listed directory itself to its results (hack).,A,A.logic,list_artifacts result wrongly included the directory; hack removed.,yes,,,"@author:
 The spark UDF test (`pytest tests/pyfunc/test_spark.py::test_spark_udf --large`) was failing due to leaked mlruns directory from another test run (we should fix that separately), see [this travis log](https://travis-ci.org/mlflow/mlflow/jobs/562924587). The failure revealed that we currently have a bug/edge case in how we handle downloading artifacts from empty directories (in ArtifactRepository.download_artifacts, we assume that an empty result from list_artifacts implies that an artifact path is a file, but it could actually be an empty directory, e.g. the `mlruns` directory in the above failure). I changed this code to get the test to pass on the PR, but this is probably not the right solution (will think about this more tomorrow)
 
 @user1:
@@ -592,7 +592,7 @@ I don't understand why do you want to add the list_dir to the result. Can you el
 Yeah agreed, adding `list_dir` is just a hack to get the tests to pass against the file-based artifact repo, because it allows us to distinguish between listing an empty directory & a file.
 
 Agree that it'd make sense for list_artifacts pointing a file to return the file itself (similar to how `ls` behaves), but that's a broader change that requires modifications across the different artifact repository implementations, so I just worked around this for now by removing the problematic empty `mlruns` directory in the `projects` tests that create it."
-178,modin-project__modin-4215@69f9652,modin-project/modin,modin/experimental/core/execution/native/implementations/omnisci_on_native/test/test_dataframe.py,functional,C,,,,"@user1:
+178,modin-project__modin-4215@69f9652,modin-project/modin,modin/experimental/core/execution/native/implementations/omnisci_on_native/test/test_dataframe.py,C,C.test-oracle,,,"Test data column has 2 values instead of 4, so the test passes silently.",C,C.test-oracle,Bad test data made the test pass silently.,yes,,,"@user1:
 ```suggestion
         ""d"": pandas.to_datetime(
             [
@@ -609,13 +609,13 @@ I think we have to add a parameter or smth else in a separate PR to explicitly t
 
 @author:
 Yeah, my bad..."
-179,netbox-community__netbox-10171@249b8b0,netbox-community/netbox,netbox/extras/tables/tables.py,style,A,,,,"@user1:
+179,netbox-community__netbox-10171@249b8b0,netbox-community/netbox,netbox/extras/tables/tables.py,B,B.performance,,,Use changed_object accessor so the column is prefetched (query optimisation).,B,B.performance,Accessor changed so the column is prefetched.,yes,,,"@user1:
 Here we want to override the column's default accessor (the instance's `object_repr` attribute) with `changed_object`, to ensure that it gets picked up by the table for prefetching.
 
 ```suggestion
         accessor=tables.A('changed_object'),
 ```"
-180,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/netbox/filtersets.py,functional,A,,,,"@user1:
+180,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/netbox/filtersets.py,A,A.unintended-change,,,PR removed the lookup sanity check (resolve_field); restore it.,A,A.unintended-change,Removed sanity check restored.,yes,,,"@user1:
 I'm pretty sure this was there for sanity-checking. Was is raising an exception? If so, it probably warrants looking into the underlying cause.
 
 @author:
@@ -623,31 +623,31 @@ I will be honest, I don't remember removing this at all.
 
 @author:
 Restored this in the latest commit"
-181,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/forms/models.py,documentation,A,,,,"@user1:
+181,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/forms/models.py,A,A.logic,yes,B,Dynamically hiding the deprecated asn form field is likely to cause odd form behaviour; keep it.,A,A.logic,"Removing the field dynamically is risky (""strange issues"").",yes,,,"@user1:
 Let's not do this, as it's likely to lead to strange issues. It's fine to leave the `asn` field in the form since the help text explains that it's being deprecated.
 
 @author:
 Done, pulled this out"
-185,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/ipam/graphql/scalars.py,style,B,,,,"@user1:
+185,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/ipam/graphql/scalars.py,B,B.redundant,,,Trivial ASNField subclass is unused; use BigInt directly.,B,B.redundant,Trivial subclass removed.,yes,,,"@user1:
 Are you planning to do anything with this? I know we talked about possibly using dotted notation. If not, should we just use BigInt directly?
 
 @author:
 Not yet, I can swap to BigInt for now"
-186,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/ipam/forms/bulk_import.py,functional,B,,,,"@user1:
+186,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/ipam/forms/bulk_import.py,B,B.redundant,,,Explicit asn form field duplicates what the model provides.,B,B.redundant,Field already provided by the model.,yes,,,"@user1:
 This should be inferred from the model; no need to specify it on the form."
-187,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/forms/bulk_edit.py,functional,A,,,,"@user1:
+187,netbox-community__netbox-7662@7c147db,netbox-community/netbox,netbox/dcim/forms/bulk_edit.py,A,A.unintended-change,,,Bulk-edit asn field removed although Site keeps asn; restore it.,A,A.unintended-change,PR removed a field that must stay; restored.,yes,,,"@user1:
 If we're keeping the `asn` field on Site for now, this field should stay.
 
 @author:
 Done"
-189,networkx__networkx-4134@3b27fe2,networkx/networkx,.circleci/config.yml,documentation,B,,,,"@user1:
+189,networkx__networkx-4134@3b27fe2,networkx/networkx,.circleci/config.yml,B,B.redundant,,,CI step creates .nojekyll that already exists.,B,B.redundant,Unneeded CI line removed.,yes,,,"@user1:
 This isn't needed.  There is already a ``.nojekyll`` in the directory containing ``latest``."
-190,networkx__networkx-4602@b2da108,networkx/networkx,networkx/algorithms/centrality/betweenness.py,functional,A,,,,"@user1:
+190,networkx__networkx-4602@b2da108,networkx/networkx,networkx/algorithms/centrality/betweenness.py,A,A.input-handling,,,sorted() fails for non-orderable nodes; use list().,A,A.input-handling,sorted fails on unorderable nodes.,yes,,,"@user1:
 Unfortunately, nodes are not sortable in general.Using `sorted` should be fine in tests where we know what the nodes are, but in the package code itself we should use `list`.
 
 @author:
 Yup this was an oversight on my part - should be fixed in 2e2a63e."
-191,networkx__networkx-5305@072b960,networkx/networkx,networkx/algorithms/distance_measures.py,functional,A,,,,"@user1:
+191,networkx__networkx-5305@072b960,networkx/networkx,networkx/algorithms/distance_measures.py,A,A.compat,,,"Default weight=""weight"" silently changes results of existing calls; default to None.",A,A.compat,Backward-incompatible default; reviewer calls this the real blocker.,yes,,,"@user1:
 API question: do we want the default to be ""weight""? This seems like it might silently change some user code as ""weight"" is a very common edge attribute name, so any existing code that calls e.g. `nx.eccentricity(G)` may get a different result than previous versions of networkx if the edges of `G` have a ""weight"" attribute!
 
 I think the correct thing to do would be to match the default value for `weight=` in `shortest_path_lengths`, which is `weight=None`.
@@ -723,7 +723,7 @@ Anyways, just some high-level pontification. The real blocker for me with going 
 @user2  @user1  Thank you both for being patient and explaining your reasoning here; I now understand what you mean.
 
 I thought you wanted to make `weight=None` do what `weight=""weight""` does, and drop `weight=""weight""` as an option altogether. My mistake!"
-192,networkx__networkx-5305@072b960,networkx/networkx,networkx/algorithms/tests/test_distance_measures.py,functional,C,,,,"@user1:
+192,networkx__networkx-5305@072b960,networkx/networkx,networkx/algorithms/tests/test_distance_measures.py,C,C.test-oracle,,,Test asserts floating-point round-off (!= 0.9); use pytest.approx.,C,C.test-oracle,Assertion about round-off removed.,yes,,,"@user1:
 I don't think this assertion is a good idea... the pytest.approx call on the next line actually tests the behavior we care about.
 ```suggestion
 ```
@@ -740,7 +740,7 @@ It's probably safest to use `pytest.approx` everywhere for testing ""equality"" 
 
 @user2:
 Would it be useful to know (and test for) cases where round-off makes a difference. In these examples, 2 have round-off and the rest don't. Do we care if that changes? probably not. :}"
-195,networkx__networkx-7159@7e65b7d,networkx/networkx,networkx/readwrite/tests/test_gml.py,functional,C,,,,"@user1:
+195,networkx__networkx-7159@7e65b7d,networkx/networkx,networkx/readwrite/tests/test_gml.py,C,C.test-design,,,Unclear what the GML test checks; fix the test input string.,C,C.test-design,Test input string corrected.,yes,,,"@user1:
 I'm not too sure what is even being tested here?
 
 ``` python
@@ -813,7 +813,7 @@ Sounds good - as of e5e528c the `\u4200` values are valid unicode characters!
 > Do we need the u in front of the single quotes? I think we should probs remove them too (?? python2 historical cruft??).
 
 Nope, those are no longer necessary either - removed in 62887bd"
-196,numba__numba-4282@a062e23,numba/numba,numba/utils.py,functional,C,,,,"@user1:
+196,numba__numba-4282@a062e23,numba/numba,numba/utils.py,C,C.message,yes,A,Raised UnsupportedError should include the original ValueError message.,C,C.message,Only the raised message text changed.,yes,,,"@user1:
 Better to include the original message, which will contain "" '.0' is not a valid parameter name"". 
 
 Also,  it is weird that python2 is generating that a arg with `.0` as the name, and that `funcsigs` can't handle it.
@@ -826,12 +826,12 @@ Good idea
 > Also, it is weird that python2 is generating that a arg with `.0` as the name, and that `funcsigs` can't handle it.
 
 Yes, this was weird. That you have seen the `.0` confirms it is not just me. Looking at the byte code disassembly, it's definitely in there!"
-198,numpy__numpy-12123@1c2abd3,numpy/numpy,numpy/lib/type_check.py,structural,C,,,,"@user1:
+198,numpy__numpy-12123@1c2abd3,numpy/numpy,numpy/lib/type_check.py,C,C.message,,,"Deprecation warning text should name the version deprecated, not the removal version.",C,C.message,Deprecation warning text.,yes,,,"@user1:
 I think we are headed toward using the version deprecated rather than the version in which we intend to remove it. The latter may change, the first is fixed and helps folks downstream know how to set up version dependent workarounds.
 
 @author:
 Thanks for fixing"
-199,numpy__numpy-14924@6a7e3f1,numpy/numpy,numpy/random/_generator.pyx,functional,A,,,,"@user1:
+199,numpy__numpy-14924@6a7e3f1,numpy/numpy,numpy/random/_generator.pyx,A,A.logic,,,Stick-breaking accumulator uses val_data (already scaled) instead of the raw beta variate.,A,A.logic,Accumulator used scaled value; distribution wrong.,yes,,,"@user1:
 It looks like you want `acc` to ""accumulate"" the products of 1 minus the beta random variates, but you can't use `val_data[i+j]` for that, because it includes the product of `acc` and the random beta (not just the random beta).  You can make this work if you save the random beta variate in its own variable.  The body of the `while` loop then looks like this:
 
                     acc = 1.
@@ -852,7 +852,7 @@ Thanks for the hint. I have pushed the suggested changes. This should restore th
 Thanks, the update looks good.
 
 I'm currently running a bunch of tests to see if anything breaks. :)"
-200,numpy__numpy-15425@e603b5f,numpy/numpy,numpy/tests/test_public_api.py,style,C,,,,"@user1:
+200,numpy__numpy-15425@e603b5f,numpy/numpy,numpy/tests/test_public_api.py,C,C.test-oracle,,,Subprocess check cannot affect the test; assert len(dir(np)) == len(set(dir(np))) instead.,C,C.test-oracle,Subprocess check replaced by a real assertion.,yes,,,"@user1:
 What is this for?
 
 @author:
@@ -872,12 +872,12 @@ Thanks, seems fair enough to me. If you are still enthusiastic: We try to keep t
 
 @author:
 @user2  Thanks for the review. I have modified the comments to be inline with the standards."
-203,numpy__numpy-22997@8c57716,numpy/numpy,numpy/__init__.cython-30.pxd,functional,A,,,,"@user1:
+203,numpy__numpy-22997@8c57716,numpy/numpy,numpy/__init__.cython-30.pxd,A,A.error-handling,,,"void C-API declarations lack `except *`, so raised errors are swallowed.",A,A.error-handling,Declarations need except * so errors are not swallowed.,yes,,,"@user1:
 Should this one (and probably a handful of other void functions) be `except *`? I assume this doesn't swallow errors.
 
 @author:
 Arg, I didn't scan the `void` ones carefully, I guess.  This isn't designed to error, but clearly can...  (one of those bad functions).  (the xincref/decref family is also weird, I think they tend to clear, but probably not always... and they shouldn't be used anway, especially in cython)"
-205,optuna__optuna-1087@4177569,optuna/optuna,optuna/integration/chainermn.py,functional,A,,,,"@user1:
+205,optuna__optuna-1087@4177569,optuna/optuna,optuna/integration/chainermn.py,A,A.logic,,,Wrapper ignores the `log` keyword instead of forwarding it to the delegate.,A,A.logic,log keyword ignored.,yes,,,"@user1:
 It seems like the keyword argument of `log` is ignored.
 
 Isn't it better to pass `log` to `self.delegate.suggest_float`?
@@ -885,9 +885,9 @@ Isn't it better to pass `log` to `self.delegate.suggest_float`?
 @author:
 Thank you!
 I will fix it."
-207,optuna__optuna-972@1f4813a,optuna/optuna,optuna/pruners/hyperband.py,functional,C,,,,"@user1:
+207,optuna__optuna-972@1f4813a,optuna/optuna,optuna/pruners/hyperband.py,C,C.doc-inline,,,Docstring example never activates the pruner (no report/should_prune).,C,C.doc-inline,Docstring example corrected.,yes,,,"@user1:
 The pruner is never activated because this objective function does not have `trial.report` or `trial.should_prune`. How about using the same objective function as the other pruners (e.g., https://github.com/optuna/optuna/blob/v1.2.0/optuna/pruners/median.py#L14-L44)."
-210,pandas-dev__pandas-42186@62d46c4,pandas-dev/pandas,.pre-commit-config.yaml,functional,A,,,,"@user1:
+210,pandas-dev__pandas-42186@62d46c4,pandas-dev/pandas,.pre-commit-config.yaml,A,A.logic,yes,B,Pre-commit hook selector `types: [cython]` misses .pxi.in files; use a files regex.,A,A.logic,Pre-commit hook did not run on .pxi.in files; config fixed.,yes,,,"@user1:
 `pxi.in` isn't recognised as `cython` by [identify](https://github.com/pre-commit/identify), does the following work?
 
 ```suggestion
@@ -912,16 +912,16 @@ Thank you!! I ran that and found that my hook is not working for the previous te
 
 @author:
 Ok with the quotes it works now"
-212,pandas-dev__pandas-42635@59d4145,pandas-dev/pandas,pandas/tests/tools/test_to_datetime.py,functional,C,,,,"@user1:
+212,pandas-dev__pandas-42635@59d4145,pandas-dev/pandas,pandas/tests/tools/test_to_datetime.py,C,C.test-design,,,Parametrize the new test over cache=True/False.,C,C.test-design,Parametrized the test over cache.,yes,,,"@user1:
 Can you parameterize this over `cache = True | False`?
 
 @author:
 Updated"
-213,pandas-dev__pandas-43930@fef88a7,pandas-dev/pandas,pandas/core/indexes/base.py,functional,B,,,,"@user1:
+213,pandas-dev__pandas-43930@fef88a7,pandas-dev/pandas,pandas/core/indexes/base.py,B,B.typing,,,Type annotation of _engine_type includes engines it can never hold.,B,B.typing,Annotation narrowed.,yes,,,"@user1:
 This type information update is strictly speaking not correct I think, since this attribute will never be Nullable/ExtensionEngine? (those are only dynamically returned from `_engine`)
 
 So if you don't change that here, the type `cast` in `_engine` definition below might not be needed (untested)"
-215,pandas-dev__pandas-50366@1e7613f,pandas-dev/pandas,pandas/_libs/tslib.pyx,functional,A,yes,,,"@user1:
+215,pandas-dev__pandas-50366@1e7613f,pandas-dev/pandas,pandas/_libs/tslib.pyx,C,C.message,,,"Error message suffix ""(search)/(match)"" is odd; unify the message.",C,C.message,Only the error message text changed.,yes,,,"@user1:
 ending this with ""search"" seems weird (and i dont see it in any test cases)
 
 @author:
@@ -951,15 +951,15 @@ Let's just unify them to
 ```python
 time data '2020-01-f00' does not match format '%Y-%d-%m'
 ```"
-216,pandas-dev__pandas-55938@b36d8d1,pandas-dev/pandas,asv_bench/benchmarks/indexing.py,functional,A,,,,"@user1:
+216,pandas-dev__pandas-55938@b36d8d1,pandas-dev/pandas,asv_bench/benchmarks/indexing.py,C,C.test-design,yes,A,"Benchmark setup overwrites the object-dtype frame, so it measures the wrong scenario.",C,C.test-design,Benchmark setup overwrote its own data frame.,yes,,,"@user1:
 Why is this assignment here? It's overriding the prior `self.df`"
-221,pydantic__pydantic-11468@92c01bd,pydantic/pydantic,docs/migration.md,style,C,,,,"@user1:
+221,pydantic__pydantic-11468@92c01bd,pydantic/pydantic,docs/migration.md,C,C.doc-external,,,Migration guide should name populate_by_name (and validate_by_name from v2.11).,C,C.doc-external,Migration guide text.,yes,,,"@user1:
 ```suggestion
     * `allow_population_by_field_name` → `populate_by_name` (or `validate_by_name` starting in v2.11)
 ```"
-225,pyg-team__pytorch_geometric-4635@498dbbf,pyg-team/pytorch_geometric,torch_geometric/data/hetero_data.py,style,B,,,,"@user1:
+225,pyg-team__pytorch_geometric-4635@498dbbf,pyg-team/pytorch_geometric,torch_geometric/data/hetero_data.py,B,B.reuse,,,Use existing is_node_attr/is_edge_attr helpers to simplify the loop.,B,B.reuse,Existing is_node_attr/is_edge_attr helpers used.,yes,,,"@user1:
 maybe you could use the `is_node_attr` and `is_edge_attr` to simplify this loop quite a bit?"
-227,python-poetry__poetry-4985@b350568,python-poetry/poetry,src/poetry/utils/env.py,style,B,,,,"@user1:
+227,python-poetry__poetry-4985@b350568,python-poetry/poetry,src/poetry/utils/env.py,B,B.reuse,,,Repeated wrapped one-liner hurts readability; define it once as a constant.,B,B.reuse,Repeated one-liner replaced by a constant.,yes,,,"@user1:
 I wonder if we should keep the original format here for better readability. What do you think? (same for the lines 730 and 805, 859)
 
 This can be achieved by `#fmt: off/on` (https://stackoverflow.com/a/58584557/9750706)
@@ -980,20 +980,20 @@ Even better! Adjusted the last commit to use the existing constant.
 ...or now that I think about it; maybe there is a reason to use a 'one-liner' version here, because it looks like command line arguments? Tests still pass though.
 
 EDIT: I tested some things in a Notebook and I don't think the multi-line version will work, but maybe I am mistaken. We could just add this constant below the `GET_PYTHON_VERSION` constant as a `GET_PYTHON_VERSION_ONELINER` and use that instead. Avoid the trouble :) _(adjusted the commit to this idea)_"
-230,python-telegram-bot__python-telegram-bot-3514@d5c0a5c,python-telegram-bot/python-telegram-bot,telegram/_utils/markup.py,functional,A,,,,"@user1:
+230,python-telegram-bot__python-telegram-bot-3514@d5c0a5c,python-telegram-bot/python-telegram-bot,telegram/_utils/markup.py,A,A.input-handling,,,Indexes keyboard[0][0] before checking rows are sequences; [1] raises.,A,A.input-handling,Non-sequence rows crash; fix moves the depth check inside the row loop.,yes,,,"@user1:
 At this point we haven't yet established that the rows are sequences as well. `check_keyboard_type([1])` would raise an exception with this addition IISC …"
-231,python-telegram-bot__python-telegram-bot-4168@96ca73d,python-telegram-bot/python-telegram-bot,telegram/_update.py,functional,A,,,,"@user1:
+231,python-telegram-bot__python-telegram-bot-4168@96ca73d,python-telegram-bot/python-telegram-bot,telegram/_update.py,A,A.logic,,,effective_sender ignores message.sender_chat for channel posts.,A,A.logic,sender_chat not used for channel posts.,yes,,,"@user1:
 I strongly suggest using `message.sender_chat` also in these cases. Not including a field called `sender_chat` in this property doesn't make much sense to me :D"
-233,python__cpython-104029@f78e70e,python/cpython,Lib/test/test_dis.py,style,C,,,,"@user1:
+233,python__cpython-104029@f78e70e,python/cpython,Lib/test/test_dis.py,C,C.test-design,,,Test hardcodes a large disassembly block; assert only the relevant line.,C,C.test-design,Hardcoded block replaced by a focused check.,yes,,,"@user1:
 This is quite a big block of code that will have to be updated when any of the generated code changes. Would it be possible to instead test only for the `CALL_INTRINSIC_2         1 (INTRINSIC_PREP_RERAISE_STAR)` line, so we don't have to hardcode so much bytecode?"
-234,python__cpython-104029@f78e70e,python/cpython,Tools/build/generate_opcode_h.py,style,C,,,,"@user1:
+234,python__cpython-104029@f78e70e,python/cpython,Tools/build/generate_opcode_h.py,B,B.structure,,,Move footer text into a variable like the header.,B,B.structure,Text moved to a variable like the header.,yes,,,"@user1:
 Let's move all this to a variable `intrinsic_footer` like we do for the header."
-237,python__mypy-14517@78b0f55,python/mypy,mypy/partially_defined.py,functional,B,,,,"@user1:
+237,python__mypy-14517@78b0f55,python/mypy,mypy/partially_defined.py,B,B.performance,,,Recording ~200 builtins per module may slow analysis.,B,B.performance,Avoid iterating all builtins per module.,yes,,,"@user1:
 I wonder if this might degrade performance, since builtins have over 200 definitions, and it looks like we are iterating over all of them for every module. Can you measure the time spent in this loop when performing a self check, for example? 
 
 @author:
 I have found a way to deal with this that doesn't involve calling `record_definition` every time! So performance should be unchanged."
-238,python__mypy-15353@65efb01,python/mypy,mypy/typeops.py,functional,A,,,,"@user1:
+238,python__mypy-15353@65efb01,python/mypy,mypy/typeops.py,A,A.state-resource,yes,B,callable_type mutates the FuncDef (is_static) as a side effect; mutation belongs in semantic analysis.,A,A.state-resource,Suspicious mutation of the definition outside semantic analysis.,yes,,,"@user1:
 Hmm, mutating fdef here seems a little suspicious to me. Why do we need this? (My weak mental model for when it's safe to mutate these kind of things is to try and keep it to semantic analysis, like you do in prepare method signature)
 
 @author:
@@ -1004,18 +1004,18 @@ Thanks! Github is having some problems, so your commit hasn't shown up. The work
 
 @author:
 I actually had some issues with my local git client suddenly deciding to use the wrong SSH key -- fixed that now, but I see that the commit still isn't visible. Will make an empty commit and push again, thanks for the tip!"
-242,python__mypy-6781@3a824fb,python/mypy,mypy/moduleinfo.py,style,A,,,,"@user1:
+242,python__mypy-6781@3a824fb,python/mypy,mypy/moduleinfo.py,A,A.logic,,,Module list holds the PyPI distribution name python-dateutil instead of importable dateutil.,A,A.logic,Distribution name where importable name is required.,yes,,,"@user1:
 This is the PyPI distribution name, but the actual package name is different, and the package name is required in this file. In this case the package name is `dateutil`. Unfortunately, some manual tweaking seems to be required to get the package name to import."
-243,python__mypy-6781@3a824fb,python/mypy,mypy/moduleinfo.py,documentation,A,,,,"@user1:
+243,python__mypy-6781@3a824fb,python/mypy,mypy/moduleinfo.py,A,A.logic,,,Module list holds a distribution name (awscli-cwlogs) that is not an importable package.,A,A.logic,Distribution names in a list that must hold importable names.,yes,,,"@user1:
 This is another PyPI distribution name that isn't a real Python package name. There are some other examples below."
-244,python__mypy-6803@8e6a9b8,python/mypy,mypy/checker.py,structural,B,,,,"@user1:
+244,python__mypy-6803@8e6a9b8,python/mypy,mypy/checker.py,B,B.redundant,,,`if notes:` guard before the loop is redundant.,B,B.redundant,Redundant if removed.,yes,,,"@user1:
 This `if` is redundant. If the list is empty, the loop body will simply not run.
 
 @author:
 Good I refactored it but I didn't improve this part. Thank you."
-245,python__mypy-6803@8e6a9b8,python/mypy,mypy/checker.py,functional,B,,,,"@user1:
+245,python__mypy-6803@8e6a9b8,python/mypy,mypy/checker.py,B,B.typing,,,Empty list needs an explicit List[str] type comment for self-check.,B,B.typing,Explicit List[str] type comment.,yes,,,"@user1:
 You might need to add an explicit type comment `List[str]` here, otherwise self-check may fail."
-247,python__mypy-9629@13dc4d2,python/mypy,mypy/checkexpr.py,functional,A,,,,"@user1:
+247,python__mypy-9629@13dc4d2,python/mypy,mypy/checkexpr.py,A,A.logic,,,"Mapping[str, Any] context causes false negatives in kwargs type checking.",A,A.logic,Inference context caused false negatives.,yes,,,"@user1:
 Unfortunately the `Any` type here may result in false negatives, since it's used for type inference:
 
 ```py
@@ -1031,14 +1031,14 @@ Random idea: Use `Mapping[str, <nothing>]` as the context, potentially only if t
 @author:
 I see... Another idea can be to relax the check here to allow the case where `typ` is `dict[<nothing>, <nothing>]`. At first I didn't like this solution as I thought it was less elegant, but if trying to change the inferred type will result in a hacky code like you said, maybe this one is better?
 https://github.com/python/mypy/blob/985a20d87eb3a516ff4457041a77026b4c6bd784/mypy/checkexpr.py#L3933-L3949"
-248,pytorch__vision-8316@92ec2fb,pytorch/vision,torchvision/transforms/v2/functional/_augment.py,documentation,B,,,,"@user1:
+248,pytorch__vision-8316@92ec2fb,pytorch/vision,torchvision/transforms/v2/functional/_augment.py,C,C.doc-inline,,,Outdated TODO comment claims the function is not TorchScript-compatible.,C,C.doc-inline,Outdated TODO comment removed.,yes,,,"@user1:
 this is properly torchscript-compatible already (see my main comment above), so we can remove this todo
 
 ```suggestion
 ```"
-249,pytorch__vision-8316@92ec2fb,pytorch/vision,torchvision/transforms/v2/functional/_augment.py,functional,B,,,,"@user1:
+249,pytorch__vision-8316@92ec2fb,pytorch/vision,torchvision/transforms/v2/functional/_augment.py,B,B.interface,,,Expose a jpeg_video kernel for consistency with other kernels.,B,B.interface,jpeg_video kernel added for consistency.,yes,,,"@user1:
 For consistency with the other kernels we should expose a `jpeg_video` kernel that calls into `jpeg_image()`."
-250,qutebrowser__qutebrowser-3590@872cff2,qutebrowser/qutebrowser,qutebrowser/mainwindow/tabbedbrowser.py,documentation,A,yes,,,"@user1:
+250,qutebrowser__qutebrowser-3590@872cff2,qutebrowser/qutebrowser,qutebrowser/mainwindow/tabbedbrowser.py,B,B.redundant,,,`if tab and tab is not None` is redundant; `is not None` suffices.,B,B.redundant,Double check reduced to is not None.,yes,,,"@user1:
 Why check for both? `if tab is not None:` should be enough.
 
 @author:
@@ -1053,17 +1053,17 @@ That's sure an interesting documentation :laughing:
 > The tab dialog does its best to make sure that this value is never 0 (but if you try hard enough, it can be).
 
 However, it's a pointer - and a nullpointer in C++ means `None` in Python."
-252,qutebrowser__qutebrowser-7003@3656345,qutebrowser/qutebrowser,tests/end2end/features/test_downloads_bdd.py,functional,C,,,,"@user1:
+252,qutebrowser__qutebrowser-7003@3656345,qutebrowser/qutebrowser,tests/end2end/features/test_downloads_bdd.py,C,C.test-design,yes,B,Move shared BDD step helper into the features conftest.py.,C,C.test-design,Shared step moved to conftest.,yes,,,"@user1:
 Move it to `tests/end2end/features/conftest.py` instead.
 
 @author:
 Done :+1:"
-253,ray-project__ray-49918@04cf1ee,ray-project/ray,python/ray/tests/test_actor_failures.py,functional,B,,,,"@user1:
+253,ray-project__ray-49918@04cf1ee,ray-project/ray,python/ray/tests/test_actor_failures.py,C,C.test-oracle,,,Assertions left commented out in a test.,C,C.test-oracle,Commented-out assertions restored.,yes,,,"@user1:
 is this intended to be deleted or uncommented?
 
 @author:
 fixed"
-256,run-llama__llama_index-13413@63620ed,run-llama/llama_index,llama-index-packs/llama-index-packs-rag-fusion-query-pipeline/llama_index/packs/rag_fusion_query_pipeline/base.py,documentation,B,,,,"@user1:
+256,run-llama__llama_index-13413@63620ed,run-llama/llama_index,llama-index-packs/llama-index-packs-rag-fusion-query-pipeline/llama_index/packs/rag_fusion_query_pipeline/base.py,B,B.convention,,,Stop using deprecated ServiceContext; pass embed_model and llm directly.,B,B.convention,Deprecated ServiceContext replaced by direct arguments.,yes,,,"@user1:
 should we even be using service context? We can pass the embed model to the index, and the llm to the query engine
 
 ```
@@ -1073,7 +1073,7 @@ self.query_engines.append(vector_index.as_query_engine(llm=self.llm))
 
 @author:
 Indeed, `service_context` is marked as deprecated."
-258,scikit-learn__scikit-learn-29401@819e167,scikit-learn/scikit-learn,sklearn/compose/_column_transformer.py,functional,C,yes,,,"@user1:
+258,scikit-learn__scikit-learn-29401@819e167,scikit-learn/scikit-learn,sklearn/compose/_column_transformer.py,C,C.doc-inline,,,Docstring wrongly says transform=None uses the global configuration.,C,C.doc-inline,Docstring change reverted.,yes,,,"@user1:
 Actually it is not necessarily using the global configuration, you could imagine something like this:
 
 ```py
@@ -1166,32 +1166,32 @@ OK well, I think we should fix the bug first and leave the docstring modificatio
 
 @author:
 Yes, I agree. I will revert the documentation changes then."
-259,scikit-learn__scikit-learn-29442@3a19575,scikit-learn/scikit-learn,sklearn/linear_model/_coordinate_descent.py,structural,C,,,,"@user1:
+259,scikit-learn__scikit-learn-29442@3a19575,scikit-learn/scikit-learn,sklearn/linear_model/_coordinate_descent.py,C,C.doc-inline,,,Docstring entry for sample_weight lacks default=None.,C,C.doc-inline,Docstring default added.,yes,,,"@user1:
 ```suggestion
     sample_weight : ndarray of shape (n_samples,), default=None
 ```"
-260,scipy__scipy-20393@c92a476,scipy/scipy,scipy/special/_add_newdocs.py,functional,A,,,,"@user1:
+260,scipy__scipy-20393@c92a476,scipy/scipy,scipy/special/_add_newdocs.py,C,C.doc-inline,yes,A,Docstrings with backslashes must be raw strings (escapes corrupt them; a test fails).,C,C.doc-inline,Docstring literals made raw.,yes,,,"@user1:
 ```suggestion
     r""""""
 ```
 
 These need to be raw strings. It looks like it’s causing a test failure."
-261,scrapy__scrapy-2456@c7bb2fa,scrapy/scrapy,tests/test_feedexport.py,style,C,,,,"@user1:
+261,scrapy__scrapy-2456@c7bb2fa,scrapy/scrapy,tests/test_feedexport.py,C,C.test-oracle,,,"Test strips expected output; compare exactly, including newlines.",C,C.test-oracle,Test compares exact bytes instead of stripping.,yes,,,"@user1:
 Could you please write this test without .strip(), so that we're explicit about newlines before and after items?
 
 @author:
 Sure :+1:"
-262,skypilot-org__skypilot-1144@36893af,skypilot-org/skypilot,sky/backends/wheel_utils.py,functional,C,,,,"@user1:
+262,skypilot-org__skypilot-1144@36893af,skypilot-org/skypilot,sky/backends/wheel_utils.py,C,C.message,,,Error message should include the glob pattern for debugging.,C,C.message,Glob pattern added to error text.,yes,,,"@user1:
 add: `glob pattern {wheel_name}` for easier debugging?
 
 @author:
 Good point. Added. Thanks!"
-266,skypilot-org__skypilot-1427@b01cb79,skypilot-org/skypilot,sky/authentication.py,functional,B,,,,"@user1:
+266,skypilot-org__skypilot-1427@b01cb79,skypilot-org/skypilot,sky/authentication.py,B,B.redundant,,,`private_key_path is None` is unreachable.,B,B.redundant,Impossible None check removed.,yes,,,"@user1:
 nit: `private_key_path is None` can't seem to happen.
 
 @author:
 Good catch! Fixed. Thanks!"
-272,skypilot-org__skypilot-3017@1f526ee,skypilot-org/skypilot,llm/mixtral/serve.yaml,functional,A,,,,"@user1:
+272,skypilot-org__skypilot-3017@1f526ee,skypilot-org/skypilot,llm/mixtral/serve.yaml,B,B.structure,yes,A,"Azure nccl.conf workaround (with side effects) belongs in the Azure template, not one example YAML.",B,B.structure,Workaround moved to the Azure template.,yes,,,"@user1:
 What is this file for? Will this have any side-effects?
 
 @user1:
@@ -1202,7 +1202,7 @@ This is a good point! This file is wrongly configured on Azure with multiple GPU
 
 @author:
 Fixed. PTAL."
-273,skypilot-org__skypilot-4067@ff528a5,skypilot-org/skypilot,examples/dag/diamond.yml,style,B,yes,,,"@user1:
+273,skypilot-org__skypilot-4067@ff528a5,skypilot-org/skypilot,examples/dag/diamond.yml,B,B.interface,,,YAML DAG `dependencies` reverses edge direction vs the Python `>>` API; use `downstream`.,B,B.interface,YAML schema direction aligned with the Python API.,yes,,,"@user1:
 I realized this would change the direction of the edge, e.g. for `dependencies` we need to specify its predecessor but not its successor, which is inconsistent with our python api (`>>`). Could we use sth like `downstream` and change the direction here?
 
 @author:
@@ -1217,16 +1217,16 @@ answer to both questions is yes. We could discuss more on naming, though I think
 
 @author:
 Thanks for the feedback. I've already renamed all relevant parts to use the downstream/edge style consistently."
-277,skypilot-org__skypilot-5435@50d9632,skypilot-org/skypilot,tests/smoke_tests/smoke_tests_utils.py,style,B,,,,"@user1:
+277,skypilot-org__skypilot-5435@50d9632,skypilot-org/skypilot,tests/smoke_tests/smoke_tests_utils.py,B,B.reuse,yes,C,Test utility re-implements deep_update; reuse overlay_skypilot_config.,B,B.reuse,"Local helper replaced by existing function (generic, in test utility).",yes,,,"@user1:
 We have a similar function at `/sky/skypilot_config.py:overlay_skypilot_config`, since `Dict[str, Any]` can be trivially converted to `config_utils.Config` you may be able to use that function instead of defining a function here."
-278,skypilot-org__skypilot-569@1c4deb7,skypilot-org/skypilot,sky/setup_files/setup.py,style,C,,,,"@user1:
+278,skypilot-org__skypilot-569@1c4deb7,skypilot-org/skypilot,sky/setup_files/setup.py,C,C.message,,,Warning text says macOS 1.15 instead of 10.15.,C,C.message,Version in warning text corrected.,yes,,,"@user1:
 not 1.15, but 10.15"
-279,skypilot-org__skypilot-614@ac824f0,skypilot-org/skypilot,sky/clouds/gcp.py,style,A,,,,"@user1:
+279,skypilot-org__skypilot-614@ac824f0,skypilot-org/skypilot,sky/clouds/gcp.py,A,A.logic,,,Default GCP image name is not the intended Ubuntu 20.04 image.,A,A.logic,Wrong image name.,yes,,,"@user1:
 is this `ubuntu 20.04`?
 
 @author:
 Ah my bad. Just updated to the correct image name."
-280,skypilot-org__skypilot-727@4fca3da,skypilot-org/skypilot,docs/source/getting-started/quickstart.rst,functional,C,,,,"@user1:
+280,skypilot-org__skypilot-727@4fca3da,skypilot-org/skypilot,docs/source/getting-started/quickstart.rst,C,C.doc-external,,,Quickstart example would not allocate a GPU; show CPU and GPU commands.,C,C.doc-external,Quickstart example corrected.,yes,,,"@user1:
 This will not allocate GPU for the training. Can we change this to 
 ```
 sky exec mycluster python train_cpu.py
@@ -1235,23 +1235,23 @@ sky exec mycluster --gpus=V100:1 python train_gpu.py
 
 @author:
 Done, good catch!"
-282,sqlfluff__sqlfluff-2121@d0d52a4,sqlfluff/sqlfluff,src/sqlfluff/dialects/dialect_redshift.py,structural,A,,,,"@user1:
+282,sqlfluff__sqlfluff-2121@d0d52a4,sqlfluff/sqlfluff,src/sqlfluff/dialects/dialect_redshift.py,A,A.logic,,,Redshift DatatypeIdentifierSegment override copies the function grammar (wrong); remove.,A,A.logic,Wrong grammar override removed.,yes,,,"@user1:
 This is wrong, please remove. Provided description of DatatypeIdentifierSegment in earlier comment."
-283,sqlfluff__sqlfluff-2121@d0d52a4,sqlfluff/sqlfluff,src/sqlfluff/dialects/dialect_postgres_keywords.py~,structural,B,,,,"@user1:
+283,sqlfluff__sqlfluff-2121@d0d52a4,sqlfluff/sqlfluff,src/sqlfluff/dialects/dialect_postgres_keywords.py~,B,B.redundant,,,Editor backup file (`.py~`) committed by accident.,B,B.redundant,Backup file committed by accident.,yes,,,"@user1:
 This looks like a backup copy of dialect_postgres_keywords, please remove. General note: you need to be more conscious of what you're committing in these PRs
 
 @author:
 Same idea. Sorry for that."
-286,sqlfluff__sqlfluff-494@554c74a,sqlfluff/sqlfluff,src/sqlfluff/rules/std.py,functional,B,,,,"@user1:
+286,sqlfluff__sqlfluff-494@554c74a,sqlfluff/sqlfluff,src/sqlfluff/rules/std.py,B,B.convention,,,Avoid `while True`; put the loop condition in the while statement.,B,B.convention,Avoid while True; readability and habit.,yes,,,"@user1:
 Generally best to avoid while True unless absolutely necessary, it's easier to read and safer to put the logic around when to loop into the while condition instead of `True`
 
 @author:
 Good catch. Bad habit die hard."
-287,sqlfluff__sqlfluff-541@c5a16c3,sqlfluff/sqlfluff,src/sqlfluff/core/templaters/base.py,style,A,,,,"@user1:
+287,sqlfluff__sqlfluff-541@c5a16c3,sqlfluff/sqlfluff,src/sqlfluff/core/templaters/base.py,C,C.doc-inline,,,Docstring refers to `full_templated`; parameter is templated_str.,C,C.doc-inline,Docstring parameter name.,yes,,,"@user1:
 What is `full_templated` in this context? Do you mean `templated_str` instead?"
-288,sqlfluff__sqlfluff-865@9e69af8,sqlfluff/sqlfluff,test/fixtures/parser/ansi/update.yml,style,A,,,,"@user1:
+288,sqlfluff__sqlfluff-865@9e69af8,sqlfluff/sqlfluff,test/fixtures/parser/ansi/update.yml,A,A.logic,yes,C,"Expected parse tree has a nested table_reference, which reflects a grammar error (anchored on fixture).",A,A.logic,Nested reference came from grammar; fix changes the dialect and restores the fixture.,yes,,,"@user1:
 Nested table_reference? This doesn't look quite right 🤔"
-289,sympy__sympy-11818@ab1bcd5,sympy/sympy,sympy/sets/fancysets.py,functional,A,,,,"@user1:
+289,sympy__sympy-11818@ab1bcd5,sympy/sympy,sympy/sets/fancysets.py,B,B.structure,,,Union logic relies on ComplexRegion internals; coerce via ComplexRegion.from_real.,B,B.structure,Hide ComplexRegion internals behind from_real.,yes,,,"@user1:
 The method could probably check this first and coerce other into a ComplexRegion before asking `if other.is_ComplexRegion`.
 
 @author:
@@ -1263,18 +1263,18 @@ If you think this makes logic of what's happening clearer, I'll change it.
 >  this makes logic of what's happening clearer
 
 Yes, that is what I think. We should avoid having to use any knowledge of the internal representation of ComplexRegion. Hence also the conversion should be carried out by ComplexRegion despite of some overhead. That could be done by overloading `ComplexRegion.__new__` to accept a subset of Reals, or, maybe preferably, by a new method `ComplexRegion.from_real`."
-290,sympy__sympy-15346@99fe375,sympy/sympy,sympy/simplify/tests/test_trigsimp.py,structural,C,,,,"@user1:
+290,sympy__sympy-15346@99fe375,sympy/sympy,sympy/simplify/tests/test_trigsimp.py,C,C.test-design,,,"Test should call trigsimp, not the expensive general simplify.",C,C.test-design,Test calls trigsimp directly.,yes,,,"@user1:
 This could be `trigsimp(r1) == cos(S(1)/50)`. `simplify` is an expensive operation that tries many different methods, most of which only apply in specific cases, while we are expressly testing `trigsimp`. (This could also be in release notes: change order of TR10i and TRmorrie in trigsimp.)"
-295,sympy__sympy-18605@a356458,sympy/sympy,sympy/tensor/indexed.py,functional,B,,,,"@user1:
+295,sympy__sympy-18605@a356458,sympy/sympy,sympy/tensor/indexed.py,B,B.simplify,,,fuzzy_not on a plain bool is unnecessary; simplify the condition.,B,B.simplify,fuzzy_not on plain bool removed.,yes,,,"@user1:
 Since `range is S.Infinity` is a normal bool rather than a fuzzy bool it isn't necessary to use `fuzzy_not` for that so this could be
 ```
 if range is not S.Infinity and fuzzy_not(range.is_integer):
 ```"
-296,sympy__sympy-18630@9ca7e3a,sympy/sympy,sympy/functions/special/hyper.py,functional,A,,,,"@user1:
+296,sympy__sympy-18630@9ca7e3a,sympy/sympy,sympy/functions/special/hyper.py,A,A.logic,,,Series terms use x**i instead of arg**i.,A,A.logic,Series built in x instead of arg.,yes,,,"@user1:
 ```suggestion
             terms.append(((Rf1/Rf2) * (arg**i)) / factorial(i))
 ```"
-298,sympy__sympy-19254@8adfdbe,sympy/sympy,sympy/polys/factortools.py,functional,A,,,,"@user1:
+298,sympy__sympy-19254@8adfdbe,sympy/sympy,sympy/polys/factortools.py,A,A.api-use,,,`binomial` is not defined (circular import); import it inside the function.,A,A.api-use,Undefined name; imported in the function.,yes,,,"@user1:
 `binomial` is not defined.
 
 @author:
@@ -1283,15 +1283,15 @@ What is the correct way of importing the binomial function?
 
 @user2:
 If you want to resolve the circular import issue, you should import inside the function block itself."
-300,sympy__sympy-19913@d466e06,sympy/sympy,sympy/printing/tests/test_pycode.py,functional,C,,,,"@user1:
+300,sympy__sympy-19913@d466e06,sympy/sympy,sympy/printing/tests/test_pycode.py,C,C.test-oracle,,,Test's expected string 'mpmath.lgamma(x)' was wrong; the printer already maps loggamma correctly (anchored on test assertion).,C,C.test-oracle,Only the test's expected string changed; no production file changed after review.,yes,yes,"Resolved by the study owner, 2026-11-09. Changed from A to C: only the expected string in the test changed after the review.","@user1:
 ```suggestion
     assert p.doprint(loggamma(x)) == 'mpmath.loggamma(x)'
 ```"
-303,sympy__sympy-22369@6eb7e6a,sympy/sympy,sympy/geometry/util.py,style,A,,,,"@user1:
+303,sympy__sympy-22369@6eb7e6a,sympy/sympy,sympy/geometry/util.py,A,A.logic,,,Changing find() to guess when the symbol is absent gives wrong results (e.g. 2*y + 1).,A,A.logic,find() change gives wrong results; reverted.,yes,,,"@user1:
 I recommend against changing `find` in this way. One might have the equation `2*y + 1` which is another way of saying `y = 1/2`."
-304,sympy__sympy-22426@05cec82,sympy/sympy,bin/coverage_doctest.py,functional,B,,,,"@user1:
+304,sympy__sympy-22426@05cec82,sympy/sympy,bin/coverage_doctest.py,B,B.naming,,,"""indirect"" misspelled in variable/parameter names.",B,B.naming,Identifier typo.,yes,,,"@user1:
 ""indirect"" is spelled wrong in these variable names."
-305,sympy__sympy-24666@7d194c7,sympy/sympy,sympy/functions/elementary/tests/test_piecewise.py,structural,B,,,,"@user1:
+305,sympy__sympy-24666@7d194c7,sympy/sympy,sympy/functions/elementary/tests/test_piecewise.py,C,C.test-design,yes,B,Test uses SymPy Tuple and float 0.5; use a Python tuple and exact S.Half.,C,C.test-design,Test data: Python tuple and exact S.Half.,yes,,,"@user1:
 Why do you have to use `Tuple` instead of tuple? And is it intended to use `0.5` instead of `S.Half`?
 
 @author:
@@ -1305,17 +1305,17 @@ It is better to use python iterables because `Tuple` is quite redundant.
 
 @user1:
 And also I suggest to use `S.Half` instead of floats."
-307,sympy__sympy-26515@2c01ca9,sympy/sympy,sympy/polys/sqfreetools.py,functional,C,,,,"@user1:
+307,sympy__sympy-26515@2c01ca9,sympy/sympy,sympy/polys/sqfreetools.py,C,C.doc-inline,,,"Docstring says ""multivariate"" where it means ""univariate"".",C,C.doc-inline,Docstring wording.,yes,,,"@user1:
 ""multivariate"" --> ""univariate""
 
 @author:
 Fixed."
-308,sympy__sympy-27352@b3187d6,sympy/sympy,sympy/polys/matrices/domainmatrix.py,functional,B,,,,"@user1:
+308,sympy__sympy-27352@b3187d6,sympy/sympy,sympy/polys/matrices/domainmatrix.py,B,B.redundant,,,if/else branches are identical; drop the type check.,B,B.redundant,Identical branches collapsed.,yes,,,"@user1:
 If the code is the same in both branches then the if check is not needed.
 
 @author:
 Okay, I will update that."
-313,tobymao__sqlglot-2096@1794bf3,tobymao/sqlglot,sqlglot/expressions.py,functional,B,,,,"@user1:
+313,tobymao__sqlglot-2096@1794bf3,tobymao/sqlglot,sqlglot/expressions.py,B,B.redundant,yes,A,Wrapping ParseError into ValueError is unnecessary; just re-raise.,B,B.redundant,ValueError wrapping unnecessary; bare raise.,yes,,,"@user1:
 just do raise i think
 
 @user1:
@@ -1323,7 +1323,7 @@ actually it's not necessary, it happens on line 3574
 
 @author:
 we can also do `raise` yeah, mostly wanted to follow the same style as in 3574"
-314,tobymao__sqlglot-2096@1794bf3,tobymao/sqlglot,sqlglot/expressions.py,functional,B,,,,"@user1:
+314,tobymao__sqlglot-2096@1794bf3,tobymao/sqlglot,sqlglot/expressions.py,B,B.simplify,yes,A,Asks whether the try/except around parse_one can be avoided.,B,B.simplify,Asks to avoid the try/except; wrapper replaced with bare raise.,yes,,,"@user1:
 possible to do without the try catch? it doesn't just return null?
 
 @author:
@@ -1332,14 +1332,14 @@ I tried without the try-catch first but it doesn't always return `None`, due to 
 https://github.com/tobymao/sqlglot/blob/6fa1581ae0bdf7e0073a7b9a355e72241e5e6959/sqlglot/parser.py#L967-L968
 
 Tbh, I'm not sure if the `is None` check below is needed - if the parsing fails, it seems like it'll always raise instead of hitting that block."
-315,tobymao__sqlglot-5284@3f57fcd,tobymao/sqlglot,sqlglot/dialects/databricks.py,functional,A,,,,"@user1:
+315,tobymao__sqlglot-5284@3f57fcd,tobymao/sqlglot,sqlglot/dialects/databricks.py,B,B.simplify,,,Lambda wrapper is unnecessary; map to groupconcat_sql directly.,B,B.simplify,Lambda wrapper removed.,yes,,,"@user1:
 ```suggestion
             exp.GroupConcat: groupconcat_sql,
 ```
 
 @author:
 right"
-318,voxel51__fiftyone-4236@2af48de,voxel51/fiftyone,fiftyone/__init__.py,functional,B,,,,"@user1:
+318,voxel51__fiftyone-4236@2af48de,voxel51/fiftyone,fiftyone/__init__.py,B,B.structure,,,Remove the force-DB-connect-on-import workaround; fix the docs build config instead.,B,B.structure,Docs-build workaround removed from package import; handled in docs config.,yes,,,"@user1:
 @author can you explain why the docs build is causing us problems here? Would love to avoid needing `_FIFTYONE_FORCE_DB_CONNECT_ON_IMPORT` if at all possible
 
 @author:
@@ -1376,26 +1376,26 @@ autodoc_default_options = {
 @author:
 Ok perhaps I do not understand sphinx directives like I thought I did, but adding to `conf.py` works where directly to the automodule directive did not.
 I thought I had tried that too but oh well glad it works!"
-320,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/client/restful/restful_client.py,functional,A,,,,"@user1:
+320,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/client/restful/restful_client.py,A,A.logic,,,Authorization header set from api_key even when the cluster has auth disabled.,A,A.logic,Header set when cluster auth is off.,yes,,,"@user1:
 `if api_key is not None and self._cluster_authed`"
-322,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,B,,,,"@user1:
+322,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,B,B.redundant,,,Unnecessary boolean flag; branch on is_legal_api_key(token) directly.,B,B.redundant,Unneeded boolean flag removed.,yes,,,"@user1:
 Why need this bool variable? Just use `self.is_legal_api_key(token)` is fine."
-323,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,functional,B,,,,"@user1:
+323,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,B,B.redundant,,,Per-user duplicate-key check duplicates the global duplicate check.,B,B.redundant,Duplicate-key check duplicated.,yes,,,"@user1:
 Does this logic be duplicated with the code below.
 The below code can detect the situation that having duplicate api-keys of a user."
-326,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,style,B,,,,"@user1:
+326,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/api/oauth2/auth_service.py,B,B.naming,,,Rename variable total_keys to all_api_keys.,B,B.naming,Variable renamed.,yes,,,"@user1:
 Rename the variable to `all_api_keys`"
-327,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/deploy/cmdline.py,functional,A,,,,"@user1:
+327,xorbitsai__inference-1168@f3ada96,xorbitsai/inference,xinference/deploy/cmdline.py,A,A.logic,yes,B,"Gate loading the stored token on `api_key is None` (as elsewhere), not on client token.",B,B.convention,Reason given is consistency with all other call sites.,no,yes,"Resolved by the study owner, 2026-11-09. Kept A against the re-check, which misread 'same as all other places': all 9 call sites in the reviewed cmdline.py used client._get_token(), none used api_key.","@user1:
 Should this be `if api_key is None` ?
 Same as all other places."
-328,xorbitsai__inference-2079@5ae18b2,xorbitsai/inference,xinference/model/llm/vllm/core.py,style,A,,,,"@user1:
+328,xorbitsai__inference-2079@5ae18b2,xorbitsai/inference,xinference/model/llm/vllm/core.py,A,A.compat,,,Top-level import of optional dependency transformers; import inside the function.,A,A.compat,Optional dependency imported at top level.,yes,,,"@user1:
 `transformers` is an optional dependency, so we may need to put the import into function."
-332,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/funnel_event_query.py,style,A,,,,"@user1:
+332,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/funnel_event_query.py,A,A.state-resource,yes,B,Mutable default argument entities=[]; use None.,A,A.state-resource,Mutable default arguments.,yes,,,"@user1:
 ⚠️
 ```suggestion
     def get_query(self, entities=None, entity_name=""events"") -> Tuple[str, Dict[str, Any]]:
 ```"
-333,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/base.py,functional,A,,,,"@user1:
+333,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/base.py,A,A.state-resource,yes,B,Mutable default argument entities=[] is shared across calls; use None.,A,A.state-resource,Mutable default argument; comment explains the shared-state risk.,yes,,,"@user1:
 Because of Python specifics, function arg default values should never be mutable objects. Such a default value is reused across function calls (weird, I know), so if one call of `_get_inner_event_query` mutated `entities` (e.g. did `entities.push(foo)`), `entities` would be `[foo]` for the next call of `_get_inner_event_query`.
 This is not a problem with objects that are immutable in Python, like strings, numbers, booleans, or `None`.
 ```suggestion
@@ -1404,20 +1404,20 @@ This is not a problem with objects that are immutable in Python, like strings, n
 
 @author:
 oh yes, I did consider this, since I treat entities as read-only, but yeah, making it explicit like this makes more sense! Thanks :)"
-334,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/funnel_event_query.py,style,A,,,,"@user1:
+334,PostHog__posthog-4868@1372f68,PostHog/posthog,ee/clickhouse/queries/funnels/funnel_event_query.py,A,A.state-resource,yes,B,Mutable default argument entities=[]; use None.,A,A.state-resource,Mutable default argument.,yes,,,"@user1:
 ⚠️
 ```suggestion
     def _get_entity_query(self, entities=None, entity_name=""events"") -> Tuple[str, Dict[str, Any]]:
 ```"
-337,saleor__saleor-5085@f8ed729,saleor/saleor,.pre-commit-config.yaml,functional,A,,,,"@user1:
+337,saleor__saleor-5085@f8ed729,saleor/saleor,.pre-commit-config.yaml,B,B.convention,,,Pin the black pre-commit hook to python3.8.,B,B.convention,Pre-commit hook python version pin (housekeeping).,yes,,,"@user1:
 ```suggestion
          language_version: python3.8
 ```"
-341,zulip__zulip-22583@37ae377,zulip/zulip,static/styles/app_components.css,functional,A,,,,"@user1:
+341,zulip__zulip-22583@37ae377,zulip/zulip,static/styles/app_components.css,A,A.logic,,,Mention indicator overflows its container; add a 2px left margin (CSS layout bug).,A,A.logic,Visual overflow bug fixed by CSS margin.,yes,,,"@user1:
 I think a 2px `margin-left` here would fix the overflow issue; test-deploying that but you might want to play with it."
-343,PostHog__posthog-10293@7041fd3,PostHog/posthog,posthog/models/team/team.py,style,A,,,,"@user1:
+343,PostHog__posthog-10293@7041fd3,PostHog/posthog,posthog/models/team/team.py,A,A.input-handling,,,CharField(max_length=200) items can overflow with long column names; use TextField.,A,A.input-handling,Length limit fails on long values.,yes,,,"@user1:
 Let's make it a `TextField`. Somebody might want to put three 60-character-long columns here, and boom, we're out of space."
-345,ManimCommunity__manim-509@1cbc24f,ManimCommunity/manim,manim/mobject/value_tracker.py,functional,A,,,,"@user1:
+345,ManimCommunity__manim-509@1cbc24f,ManimCommunity/manim,manim/mobject/value_tracker.py,A,A.logic,,,__iadd__ returns a new ValueTracker instead of mutating; other references miss the change.,A,A.logic,__iadd__ must mutate in place and return self.,yes,,,"@user1:
 I like this approach, but it creates a new instance of `ValueTracker` instead of mutating the existing one. This has two problems:
 - references to the old object won't see the change
 - it's inefficient to create a new object
@@ -1426,9 +1426,9 @@ It might be better to instead use the `increment_value` method, and then return 
 
 @author:
 Thanks for the review! That is exactly what I was trying to figure out (not creating a new `ValueTracker`). Fixed in the next commit."
-346,OpenMined__PySyft-4522@776c2e8,OpenMined/PySyft,syft/frameworks/torch/mpc/falcon/falcon_helper.py,structural,B,,,,"@user1:
+346,OpenMined__PySyft-4522@776c2e8,OpenMined/PySyft,syft/frameworks/torch/mpc/falcon/falcon_helper.py,B,B.redundant,,,Leftover debug print statements.,B,B.redundant,Debug prints removed.,yes,,,"@user1:
 MAYBE: Please remove the prints :D"
-349,ManimCommunity__manim-1140@ed7dc3d,ManimCommunity/manim,manim/grpc/impl/frame_server_impl.py,functional,B,yes,,,"@user1:
+349,ManimCommunity__manim-1140@ed7dc3d,ManimCommunity/manim,manim/grpc/impl/frame_server_impl.py,A,A.unintended-change,yes,B,"Cleanup removed stub creation in untested renderer code; unclear it is safe, restore it.",A,A.unintended-change,Reviewer doubts cleanup is safe; stub creation restored.,yes,,,"@user1:
 Is this change, in particular the removal of `stub`, actually safe to make?
 
 @author:
@@ -1436,7 +1436,7 @@ Stub is unused and is a function var. Also the test pass, so I have to believe s
 
 @user1:
 I don't think that we have any tests for the WebGL renderer."
-351,home-assistant__core-142977@fa60db7,home-assistant/core,homeassistant/helpers/script.py,functional,B,yes,,,"@user1:
+351,home-assistant__core-142977@fa60db7,home-assistant/core,homeassistant/helpers/script.py,B,B.structure,yes,A,"Check `enabled` where Script runs (generic for all sub-scripts), not in the parallel helper.",B,B.structure,Check moved to where scripts run; reviewer's reason is placement.,yes,,,"@user1:
 If `enabled` is an attribute of a `Script`, it should ideally be checked there, probably in `Script.async_run`.
 
 @user1:
@@ -1493,14 +1493,14 @@ It should look like this: https://github.com/home-assistant/core/blob/dev/homeas
 
 @author:
 @user1 okay that should be that sorted now"
-352,dbt-labs__dbt-core-7276@acfae95,dbt-labs/dbt-core,core/dbt/contracts/publication.py,style,B,,,,"@user1:
+352,dbt-labs__dbt-core-7276@acfae95,dbt-labs/dbt-core,core/dbt/contracts/publication.py,B,B.naming,,,Rename field to public_node_dependencies.,B,B.naming,Field renamed.,yes,,,"@user1:
 What about - `public_node_dependencies`?
 
 @author:
 Done"
-353,saleor__saleor-5611@a2d5871,saleor/saleor,saleor/warehouse/migrations/0003_warehouse_slug.py,style,B,,,,"@user1:
+353,saleor__saleor-5611@a2d5871,saleor/saleor,saleor/warehouse/migrations/0003_warehouse_slug.py,B,B.convention,,,Value never changes; use a module-level constant instead of passing it around.,B,B.convention,Constant instead of threading a value through.,yes,,,"@user1:
 `default_slug_value` never changes so it doesn't have to be passed as an argument; it could be a constant at the module level."
-354,PostHog__posthog-7569@db32271,PostHog/posthog,ee/clickhouse/views/cohort.py,functional,B,,,,"@user1:
+354,PostHog__posthog-7569@db32271,PostHog/posthog,ee/clickhouse/views/cohort.py,B,B.convention,,,Pass team= to filter constructors (auto-simplify) instead of calling simplify at call sites.,B,B.convention,Pass team= instead of calling simplify at call sites.,yes,,,"@user1:
 Why do we need to call it this way? I'd expect `team=team` arg to filter instead.
 
 The expected behavior is that passing team arg should automatically simplify - callsites don't need to worry beyond this and should not be calling simplify themselves.
@@ -1516,14 +1516,14 @@ Please pass `team=team` to all filters and _don't_ call simplify outside of test
 
 @author:
 ah nvm i see where it's simplifying. done!"
-356,dbt-labs__dbt-core-8743@fb6f32f,dbt-labs/dbt-core,core/dbt/contracts/graph/unparsed.py,functional,B,,,,"@user1:
+356,dbt-labs__dbt-core-8743@fb6f32f,dbt-labs/dbt-core,core/dbt/contracts/graph/unparsed.py,B,B.interface,,,classmethod that receives an instance should be a regular method; add type annotations.,B,B.interface,"classmethod turned into instance method, return annotation added.",yes,,,"@user1:
 What is the utility of this as a classmethod given it is passed an instance of itself? Perhaps a regular method would be more straightforward. Also, types on this signature would be great!
 
 @author:
 Oh, right. I originally created it as an override of the 'validate' class method, but that didn't work because it had to have a different signature."
-357,pwndbg__pwndbg-2075@3d3a319,pwndbg/pwndbg,.github/workflows/lint.yml,functional,A,,,,"@user1:
+357,pwndbg__pwndbg-2075@3d3a319,pwndbg/pwndbg,.github/workflows/lint.yml,A,A.unintended-change,yes,B,CI mypy step reports at warning level; keep error level as before the change.,A,A.unintended-change,CI mypy level restored to previous behaviour.,yes,,,"@user1:
 This should be ""error"", which matches the behavior before this change."
-359,geldata__gel-6352@24b4f19,geldata/gel,edb/server/args.py,functional,B,,,,"@user1:
+359,geldata__gel-6352@24b4f19,geldata/gel,edb/server/args.py,B,B.interface,,,Mapping SIMPLE_HTTP to Scram is misleading; add a Password auth method value.,B,B.interface,Misleading auth method value; new enum member.,yes,,,"@user1:
 This is a bit misleading, as we're not sending any ""Salted Challenges"" as in SCRAM. Should we have a new `ServerAuthMethod.Password` enum?
 
 @author:
@@ -1538,7 +1538,7 @@ Yeah I think this should work
 
 @author:
 Ok got it"
-360,PostHog__posthog-8874@960dad4,PostHog/posthog,ee/clickhouse/queries/trends/clickhouse_trends.py,functional,B,,,,"@user1:
+360,PostHog__posthog-8874@960dad4,PostHog/posthog,ee/clickhouse/queries/trends/clickhouse_trends.py,B,B.redundant,,,SQL/parse function constructed twice per entity; compute once.,B,B.redundant,Parse function no longer built twice.,yes,,,"@user1:
 Constructing this twice might not be ideal. What if each thread was also responsible for also serializing the data? This might avoid the parsing-related duplication that's occurring here and in`_run_query`
 
 @author:
@@ -1552,7 +1552,7 @@ How about this? Cleaner than repeating all of the logic
 
 @user2:
 oh yep, nice"
-361,geldata__gel-5130@2e5341f,geldata/gel,edb/edgeql/compiler/stmt.py,functional,A,,,,"@user1:
+361,geldata__gel-5130@2e5341f,geldata/gel,edb/edgeql/compiler/stmt.py,A,A.logic,yes,B,DML ban only applied to SELECT where/order by; apply it in clauses so UPDATE/DELETE are covered.,A,A.logic,DML ban must also cover update/delete where clauses (main reason given).,yes,,,"@user1:
 I'd do this in `clauses` itself, for two reasons:
  * A new context is already getting made there, so it'll be a bit faster
  * But more importantly, we want this to be true for where clauses on updates and deletes also
@@ -1562,9 +1562,9 @@ And I think limit/offset should get checked too
 
 @author:
 I think that DMLs in limits and offsets are fine as the limit and offset clauses will only get executed once."
-362,geldata__gel-5130@2e5341f,geldata/gel,edb/edgeql/compiler/context.py,functional,C,yes,,,"@user1:
+362,geldata__gel-5130@2e5341f,geldata/gel,edb/edgeql/compiler/context.py,B,B.interface,yes,C,Make disallow_dml Optional[str] so it can carry the context for the error message.,B,B.interface,Field type changed so it can carry context.,yes,,,"@user1:
 Maybe make this an `Optional[str]` so we can say ""UPDATE may not be done in a FILTER clause"" or whatever"
-366,RasaHQ__rasa-5341@d8b1c24,RasaHQ/rasa,rasa/nlu/components.py,functional,C,,,,"@user1:
+366,RasaHQ__rasa-5341@d8b1c24,RasaHQ/rasa,rasa/nlu/components.py,C,C.message,,,Warning wrongly says DIETClassifier featurizes lookup tables.,C,C.message,Warning text corrected.,yes,,,"@user1:
 ```suggestion
                 ""To make use of lookup tables, add a 'DIETClassifier' or a 'CRFEntityExtractor' with ""
 ```
@@ -1575,9 +1575,9 @@ Got it, will fix. How are they used in DIET then?
 
 @user1:
 `RegexFeaturizer` adds them as sparse features. `DIETClassifier` simply uses the sparse features."
-367,dbt-labs__dbt-core-7186@c6b5b12,dbt-labs/dbt-core,core/dbt/contracts/graph/model_config.py,functional,B,,,,"@user1:
+367,dbt-labs__dbt-core-7186@c6b5b12,dbt-labs/dbt-core,core/dbt/contracts/graph/model_config.py,B,B.structure,,,"delimiter belongs in SeedConfig, not NodeConfig.",B,B.structure,Field belongs in SeedConfig.,yes,,,"@user1:
 This should go in [`SeedConfig`](https://github.com/dbt-labs/dbt-core/blob/main/core/dbt/contracts/graph/model_config.py#L500), now defined separately, rather than `NodeConfig`"
-368,All-Hands-AI__OpenHands-8343@9d4e2af,All-Hands-AI/OpenHands,openhands/core/logger.py,functional,B,yes,,,"@user1:
+368,All-Hands-AI__OpenHands-8343@9d4e2af,All-Hands-AI/OpenHands,openhands/core/logger.py,A,A.unintended-change,yes,B,Unrelated change of the default JSON log level key; revert.,A,A.unintended-change,Unrelated default change reverted.,yes,,,"@user1:
 It won't hurt us to change this default because we override anyway but why is it changing here?
 
 @author:
@@ -1585,9 +1585,9 @@ The agent said that `test_logging.py` was failing, but I'll try reverting it.
 
 @user1:
 Yeah probably because it changed the tests"
-369,All-Hands-AI__OpenHands-8343@9d4e2af,All-Hands-AI/OpenHands,openhands/llm/llm.py,functional,A,,,,"@user1:
+369,All-Hands-AI__OpenHands-8343@9d4e2af,All-Hands-AI/OpenHands,openhands/llm/llm.py,A,A.logic,,,Missing comma concatenates '127.0.0.1' and '0.0.0.0'; local-host detection broken.,A,A.logic,Missing comma concatenates two hosts.,yes,,,"@user1:
 Not a behavior change but looks like this was broken before, missing a comma."
-371,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,functional,A,,,,"@user1:
+371,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,A,A.logic,yes,B,Commented-out head_node IAM profile assignment may not be equivalent to the node_config one.,A,A.logic,Asks whether disabling the head_node assignment changes behaviour; fix not attributable (file dropped).,yes,,,"@user1:
 Why/OK to comment this out?
 
 This line assigns `config[""head_node""][""IamInstanceProfile""]` while the loop below assigns the `node_config` dict for `ray.head.default`, which is slightly different?
@@ -1596,7 +1596,7 @@ This line assigns `config[""head_node""][""IamInstanceProfile""]` while the loop
 The effect should be similar according to the code below. TL;DR ray looks for the instance profile in the `node_config` first and then goes to the `head_node`, which treats them equivalently. We use the `node_config` since it is general for both head and workers when we don't need to distinguish head or worker.
 
 https://github.com/skypilot-org/skypilot/blob/fa02be38ac8d885bee2c76817b959abf40366d49/sky/skylet/providers/aws/config.py#L191-L203"
-372,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,functional,B,,,,"@user1:
+372,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,B,B.structure,,,"Duplicated 1,200-line config_v2.py; keep one config.py behind a feature flag.",B,B.structure,Duplicate config file; feature flag in one file.,yes,,,"@user1:
 Is it possible to keep one `config.py`, while allowing `bootstrap_aws()` to take an argument like `use_skypilot_iam_role_head_and_workers=True`? This is to ease reviewing and code maintenance.
 
 @user2:
@@ -1625,30 +1625,30 @@ Tested:
 1. on master branch `sky launch -c old echo hi`
 2. check the IAM role of that instance to be `ray-autoscaler-v1` 
 3. switch to the current branch `sky launch -c old echo hi`, the job ID is 2 means it reuses the original cluster (also checked the console that there is only 1 cluster named old)"
-373,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,functional,A,,,,"@user1:
+373,skypilot-org__skypilot-1489@1430d74,skypilot-org/skypilot,sky/skylet/providers/aws/config_v2.py,A,A.api-use,,,`profile` is undefined in this branch (NameError).,A,A.api-use,profile undefined.,yes,,,"@user1:
 `profile` is undefined on this line. Seems duplicated by L368 to L371.
 
 @author:
 Fixed. Thanks!"
-375,saleor__saleor-4617@9c2907b,saleor/saleor,saleor/graphql/account/mutations/base.py,style,B,,,,"@user1:
+375,saleor__saleor-4617@9c2907b,saleor/saleor,saleor/graphql/account/mutations/base.py,B,B.structure,,,Extract storefront URL validation into a reusable function.,B,B.structure,Validation extracted to shared function.,yes,,,"@user1:
 It would be nice to extract this validation to a function, as we will want to validate the URL against `ALLOWED_STOREFRONT_HOSTS` in a few places. Not sure where we could put the function but maybe somewhere in `saleor/core`?"
-377,ansible__ansible-65021@f63c26e,ansible/ansible,test/integration/targets/elb_application_lb/tasks/test_modifying_alb_listeners.yml,style,B,,,,"@user1:
+377,ansible__ansible-65021@f63c26e,ansible/ansible,test/integration/targets/elb_application_lb/tasks/test_modifying_alb_listeners.yml,B,B.redundant,yes,C,Leftover debug tasks in an integration-test playbook.,B,B.redundant,"Leftover debug tasks removed (generic, in test playbook).",yes,,,"@user1:
 Could you please remove the debug statements from this patch?
 
 @author:
 Thanks for pointing those debug statements out in a kind way. I thought i had removed them."
-378,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,functional,B,,,,"@user1:
+378,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,B,B.redundant,,,AuthFailed exception class is unused.,B,B.redundant,Unused exception class removed.,yes,,,"@user1:
 Is this used anywhere?"
-379,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,functional,A,,,,"@user1:
+379,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,A,A.api-use,,,`logger` is not defined in this module scope (NameError).,A,A.api-use,logger not defined.,yes,,,"@user1:
 `logger` has not been defined."
-381,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,functional,B,,,,"@user1:
+381,netbox-community__netbox-13373@1d02196,netbox-community/netbox,netbox/netbox/authentication.py,B,B.interface,,,Separate enable setting unnecessary; the pipeline entry already toggles the feature.,B,B.interface,Separate enable setting dropped.,yes,,,"@user1:
 We probably don't need this setting. Adding/removing this function to/from the authentication pipeline should be enough to enable or disable the functionality."
-382,ManimCommunity__manim-482@f2fd3e3,ManimCommunity/manim,tests/test_geometry.py,style,C,,,,"@user1:
+382,ManimCommunity__manim-482@f2fd3e3,ManimCommunity/manim,tests/test_geometry.py,C,C.test-design,,,New test file name clashes with existing graphical test_geometry; rename it.,C,C.test-design,Test file renamed.,yes,,,"@user1:
 Unfortunatly there is already a test_geometry file, which is for graphical unit tests of geometrey module. Could you please rename this file into something like ""test_unit_geometry.py'"" ? 
 
 @author:
 Done"
-383,home-assistant__core-146453@71eab0c,home-assistant/core,homeassistant/components/hassio/__init__.py,functional,A,,,,"@user1:
+383,home-assistant__core-146453@71eab0c,home-assistant/core,homeassistant/components/hassio/__init__.py,A,A.logic,,,"installation_type hardcoded ""Supervised"" although the branch also runs on HAOS.",A,A.logic,Wrong hardcoded installation type on HAOS.,yes,,,"@user1:
 Installation type isn't always Supervised here, right?
 
 @author:
@@ -1690,35 +1690,35 @@ There's an `or` operator after `is_haos` in the check in your last reference.
 
 @author:
 sharp...."
-387,netbox-community__netbox-17674@1507840,netbox-community/netbox,netbox/ipam/filtersets.py,style,B,,,,"@user1:
+387,netbox-community__netbox-17674@1507840,netbox-community/netbox,netbox/ipam/filtersets.py,B,B.naming,yes,A,Filter method wrongly named test_filter_interface_id.,B,B.naming,Method name corrected.,yes,,,"@user1:
 Is this function name right? `test_`?
 
 
 @author:
 Yeah sorry, I neglected to commit my last set of changes before pushing."
-388,netbox-community__netbox-14047@0ec158d,netbox-community/netbox,netbox/virtualization/forms/filtersets.py,functional,A,,,,"@user1:
+388,netbox-community__netbox-14047@0ec158d,netbox-community/netbox,netbox/virtualization/forms/filtersets.py,A,A.logic,yes,B,"manufacturer_id filter field has no effect on VM filtering (confusing, out of scope).",A,A.logic,Filter field with no effect on results; confusing to users; removed.,yes,,,"@user1:
 There is no `manufacturer_id` filter for virtual machines, so this form field would have no effect beyond constraining the choices for the platform field below, which could be very confusing to the user. The scope of FR #12741 deals only with the VM & device edit forms; we shouldn't be making any changes to the list filters as part of this work anyway."
-389,langflow-ai__langflow-918@c710c1c,langflow-ai/langflow,src/backend/langflow/services/database/models/user/crud.py,functional,C,,,,"@user1:
+389,langflow-ai__langflow-918@c710c1c,langflow-ai/langflow,src/backend/langflow/services/database/models/user/crud.py,B,B.typing,,,Annotate as Optional[User].,B,B.typing,Optional[User] annotation.,yes,,,"@user1:
 Maybe `Optional[User]` would be better in this case?
 
 I think the point of this is mainly that a user might not be found in a function that uses this other function.
 
 @author:
 Done"
-390,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/azure/linux.yml,functional,B,,,,"@user1:
+390,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/azure/linux.yml,A,A.logic,yes,B,CI activates the conda env before it is created.,A,A.logic,Activation of an env that does not exist yet.,yes,,,"@user1:
 if I'm not wrong, the environment is created in the next file, and it doesn't exist here, so it can't be activated (and it's not needed)"
-391,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.cmd,structural,B,,,,"@user1:
+391,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.cmd,B,B.redundant,,,`-n pandas-dev` redundant: env name is defined in the YAML file.,B,B.redundant,Redundant -n flag removed.,yes,,,"@user1:
 you don't need the `-n pandas-dev`, the name of the environment is already defined in the yaml file"
-392,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.sh,functional,A,,,,"@user1:
+392,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.sh,A,A.unintended-change,,,Removed env activation is needed by the next step (pandas removal).,A,A.unintended-change,Removed activation needed by next step; restored.,yes,,,"@user1:
 This one can't be removed, as the rest of the next step is to remove pandas from the environment, so it needs to be active"
-393,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.sh,structural,B,,,,"@user1:
+393,pandas-dev__pandas-23866@45e5f06,pandas-dev/pandas,ci/incremental/setup_conda_environment.sh,B,B.redundant,,,`-n pandas-dev` redundant in conda env create.,B,B.redundant,Redundant -n flag removed.,yes,,,"@user1:
 same about `-n pandas-dev` not needed"
-397,RasaHQ__rasa-7797@3d69847,RasaHQ/rasa,.github/workflows/continous-integration.yml,functional,B,,,,"@user1:
+397,RasaHQ__rasa-7797@3d69847,RasaHQ/rasa,.github/workflows/continous-integration.yml,A,A.logic,yes,B,Copy-pasted `if:` restricts the docs-wait CI job to tags/main; remove it.,A,A.logic,Copy-pasted condition stopped the CI job running; removed.,yes,,,"@user1:
 Why do we need it? I see that the `Test Documentation` runs always, thus we should have this `if` here 
 
 @author:
 You mean we don't need the `if` in line 62? I agree. This is a copy-and-paste error. I didn't mean to include line 62. I will delete it."
-399,scikit-learn__scikit-learn-23548@cc5e175,scikit-learn/scikit-learn,sklearn/metrics/tests/test_ranking.py,functional,C,,,,"@user1:
+399,scikit-learn__scikit-learn-23548@cc5e175,scikit-learn/scikit-learn,sklearn/metrics/tests/test_ranking.py,C,C.test-design,,,Test stops at the first failing call; parametrize over the inputs.,C,C.test-design,Parametrized over the inputs.,yes,,,"@user1:
 This test would only test the first line, since it will fail right away and the other lines would not run.
 
 I suggest using a `pytest.mark.parametrize` to parametrize over the different inputs.
@@ -1726,7 +1726,7 @@ I suggest using a `pytest.mark.parametrize` to parametrize over the different in
 @author:
 Thanks for the catch! I used `pytest.mark.parametrize` to test different 1d array input combinations.
 The test should raise ValueError if one of the input is 1d array."
-400,pytorch__vision-2988@7ea166d,pytorch/vision,test/test_image.py,functional,A,,,,"@author:
+400,pytorch__vision-2988@7ea166d,pytorch/vision,test/test_image.py,A,A.logic,yes,C,channels=1 should convert palette images to grayscale too (anchored on the test's skip condition).,A,A.logic,channels=1 semantics wrong for palette images; production decoder changed too.,yes,,,"@author:
 My current implementation does not convert palette images to grayscale. This is not a bug/limitation but a feature™. This is because palette images already have only 1 channel. So when a user specifies `channels=1` there is no need do an additional conversion to grayscale.
 
 @user1:
@@ -1766,16 +1766,16 @@ That's fine with me
 
 @author:
 done"
-402,pandas-dev__pandas-35974@d0a8a68,pandas-dev/pandas,pandas/io/excel/_xlrd.py,functional,B,,,,"@user1:
+402,pandas-dev__pandas-35974@d0a8a68,pandas-dev/pandas,pandas/io/excel/_xlrd.py,B,B.simplify,,,Skipped rows appended as empty lists; just continue.,B,B.simplify,Empty-list placeholder and the skip helper dropped.,yes,,,"@user1:
 Do we need to append the empty list here? Would be preferable to just continue
 
 @author:
 I removed `should_skip_row` entirely, I think the benefit from the original PR came from not reading all the rows into memory, rather than from optimising skipping rows"
-407,pandas-dev__pandas-28802@33c889c,pandas-dev/pandas,pandas/tests/reshape/test_cut.py,functional,C,,,,"@user1:
+407,pandas-dev__pandas-28802@33c889c,pandas-dev/pandas,pandas/tests/reshape/test_cut.py,C,C.test-oracle,,,Add `list` as an input box to the test parametrization.,C,C.test-oracle,Missing list case added to the test.,yes,,,"@user1:
 Can you add `list` as a `box` since this should also work for something like `[True, True, False]`?"
-410,pandas-dev__pandas-23480@ab05b87,pandas-dev/pandas,pandas/tests/test_multilevel.py,functional,C,,,,"@user1:
+410,pandas-dev__pandas-23480@ab05b87,pandas-dev/pandas,pandas/tests/test_multilevel.py,C,C.test-design,,,Move the reindex test to pandas/tests/series.,C,C.test-design,Test moved to the series test module.,yes,,,"@user1:
 move in pandas/tests/series where reindex tests are"
-413,pytorch__vision-4457@231054c,pytorch/vision,torchvision/transforms/autoaugment.py,functional,C,,,,"@user1:
+413,pytorch__vision-4457@231054c,pytorch/vision,torchvision/transforms/autoaugment.py,C,C.doc-inline,,,Docstring should say PIL images are expected in RGB mode.,C,C.doc-inline,Docstring mode corrected.,yes,,,"@user1:
 ```suggestion
     If img is PIL Image, it is expected to be in mode ""RGB"".
 ```
@@ -1819,28 +1819,28 @@ I think option 3 is worth exploring but it will take longer and needs to happen 
 Yeah, I think that this PR is just for updating the documentation only to keep it relates to the original issue. Furthermore, since we have already declared some policies such as ImageNet, CIFAR10 that their input is not a grayscale image. Thus, changing to support grayscale images would have some conflicts with the policy definitions as well that we might have further discussion in another thread.
 
 In conclusion, in this PR, I would change the document so that this transformation only supports RGB for now."
-416,scikit-learn__scikit-learn-9802@5c7da54,scikit-learn/scikit-learn,sklearn/linear_model/stochastic_gradient.py,functional,B,,,,"@user1:
+416,scikit-learn__scikit-learn-9802@5c7da54,scikit-learn/scikit-learn,sklearn/linear_model/stochastic_gradient.py,B,B.interface,,,Internal warning flag should not be a public constructor parameter.,B,B.interface,Internal flag removed from public constructor.,yes,,,"@user1:
 I don't think we want this as a constructor parameter. It should be a parameter to `_validate_params`
 
 @author:
 Thanks. I'll modify the code."
-421,apache__airflow-32366@52228da,apache/airflow,Dockerfile,functional,B,,,,"@user1:
+421,apache__airflow-32366@52228da,apache/airflow,Dockerfile,B,B.convention,,,Remove `|| pip install pydantic>=2` hack; use EAGER_UPGRADE_ADDITIONAL_REQUIREMENTS.,B,B.convention,Hack removed in favour of the project's mechanism.,yes,,,"@user1:
 Looks great. Yeah. Lets' remove it then and see if `pip` can resolve them on their own. If there are problems with ""eager upgrade"" and pip not finding the right resolution automatically, the right way to handle it will be to add ""pydantic>=2"" to `EAGER_UPGRADE_ADDITIONAL_REQUIREMENTS` (currently empty so it should be commented that likely we should remove it in the future when the resolution is improved) in both Dockerfile and Dockerfile.ci. This is the way how we ""help"" `pip` by additionally limiting the `eager upgrade`.
 
 @author:
 It would resolve it to 1.18 because (a dependency of) Moto pins it to `pydantic~=1.18` (I tried it locally before settling on this hack)"
-423,scipy__scipy-13893@4fcbd8b,scipy/scipy,scipy/optimize/tests/test_linprog.py,functional,C,,,,"@user1:
+423,scipy__scipy-13893@4fcbd8b,scipy/scipy,scipy/optimize/tests/test_linprog.py,C,C.test-oracle,,,Use atol instead of adding 1 to compare with zero.,C,C.test-oracle,Assertion uses atol instead of adding 1.,yes,,,"@user1:
 Set `atol` instead of adding 1.
 
 @author:
 Yep, that worked!  Removed `+1` and added `atol=1e-12`"
-431,hummingbot__hummingbot-4889@d8a242a,hummingbot/hummingbot,test/hummingbot/connector/exchange/mexc/test_mexc_api_order_book_data_source.py,functional,C,,,,"@user1:
+431,hummingbot__hummingbot-4889@d8a242a,hummingbot/hummingbot,test/hummingbot/connector/exchange/mexc/test_mexc_api_order_book_data_source.py,C,C.test-design,,,Tests patch asyncio.sleep globally; patch a _sleep wrapper method instead.,C,C.test-design,Mock a wrapper instead of asyncio.sleep.,yes,,,"@user1:
 `asyncio.sleep` should not be patched directly as this could affect other portions of the code also using this function (other than the one intended to be patched). To avoid this, the object that calls `asyncio.sleep` can have a member function called `_sleep` that it then calls `asyncio.sleep`. Then, the mock will be on the member `_sleep` function.
 
 This goes for any other tests patching `asyncio.sleep` directly."
-432,hummingbot__hummingbot-4889@d8a242a,hummingbot/hummingbot,test/hummingbot/connector/exchange/mexc/test_mexc_exchange.py,functional,C,,,,"@user1:
+432,hummingbot__hummingbot-4889@d8a242a,hummingbot/hummingbot,test/hummingbot/connector/exchange/mexc/test_mexc_exchange.py,C,C.test-design,,,Fixed 0.3 s sleep in tests; await the resume_test_event instead.,C,C.test-design,Fixed sleep replaced by event wait.,yes,,,"@user1:
 This directly adds `0.3` seconds to the test suite, and we are actively trying to identify those tests that use this strategy in our codebase and refactor them. The way to avoid waiting for a fixed amount of time is to instead await `self.resume_test_event`, which will be set by the `side_effect` defined above."
-440,matplotlib__matplotlib-26151@c6a1bf5,matplotlib/matplotlib,lib/matplotlib/_mathtext.py,style,A,,,,"@user1:
+440,matplotlib__matplotlib-26151@c6a1bf5,matplotlib/matplotlib,lib/matplotlib/_mathtext.py,A,A.compat,,,pyparsing version compared as strings; use a numeric tuple comparison.,A,A.compat,Dependency version compared as strings.,yes,,,"@user1:
 This falls into the category of lurking problems that _probably_ won't be a real problem but _could_ be...
 
 string comparison of version numbers is likely to fail. 
@@ -1856,7 +1856,7 @@ if tuple(int(x) for x in pyparsing_version.split(""."")) < (3, 0, 0):
 may work in a bit more robust manner
 
 Or we can just use `nestedExpr` for now and handle switching to the new name later (as at least oneOf is already using the deprecated version, so that change can be separated from this PR."
-441,goauthentik__authentik-13602@50ea3f3,goauthentik/authentik,authentik/events/migrations/0009_remove_notificationtransport_webhook_mapping_and_more.py,style,A,,,,"@user1:
+441,goauthentik__authentik-13602@50ea3f3,goauthentik/authentik,authentik/events/migrations/0009_remove_notificationtransport_webhook_mapping_and_more.py,A,A.logic,,,Migration removes the field instead of renaming it (data loss).,A,A.logic,RemoveField/AddField replaced by RenameField (data preserved).,yes,,,"@user1:
 Is this intended? It should be a rename I think
 
 @author:
@@ -1867,7 +1867,7 @@ When running makemigrations it should ask whether the field was renamed. If it d
 
 @author:
 It didn't, probably because I added related_name and that was enough to throw it off"
-444,scikit-learn__scikit-learn-15277@594e3a6,scikit-learn/scikit-learn,azure-pipelines.yml,style,B,,,,"@user1:
+444,scikit-learn__scikit-learn-15277@594e3a6,scikit-learn/scikit-learn,azure-pipelines.yml,B,B.structure,,,Two lint commands duplicated across CI configs; combine into one script.,B,B.structure,Lint commands combined in one script.,yes,,,"@user1:
 You have two lint commands here... Should these be together in a single script to make it easy to change both circle and Azure runs?
 
 @author:
@@ -1877,12 +1877,12 @@ I would be okay with combining them. What do you think of naming the combined sc
 > I would be okay with combining them. What do you think of naming the combined script ""linting.sh""?
 
 sounds good to me."
-448,pandas-dev__pandas-35284@644bdf7,pandas-dev/pandas,pandas/io/formats/latex.py,style,B,,,,"@user1:
+448,pandas-dev__pandas-35284@644bdf7,pandas-dev/pandas,pandas/io/formats/latex.py,B,B.redundant,,,Duplicated position-assignment block.,B,B.redundant,Duplicated block removed.,yes,,,"@user1:
 Duplicated lines?
 
 @author:
 Right thanks !"
-450,pandas-dev__pandas-16744@b8a6007,pandas-dev/pandas,pandas/tests/series/test_datetime_values.py,functional,C,,,,"@user1:
+450,pandas-dev__pandas-16744@b8a6007,pandas-dev/pandas,pandas/tests/series/test_datetime_values.py,C,C.test-oracle,,,Test always passes (try/except with a truthy assert); compare with an expected Series.,C,C.test-oracle,Test always passed; now compares results.,yes,,,"@user1:
 This test will always pass, since
 
 - if there's no exception originally, everything is fine
@@ -1894,11 +1894,11 @@ It's best to assign `result = ` that operation, construct an expected series `ex
 You are right. My bad!
 
 Please check now."
-453,pandas-dev__pandas-23886@d6a2d5b,pandas-dev/pandas,pandas/io/formats/style.py,structural,C,,,,"@user1:
+453,pandas-dev__pandas-23886@d6a2d5b,pandas-dev/pandas,pandas/io/formats/style.py,C,C.doc-inline,,,Remove the quotes around Reset in the docstring summary.,C,C.doc-inline,Docstring wording.,yes,,,"@user1:
 I'd remove the quotes here too."
-456,freqtrade__freqtrade-5846@da4344d,freqtrade/freqtrade,requirements.txt,functional,B,,,,"@user1:
+456,freqtrade__freqtrade-5846@da4344d,freqtrade/freqtrade,requirements.txt,B,B.convention,,,"Type-stub package belongs in requirements-dev.txt, not runtime requirements.",B,B.convention,Type stubs belong in dev requirements.,yes,,,"@user1:
 I think the `types` dependency should go into `requirements-dev.txt` ... it's not necessary on an installation that ain't running `mypy`."
-457,frappe__frappe-16877@e78a251,frappe/frappe,frappe/database/query.py,functional,A,,,,"@user1:
+457,frappe__frappe-16877@e78a251,frappe/frappe,frappe/database/query.py,A,A.api-use,,,func_is calls .isnull() on a plain string key (AttributeError); wrap in Field(key).,A,A.api-use,Method called on a str; wrap in Field.,yes,,,"@user1:
 Started getting attribute error without this 🤔 
 
 ```suggestion
@@ -1963,7 +1963,7 @@ AttributeError: 'str' object has no attribute 'isnotnull'
 
 @author:
 need to instantiate field objects for str inputs, took field objects only into account fixed [3296898](https://github.com/frappe/frappe/pull/16877/commits/3296898b4864d977cfb9b4bbdb5a68ca64cbb4c5)"
-458,matplotlib__matplotlib-27172@9f80d55,matplotlib/matplotlib,lib/matplotlib/axes/_axes.py,functional,C,yes,,,"@user1:
+458,matplotlib__matplotlib-27172@9f80d55,matplotlib/matplotlib,lib/matplotlib/axes/_axes.py,C,C.doc-inline,,,Docstring says no legend is drawn; an empty legend is drawn.,C,C.doc-inline,Docstring claim corrected.,yes,,,"@user1:
 I think this isn't (and was not) correct. We draw an empty legend. Please fix this along the way.
 
 @author:
@@ -1986,7 +1986,7 @@ Correct, the legend is empty and thus shrinks to the small box. You will also no
 
 @author:
 Ahh, I totally missed that, haha.  Thanks!"
-463,goauthentik__authentik-12630@7fed46f,goauthentik/authentik,authentik/stages/authenticator_email/models.py,functional,B,,,,"@user1:
+463,goauthentik__authentik-12630@7fed46f,goauthentik/authentik,authentik/stages/authenticator_email/models.py,B,B.convention,,,Use the project's timedelta-string format for durations instead of integer minutes.,B,B.convention,Use the project's duration string format for consistency.,yes,,,"@user1:
 We usually allow text inputs for those. An example of a declaration: https://github.com/goauthentik/authentik/blob/main/authentik/tenants/models.py#L66. Usage: https://github.com/goauthentik/authentik/blob/39d8b413577be7c0136bb9074f4f86d7861dfffc/authentik/events/models.py#L64
 
 @author:
@@ -1997,7 +1997,7 @@ Is there a use case where the token is valid in days, years, or seconds?
 
 @user2:
 There usually isn't a use case where the token is valid for that long, however for consistency we should use the same format everywhere (and refactor the email stage to use the same format)"
-467,scikit-learn__scikit-learn-12822@c451532,scikit-learn/scikit-learn,sklearn/feature_extraction/text.py,documentation,C,,,,"@user1:
+467,scikit-learn__scikit-learn-12822@c451532,scikit-learn/scikit-learn,sklearn/feature_extraction/text.py,C,C.doc-inline,,,Docstring lists CountVectorizer as if it were a constructor parameter.,C,C.doc-inline,Docstring listed a class as a parameter.,yes,,,"@user1:
 Putting these here would suggest that `CountVectorizer` is an `__init__` parameter to the class, which it isn't. That's why travis is failing.
 
 These information you have here are useful (IMO), but I guess the idea here is to also explain what these classes do by better explaining the parameters already listed in the docstring. For instance, the `norm` parameter was mentioned as badly documented in the issue. As an example, you can have a look at the parameter descriptions of [`LogisticRegression`](https://scikit-learn.org/dev/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression), I hope it helps.
@@ -2005,17 +2005,17 @@ These information you have here are useful (IMO), but I guess the idea here is t
 @author:
 @user1 
 I updated some descriptions.  Is this better?"
-468,pandas-dev__pandas-34933@de64663,pandas-dev/pandas,pandas/core/frame.py,functional,C,,,,"@user1:
+468,pandas-dev__pandas-34933@de64663,pandas-dev/pandas,pandas/core/frame.py,B,B.typing,,,Add the bool type annotation for ignore_index.,B,B.typing,Add bool annotation.,yes,,,"@user1:
 include the type for ignore_index.
 
 @author:
 Got it, done."
-469,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+469,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,B,B.redundant,,,Unused return value `original`.,B,B.redundant,Unused return value removed.,yes,,,"@user1:
 I don't think `original` is used? In that case, it's not needed to return it
 
 @author:
 I have addressed this review comment"
-470,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+470,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,B,B.redundant,,,Unused parameters retbins and name.,B,B.redundant,Unused parameters removed.,yes,,,"@user1:
 I think `retbins` arg is not used anymore in this function?
 
 @user1:
@@ -2023,12 +2023,12 @@ And the same for `name`
 
 @author:
 I have addressed this review comment"
-471,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+471,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,B,B.redundant,,,`if name is None` check is redundant (just initialised to None).,B,B.redundant,Redundant None check removed.,yes,,,"@user1:
 this check is not needed, as you defined `name = None` above
 
 @author:
 I have addressed this review comment"
-472,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,functional,B,,,,"@user1:
+472,pandas-dev__pandas-14737@8e4adbb,pandas-dev/pandas,pandas/tools/tile.py,B,B.redundant,,,try/except around x.size unnecessary: x is already an array.,B,B.redundant,Unneeded try/except removed.,yes,,,"@user1:
 The `try ... except ...` below should not be necessary anymore, since `x` is already an array (asarray is used in `_preprocess_for_cut`)
 
 @author:
@@ -2051,24 +2051,24 @@ Normally it should already be assured before that you have an array here
 
 @author:
 I have addressed this review comment"
-473,pytorch__vision-2596@8859151,pytorch/vision,packaging/pkg_helpers.bash,structural,B,,,,"@user1:
+473,pytorch__vision-2596@8859151,pytorch/vision,packaging/pkg_helpers.bash,B,B.convention,,,ffmpeg version pinned in one install line but not the other (inconsistent).,B,B.convention,Inconsistent version pinning in a build script.,yes,,,"@user1:
 It is a bit weird that you pinned the version of `ffmpeg` in the following line but not in this one.
 
 @author:
 I think we can remove the version pinning safely"
-475,pandas-dev__pandas-23141@1c22791,pandas-dev/pandas,pandas/tests/indexes/multi/test_constructor.py,functional,C,,,,"@user1:
+475,pandas-dev__pandas-23141@1c22791,pandas-dev/pandas,pandas/tests/indexes/multi/test_constructor.py,C,C.test-oracle,,,"Test should also check the error message, not only the exception type.",C,C.test-oracle,Test should check the error message.,yes,,,"@user1:
 Let's the check the error message via `pandas.util.testing.assert_raises_regex`."
-476,ccxt__ccxt-14582@83f50a7,ccxt/ccxt,js/base/Exchange.js,functional,A,,,,"@user1:
+476,ccxt__ccxt-14582@83f50a7,ccxt/ccxt,js/base/Exchange.js,A,A.compat,yes,B,`!== null` is not supported by the JS-to-Python/PHP transpiler.,A,A.compat,Construct cannot be transpiled to the other target languages.,yes,,,"@user1:
 !== null is not transpilable 
 
 @author:
 fixed it"
-477,ccxt__ccxt-14830@1d1701f,ccxt/ccxt,js/poloniex.js,functional,A,,,,"@user1:
+477,ccxt__ccxt-14830@1d1701f,ccxt/ccxt,js/poloniex.js,A,A.logic,,,"Modulo conditional inverted, so the wrong elements are parsed.",A,A.logic,Inverted conditional.,yes,,,"@user1:
 @author in this case you've also inverted the conditional, no?
 
 @author:
 oh, I think you're right!"
-478,ccxt__ccxt-16729@284cdce,ccxt/ccxt,js/huobi.js,functional,A,,,,"@user1:
+478,ccxt__ccxt-16729@284cdce,ccxt/ccxt,js/huobi.js,A,A.logic,,,fetchBalance routing broken (returns empty balance for spot).,A,A.logic,Margin routing wrong for spot.,yes,,,"@user1:
 @author something is off here 
 ```
  p huobi balance
@@ -2086,9 +2086,9 @@ all I wanted to mean is that, if someone uses `fetchBalance ({marginMode: 'isola
 @user1:
 >  fetchBalance ({marginMode: 'isolated/cross'}) I mean that user is requesting spot margin balance 
 @author yes I think that is correct unless we have the ambiguity between isolated/cross on the swap wallet as well"
-481,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages.js,functional,B,,,,"@user1:
+481,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages.js,B,B.simplify,,,Conditional re-sorting is a low-value optimisation; sort unconditionally (and rename flag).,B,B.simplify,Conditional sort dropped as low-value optimisation.,yes,,,"@user1:
 `needs_resorting` would be a nicer variable name, but also probably we should just sort unconditionally; it's a really low value optimization, since there should never be a lot of these and they likely don't change often."
-482,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages.js,functional,C,,,,"@user1:
+482,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages.js,B,B.naming,yes,A,"Typo ""succes"" in identifier name (the target test checks the success callback signature).",B,B.naming,Typo in identifier name.,yes,,,"@user1:
 success has a typo."
-483,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages_overlay_ui.js,functional,B,,,,"@user1:
+483,zulip__zulip-25349@67de2a4,zulip/zulip,web/src/scheduled_messages_overlay_ui.js,B,B.naming,,,Rename data attribute to data-scheduled-message-id (they are not message IDs).,B,B.naming,Data attribute renamed.,yes,,,"@user1:
 This can be a follow-up, but we should definitely call it `data-scheduled-message-id`, to avoid confusion -- they are not message IDs."
